@@ -1,5 +1,10 @@
 """Readable matchup history and model sensitivities, without causal claims."""
 
+from datetime import date
+import math
+
+import pandas as pd
+
 GROUPS = {
     "Recent striking form": [
         "own_last5_mean_strikes",
@@ -25,6 +30,106 @@ GROUPS = {
         "opponent_layoff_days",
     ],
 }
+
+
+def _observed_comparison(bundle, fighter_id, opponent_id, names, asof):
+    """Summarize observed covered bouts, separately from imputed model inputs."""
+    asof = date.fromisoformat(str(asof)).isoformat()
+    bouts = bundle.bouts[bundle.bouts.event_date < asof]
+    observed = bundle.stats.merge(bouts, on="bout_id", validate="many_to_one")
+    other = bundle.stats[["bout_id", "fighter_id", "sig_landed", "sig_attempted"]].rename(
+        columns={
+            "fighter_id": "opponent_id",
+            "sig_landed": "sig_absorbed",
+            "sig_attempted": "opponent_sig_attempted",
+        }
+    )
+    observed = observed.merge(
+        other, on=["bout_id", "opponent_id"], how="left", validate="one_to_one"
+    ).sort_values(["event_date", "bout_id"], ascending=False)
+
+    def number(value):
+        return float(value) if pd.notna(value) and math.isfinite(float(value)) else None
+
+    def total(frame, column):
+        return number(frame[column].sum()) if len(frame) and frame[column].notna().all() else None
+
+    def ratio(numerator, denominator):
+        return (
+            numerator / denominator
+            if numerator is not None and denominator is not None and denominator > 0
+            else None
+        )
+
+    def summary(history, identity):
+        count = len(history)
+        minutes = float(history.duration_seconds.sum()) / 60 if count else 0.0
+        landed = total(history, "sig_landed")
+        attempted = total(history, "sig_attempted")
+        absorbed = total(history, "sig_absorbed")
+        faced = total(history, "opponent_sig_attempted")
+        absorption = ratio(absorbed, minutes)
+        pace = ratio(landed, minutes)
+        defense = ratio(absorbed, faced)
+        return {
+            "fighter_id": identity,
+            "name": names.get(identity, identity),
+            "covered_bouts": count,
+            "observed_minutes": minutes,
+            "sig_landed_per_min": pace,
+            "sig_absorbed_per_min": absorption,
+            "net_sig_per_min": pace - absorption if pace is not None and absorption is not None else None,
+            "sig_attempted_per_min": ratio(attempted, minutes),
+            "accuracy": ratio(landed, attempted),
+            "defense": 1 - defense if defense is not None else None,
+            "mean_sig_landed": ratio(landed, count),
+            "mean_duration_minutes": ratio(minutes, count),
+            "full_time_share": float((history.duration_seconds >= history.scheduled_rounds * 300).mean())
+            if count
+            else None,
+        }
+
+    histories = {
+        key: observed[observed.fighter_id == identity]
+        for key, identity in [("fighter", fighter_id), ("opponent", opponent_id)]
+    }
+    windows = {
+        window: {
+            key: summary(
+                history.head(5) if window == "last5" else history,
+                fighter_id if key == "fighter" else opponent_id,
+            )
+            for key, history in histories.items()
+        }
+        for window in ["last5", "career"]
+    }
+    records = {}
+    for key, history in histories.items():
+        records[key] = [
+            {
+                "bout_id": r.bout_id,
+                "event_id": r.event_id,
+                "event_date": r.event_date,
+                "event_name": r.event_name,
+                "opponent_id": r.opponent_id,
+                "opponent_name": names.get(r.opponent_id, r.opponent_id),
+                "sig_landed": int(r.sig_landed),
+                "sig_absorbed": int(r.sig_absorbed) if pd.notna(r.sig_absorbed) else None,
+                "sig_attempted": int(r.sig_attempted),
+                "duration_minutes": float(r.duration_seconds) / 60,
+                "scheduled_rounds": int(r.scheduled_rounds),
+                "method": r.method,
+                "reached_limit": bool(r.duration_seconds >= r.scheduled_rounds * 300),
+            }
+            for r in history.itertuples(index=False)
+        ]
+    return {
+        "as_of": asof,
+        "coverage_label": "Covered UFC bouts since 2013",
+        "windows": windows,
+        "history": records,
+        "note": "Observed normalized UFC history strictly before the as-of event date; same-day and future bouts are excluded. Career means covered dataset history, not a complete MMA record. Rates and accuracy/defense use ratios of summed counts and exposure. Unknown denominators return null; ML priors are never shown as observations.",
+    }
 
 
 def matchup_context(repository, forecaster, fighter_id, opponent_id, scheduled_rounds, asof):
@@ -97,6 +202,9 @@ def matchup_context(repository, forecaster, fighter_id, opponent_id, scheduled_r
         "fighter_recent": recent(fighter_id),
         "opponent_recent": recent(opponent_id),
         "comparison": comparison,
+        "comparison_note": "Legacy comparison values are model inputs and may include cold-start priors. "
+        "Use comparison_dashboard for observed historical statistics and sample sizes.",
+        "comparison_dashboard": _observed_comparison(bundle, fighter_id, opponent_id, names, asof),
         "explanation": sorted(explanation, key=lambda r: abs(r["delta_mean"]), reverse=True),
         "explanation_note": "These are model sensitivity checks, not causal effects or additive SHAP values. "
         "Groups overlap and their changes must not be summed. Reference medians use training history only.",

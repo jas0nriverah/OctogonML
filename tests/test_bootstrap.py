@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+import pytest
 
 from cagemetrics.api import create_app
 from cagemetrics.cli import main
@@ -10,12 +11,13 @@ from cagemetrics.config import Settings
 from cagemetrics.db import Repository
 
 
-def test_offline_bootstrap_and_real_v2_inference(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("channel", ["v2", "v3"])
+def test_offline_bootstrap_and_real_inference(tmp_path, monkeypatch, capsys, channel):
     project = Path(__file__).resolve().parents[1]
     monkeypatch.setenv("CAGEMETRICS_HOME", str(project))
     monkeypatch.setenv("CAGEMETRICS_DATA_DIR", str(tmp_path / "runtime"))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'runtime' / 'fresh.db'}")
-    monkeypatch.setenv("CAGEMETRICS_MODEL_CHANNEL", "v2")
+    monkeypatch.setenv("CAGEMETRICS_MODEL_CHANNEL", channel)
 
     def offline(*_args, **_kwargs):
         raise AssertionError("Bootstrap must use the packaged source snapshot")
@@ -31,7 +33,7 @@ def test_offline_bootstrap_and_real_v2_inference(tmp_path, monkeypatch, capsys):
     with TestClient(create_app(settings)) as client:
         assert client.get("/health/ready").status_code == 200
         metadata = client.get("/api/v1/models/current").json()
-        assert metadata["serving_channel"] == "v2"
+        assert metadata["serving_channel"] == channel
         assert metadata["training_cutoff"] == "2026-06-30"
         assert metadata["calibration_cutoff"] == "2026-10-17"
         upcoming = client.get("/api/v1/upcoming").json()
@@ -39,7 +41,7 @@ def test_offline_bootstrap_and_real_v2_inference(tmp_path, monkeypatch, capsys):
         assert upcoming["athlete_projection_count"] == 118
         assert "features" not in upcoming["fixtures"][0]["projections"][0]
         assert "distribution" not in upcoming["fixtures"][0]["projections"][0]
-        assert len(client.get("/api/v1/fighter-photos").json()["fighters"]) == 126
+        assert len(client.get("/api/v1/fighter-photos").json()["fighters"]) >= 134
         assert client.get("/api/v1/forward").json()["summary"]["n_issued"] == 0
         athletes = client.get("/api/v1/fighters?limit=2").json()["fighters"]
         response = client.post(
@@ -54,6 +56,10 @@ def test_offline_bootstrap_and_real_v2_inference(tmp_path, monkeypatch, capsys):
         assert response.status_code == 201, response.text
         assert response.json()["model_version"] == metadata["model_version"]
         assert response.json()["mean"] > 0
+        parameters = response.json()["distribution_parameters"]
+        assert parameters["family"] == (
+            "duration_negative_binomial_mixture" if channel == "v3" else "negative_binomial"
+        )
         assert client.get(f"/api/v1/predictions/{response.json()['prediction_id']}").json() == response.json()
         # Repeating bootstrap is safe and does not re-fit or duplicate observations.
     main(["bootstrap"])

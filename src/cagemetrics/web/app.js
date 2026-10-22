@@ -21,6 +21,107 @@ const percent = (value) =>
     : `${number(Number(value) * 100, 1)}%`;
 const date = (value) => (value ? String(value).slice(0, 10) : "—");
 const state = { fighters: [], loaded: new Set(), recent: null, prediction: null, photos: new Map(), upcoming: null };
+const directoryState={q:'',division:'',page:1};
+let directoryRequest=0,profileRequest=0,directoryDebounce;
+function directoryUrl() {
+  const params=new URLSearchParams();
+  if(directoryState.q)params.set('q',directoryState.q);
+  if(directoryState.division)params.set('division',directoryState.division);
+  if(directoryState.page>1)params.set('page',String(directoryState.page));
+  return `/fighters${params.size?'?'+params:''}`;
+}
+function fighterProfileLink(id,name,className='') {
+  return id?`<a class="${escapeHtml(className)}" data-fighter-link href="/fighters/${encodeURIComponent(id)}">${escapeHtml(name)}</a>`:escapeHtml(name);
+}
+async function loadDirectory() {
+  const token=++directoryRequest,query={...directoryState};
+  $('directory-query').value=query.q;
+  $('directory-content').setAttribute('aria-busy','true');
+  $('directory-content').innerHTML='<div class="panel loading-state">Finding covered athlete profiles…</div>';
+  try {
+    const params=new URLSearchParams({...query,per_page:'24'});
+    const report=await api(`/api/v1/fighter-directory?${params}`);
+    if(token!==directoryRequest)return;
+    const rows=report.fighters||[],pagination=report.pagination||{};
+    $('directory-title').textContent=`Browse ${number(report.total_canonical,0)} fighters`;
+    $('directory-division').innerHTML='<option value="">All divisions</option>'+ (report.divisions||[]).map(d=>`<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+    $('directory-division').value=query.division;
+    const cards=rows.map(f=>{
+      rememberPhoto(f);
+      return `<a href="/fighters/${encodeURIComponent(f.fighter_id||f.id)}" data-fighter-link class="directory-card"><div class="directory-portrait">${athletePortrait(f)}<span class="directory-division">${escapeHtml(f.latest_division||'Division unavailable')}</span></div><div class="directory-card-copy"><h3>${escapeHtml(f.name)}</h3><div class="directory-card-stats"><span><b>${number(f.covered_bouts,0)}</b> covered ${f.covered_bouts===1?'bout':'bouts'}</span><span>Last covered<br><b>${escapeHtml(date(f.last_fight_date))}</b></span></div><span class="directory-card-action">View fighter profile <span aria-hidden="true">↗</span></span></div></a>`;
+    }).join('');
+    const total=pagination.total??rows.length;
+    $('directory-content').innerHTML=`<div class="directory-results-note"><span>${number(total,0)} ${total===1?'athlete':'athletes'}${query.q?` matching “${escapeHtml(query.q)}”`:''}</span><span>UFC history · ESPN athlete photos</span></div>${rows.length?`<div class="fighter-directory-grid">${cards}</div>`:`<div class="panel directory-empty"><p class="eyebrow">NO MATCHES</p><h3>No covered athlete matches these filters.</h3><p>Try a shorter name or choose all divisions.</p><button id="directory-clear" class="secondary-button" type="button">Clear filters</button></div>`}<nav class="directory-pagination" aria-label="Fighter directory pages"><button type="button" class="secondary-button" data-directory-page="${Math.max(1,query.page-1)}" ${pagination.has_previous?'':'disabled'}>← Previous</button><span>Page ${number(pagination.page??query.page,0)} of ${number(Math.max(1,pagination.total_pages||1),0)}</span><button type="button" class="secondary-button" data-directory-page="${query.page+1}" ${pagination.has_next?'':'disabled'}>Next →</button></nav>`;
+    bindPortraits($('directory-content'));
+    $('directory-content').querySelectorAll('[data-directory-page]').forEach(button=>button.addEventListener('click',()=>{
+      directoryState.page=Number(button.dataset.directoryPage);history.pushState({},'',directoryUrl());loadDirectory();$('directory-form').scrollIntoView({block:'start',behavior:'instant'});
+    }));
+    $('directory-clear')?.addEventListener('click',()=>{directoryState.q='';directoryState.division='';directoryState.page=1;history.replaceState({},'',directoryUrl());loadDirectory();});
+  } catch(error) {
+    if(token!==directoryRequest)return;
+    $('directory-content').innerHTML=`${errorPanel(error.message)}<button id="directory-retry" type="button" class="secondary-button">Retry directory</button>`;
+    $('directory-retry').addEventListener('click',loadDirectory);
+  } finally {if(token===directoryRequest)$('directory-content').setAttribute('aria-busy','false');}
+}
+function applyDirectoryFilters() {
+  clearTimeout(directoryDebounce);
+  directoryState.q=$('directory-query').value.trim();directoryState.division=$('directory-division').value;directoryState.page=1;
+  history.replaceState({},'',directoryUrl());loadDirectory();
+}
+$('directory-form').addEventListener('submit',event=>{event.preventDefault();applyDirectoryFilters();});
+$('directory-query').addEventListener('input',()=>{++directoryRequest;clearTimeout(directoryDebounce);directoryDebounce=setTimeout(applyDirectoryFilters,300);});
+$('directory-division').addEventListener('change',applyDirectoryFilters);
+function profileHistoryChart(items) {
+  if(!items.length)return '<p class="panel-description">No observed count history is available.</p>';
+  const rows=items.slice().reverse(),w=800,h=235,l=40,r=20,t=20,b=40;
+  const max=Math.max(20,...rows.flatMap(row=>[Number(row.sig_landed)||0,Number(row.sig_absorbed)||0]));
+  const scale=Math.ceil(max/50)*50,x=i=>l+(i+.5)/rows.length*(w-l-r),y=v=>h-b-v/scale*(h-t-b);
+  const bar=Math.min(20,(w-l-r)/rows.length*.32);
+  return `<svg class="profile-history-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Observed significant strikes landed and absorbed by bout, oldest to newest">${[0,.5,1].map(v=>`<line x1="${l}" x2="${w-r}" y1="${y(v*scale)}" y2="${y(v*scale)}" stroke="#37383f"/><text x="${l-7}" y="${y(v*scale)+4}" text-anchor="end" fill="#a7a9af" font-size="10">${number(v*scale,0)}</text>`).join('')}${rows.map((row,i)=>`<rect x="${x(i)-bar}" y="${y(row.sig_landed)}" width="${bar}" height="${h-b-y(row.sig_landed)}" fill="#f18a85"><title>${escapeHtml(row.event_date)} vs ${escapeHtml(row.opponent_name)}: ${number(row.sig_landed,0)} landed</title></rect><rect x="${x(i)}" y="${y(row.sig_absorbed)}" width="${bar}" height="${h-b-y(row.sig_absorbed)}" fill="#81b6f4"><title>${escapeHtml(row.event_date)} vs ${escapeHtml(row.opponent_name)}: ${number(row.sig_absorbed,0)} absorbed</title></rect>${rows.length<=8||i===0||i===rows.length-1||i%Math.ceil(rows.length/6)===0?`<text x="${x(i)}" y="${h-19}" text-anchor="middle" fill="#a7a9af" font-size="9">${escapeHtml(String(row.event_date).slice(2,7))}</text>`:''}`).join('')}<text x="${w/2}" y="${h-1}" text-anchor="middle" fill="#a7a9af" font-size="10">OBSERVED BOUTS · OLDEST → NEWEST</text></svg>`;
+}
+function renderProfileWindow(report, window) {
+  const summary=report.windows?.[window]||{},all=report.history||[],rows=window==='last5'?all.slice(0,5):all;
+  const definitions=[['sig_landed_per_min','LANDED / MIN','Significant-strike output',2],['sig_absorbed_per_min','ABSORBED / MIN','Lower means fewer absorbed',2],['net_sig_per_min','NET STRIKES / MIN','Landed minus absorbed',2],['sig_attempted_per_min','ATTEMPTS / MIN','Significant strikes attempted',2],['accuracy','ACCURACY','Landed ÷ attempted',1,true],['defense','DEFENSE','Opponent attempts avoided',1,true],['mean_duration_minutes','MEAN DURATION','Minutes per covered bout',1],['full_time_share','FULL-DURATION SHARE','Reached scheduled limit',1,true]];
+  return `<div class="observed-heading"><div><p class="eyebrow">OBSERVED UFC HISTORY</p><h3>The striking profile</h3></div><div class="history-window" role="group" aria-label="Fighter profile sample"><button type="button" data-profile-window="last5" aria-pressed="${window==='last5'}">Last 5</button><button type="button" data-profile-window="career" aria-pressed="${window==='career'}">All covered</button></div></div><p class="panel-description">${number(summary.covered_bouts,0)} covered ${summary.covered_bouts===1?'bout':'bouts'} · ${number(summary.observed_minutes,1)} observed minutes.</p><div class="profile-stat-grid">${definitions.map(([key,label,note,digits,fraction])=>metric(label,fraction?percent(summary[key]):number(summary[key],digits),note)).join('')}</div><div class="panel data-panel profile-form-chart"><div class="profile-chart-title"><h3>Count history</h3><div class="comparison-legend"><span class="red-side">● Landed</span><span class="blue-side">● Absorbed</span></div></div>${profileHistoryChart(rows)}</div><div class="panel data-panel"><h3>${window==='last5'?'Last five covered bouts':'All covered bouts'}</h3><p class="panel-description">Newest first · Covered UFC bouts since 2013.</p>${rows.length?`<div class="table-scroll"><table><thead><tr><th>DATE / EVENT</th><th>OPPONENT</th><th>LANDED</th><th>ABSORBED</th><th>ATTEMPTED</th><th>MINUTES</th><th>FORMAT / METHOD</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${escapeHtml(date(row.event_date))}<small>${escapeHtml(row.event_name||'')}</small></td><td>${fighterProfileLink(row.opponent_id,row.opponent_name)}</td><td class="red-side">${number(row.sig_landed,0)}</td><td class="blue-side">${number(row.sig_absorbed,0)}</td><td>${number(row.sig_attempted,0)}</td><td>${number(row.duration_minutes,1)}</td><td>${escapeHtml(row.scheduled_rounds)} rounds<small>${escapeHtml(row.method||'Unavailable')}</small></td></tr>`).join('')}</tbody></table></div>`:'<p class="panel-description">No covered UFC bouts are available.</p>'}</div>`;
+}
+async function loadFighterProfile(id) {
+  const token=++profileRequest;
+  $('profile-content').innerHTML='<div class="panel loading-state">Loading this athlete’s covered fight history…</div>';
+  $('profile-content').setAttribute('aria-busy','true');
+  try {
+    const report=await api(`/api/v1/fighters/${encodeURIComponent(id)}`);
+    if(token!==profileRequest)return;
+    const fighter=report.fighter||{},summary=report.windows?.career||{},photo=safeUrl(fighter.photo_source_url);
+    rememberPhoto(fighter);document.title=`${fighter.name||'Fighter profile'} · OctogonML`;
+$('profile-content').innerHTML=`<a class="text-link profile-back" data-fighter-link href="${escapeHtml(directoryUrl())}">← Fighter directory</a><div class="panel fighter-profile-hero"><div class="profile-portrait">${athletePortrait(fighter)}<span class="profile-photo-caption">${fighter.photo_url?'ESPN athlete photo':'Photo unavailable'}</span></div><div class="profile-identity"><p class="eyebrow">FIGHTER PROFILE · UFC HISTORY</p><h1>${escapeHtml(fighter.name)}</h1><div class="profile-tags"><span>Last covered division · ${escapeHtml(fighter.latest_division||'Unavailable')}</span><span>Last covered bout ${escapeHtml(date(fighter.last_fight_date))}</span></div><p class="profile-coverage">UFC bouts covered since 2013.</p><div class="profile-sample-stats"><div><strong>${number(fighter.covered_bouts??summary.covered_bouts,0)}</strong><span>Covered bouts</span></div><div><strong>${number(summary.observed_minutes,1)}</strong><span>Observed minutes</span></div></div><div class="profile-compare-actions"><button type="button" class="primary-button" data-profile-compare="fighter">Compare in red corner <span>↗</span></button><button type="button" class="secondary-button" data-profile-compare="opponent">Compare in blue corner <span>↗</span></button></div><p id="profile-compare-error" class="error-message" role="alert" hidden></p>${photo?`<a class="profile-source text-link" href="${escapeHtml(photo)}" target="_blank" rel="noopener">Photo source ↗</a>`:''}</div></div><section id="profile-observed" class="profile-observed" aria-label="Observed fighter statistics"></section><details class="panel data-panel profile-data-note"><summary>Coverage and source notes</summary><p class="panel-description">${escapeHtml(factText(report.note||'All values describe eligible completed bouts in this dataset. Missing history and photography remain explicitly unavailable.'))}</p><p class="panel-description">Stable athlete ID: ${escapeHtml(fighter.fighter_id||fighter.id)}. Photo source observed ${escapeHtml(date(fighter.photo_observed_at))}. Photography identifies the athlete and does not imply an affiliation with UFC or ESPN.</p></details>`;
+    bindPortraits($('profile-content'));
+    $('profile-content').querySelector('.profile-data-note').insertAdjacentHTML('beforeend',`<p class="panel-description">Dataset coverage: ${escapeHtml(date(report.data_window?.start))} → ${escapeHtml(date(report.data_window?.end))}. This athlete’s covered dates: ${escapeHtml(date(report.coverage?.fighter_start))} → ${escapeHtml(date(report.coverage?.fighter_end))}. Sources: ${escapeHtml((report.coverage?.source_names||[]).join(' · ')||'See dataset attribution')}.</p>`);
+    const render=window=>{
+      $('profile-observed').innerHTML=renderProfileWindow(report,window);
+      $('profile-observed').querySelectorAll('[data-profile-window]').forEach(button=>button.addEventListener('click',()=>render(button.dataset.profileWindow)));
+    };
+    render('last5');
+    $('profile-content').querySelectorAll('[data-profile-compare]').forEach(button=>button.addEventListener('click',async()=>{
+      await initialization;
+      const field=button.dataset.profileCompare,other=field==='fighter'?'opponent':'fighter';
+      const known=state.fighters.find(row=>String(row.fighter_id)===String(id));
+      if(!known){$('profile-compare-error').textContent='Matchup athlete selection is unavailable. Refresh when the athlete API is ready.';$('profile-compare-error').hidden=false;return;}
+      const replacement=$(field).value!==String(id)?$(field).value:state.fighters.find(row=>String(row.fighter_id)!==String(id))?.fighter_id;
+      const selectedOther=$(other).value===String(id)?replacement:$(other).value;
+      for(const target of ['fighter','opponent']){
+        $(`${target}-search`).value='';
+        $(target).innerHTML=state.fighters.map(f=>`<option value="${escapeHtml(f.fighter_id)}">${escapeHtml(f.name)} · ${number(f.bout_count,0)} bouts</option>`).join('');
+      }
+      $(field).value=String(id);$(other).value=selectedOther;enforceDistinct();state.prediction=null;$('form-error').hidden=true;
+      $('forecast-result').innerHTML=`<div class="panel empty-state"><p class="eyebrow">ATHLETE SELECTED</p><h2>${escapeHtml(known.name)} is ready to compare.</h2><p>Choose the other athlete, scheduled rounds, and hypothetical strike threshold, then select Compare fighters to generate both count forecasts.</p></div>`;
+      navigateView('explorer');$('forecast-form').scrollIntoView({block:'start',behavior:'instant'});
+    }));
+  } catch(error){
+    if(token!==profileRequest)return;
+    $('profile-content').innerHTML=`<a class="text-link profile-back" data-fighter-link href="/fighters">← Fighter directory</a>${errorPanel(error.message)}<button id="profile-retry" class="secondary-button" type="button">Retry profile</button>`;
+    $('profile-retry').addEventListener('click',()=>loadFighterProfile(id));
+  } finally {if(token===profileRequest)$('profile-content').setAttribute('aria-busy','false');}
+}
 async function api(path, options = {}) {
   const response = await fetch(path, {
     ...options,
@@ -62,27 +163,52 @@ function metricValues(data) {
     level: m.interval_level ?? 0.8,
   };
 }
-document.querySelectorAll("[data-view]").forEach((button) =>
-  button.addEventListener("click", () => {
+function showView(name) {
+    clearTimeout(directoryDebounce);
+    if(name!=='profile')++profileRequest;
     document.querySelectorAll("[data-view]").forEach((b) => {
-      const selected = b === button;
+      const selected = b.dataset.view === (name==='profile'?'fighters':name);
       b.classList.toggle("active", selected);
       b.setAttribute("aria-selected", String(selected));
     });
     document
       .querySelectorAll(".view")
       .forEach(
-        (view) => (view.hidden = view.id !== `view-${button.dataset.view}`),
+        (view) => (view.hidden = view.id !== `view-${name}`),
       );
     document.querySelector(".note-number").textContent =
-      { upcoming: "2026 / UFC", explorer: "MATCHUP / LAB", recent: "RECENT / RESULTS", evidence: "MODEL / EVIDENCE", forward: "FORWARD / TRACKER" }[button.dataset.view];
+      { upcoming: "2026 / UFC", explorer: "MATCHUP / LAB", fighters:'FIGHTER / DIRECTORY', profile:'ATHLETE / PROFILE', recent: "RECENT / RESULTS", evidence: "MODEL / EVIDENCE", forward: "FORWARD / TRACKER" }[name]||'';
+    document.querySelector('.intro').hidden=['fighters','profile'].includes(name);
     document.querySelector('.research-menu').open = false;
-    if (button.dataset.view === "upcoming") loadUpcoming();
-    if (button.dataset.view === "recent") loadRecent();
-    if (button.dataset.view === "evidence") loadEvidence();
-    if (button.dataset.view === "forward") loadForward();
-  }),
-);
+    if(name==='upcoming')loadUpcoming();
+    if(name==='fighters')loadDirectory();
+    if(name==='recent')loadRecent();
+    if(name==='evidence')loadEvidence();
+    if(name==='forward')loadForward();
+    if(name!=='profile')document.title=name==='fighters'?'Fighters · OctogonML':'OctogonML · UFC strike forecasts';
+}
+function navigateView(name) {
+  const path=name==='upcoming'?'/':name==='fighters'?directoryUrl():`/?view=${encodeURIComponent(name)}`;
+  history.pushState({},'',path);showView(name);window.scrollTo({top:0,behavior:'instant'});
+}
+function routeLocation() {
+  const match=location.pathname.match(/^\/fighters\/([^/]+)\/?$/);
+  if(match){showView('profile');loadFighterProfile(decodeURIComponent(match[1]));return;}
+  if(/^\/fighters\/?$/.test(location.pathname)){
+    const query=new URLSearchParams(location.search);
+    directoryState.q=query.get('q')||'';directoryState.division=query.get('division')||'';directoryState.page=Math.max(1,Number(query.get('page'))||1);
+    showView('fighters');return;
+  }
+  const view=new URLSearchParams(location.search).get('view')||'upcoming';
+  showView(['upcoming','explorer','recent','evidence','forward'].includes(view)?view:'upcoming');
+}
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>navigateView(button.dataset.view)));
+window.addEventListener('popstate',routeLocation);
+document.addEventListener('click',event=>{
+  const link=event.target.closest('a[data-fighter-link]');
+  if(!link||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  event.preventDefault();history.pushState({},'',link.getAttribute('href'));routeLocation();window.scrollTo({top:0,behavior:'instant'});
+});
 async function initialize() {
   const results = await Promise.allSettled([
     api("/api/v1/overview"),
@@ -169,29 +295,109 @@ $("forecast-form").addEventListener("submit", async (event) => {
   const button = $("forecast-button");
   button.disabled = true;
   button.textContent = "Calculating forecast…";
+  $('forecast-result').setAttribute('aria-busy','true');
   try {
-    const prediction = await api("/api/v1/predictions", {
-      method: "POST",
-      body: JSON.stringify({
+    const request = {
         fighter_id: $("fighter").value,
         opponent_id: $("opponent").value,
         scheduled_rounds: Number(
           document.querySelector("[name=scheduled_rounds]:checked").value,
         ),
         line: Number($("line").value),
-      }),
-    });
-    renderPrediction(prediction);
-    addExplorerPhotos(prediction);
-    state.prediction = prediction;
-    addMatchupDisclosure(prediction);
+      };
+    const params=new URLSearchParams({fighter_id:request.fighter_id,opponent_id:request.opponent_id,scheduled_rounds:String(request.scheduled_rounds)});
+    const results=await Promise.allSettled([
+      api('/api/v1/predictions',{method:'POST',body:JSON.stringify(request)}),
+      api('/api/v1/predictions',{method:'POST',body:JSON.stringify({...request,fighter_id:request.opponent_id,opponent_id:request.fighter_id})}),
+      api(`/api/v1/matchups?${params}`),
+    ]);
+    if(results[0].status==='rejected'&&results[1].status==='rejected')throw new Error(results[0].reason.message);
+    const predictions=results.slice(0,2).map(result=>result.status==='fulfilled'?result.value:null);
+    state.prediction=predictions[0]||predictions[1];
+    renderComparison(predictions,results[2].status==='fulfilled'?results[2].value:null,request);
+    const failures=results.filter(result=>result.status==='rejected');
+    if(failures.length)showFormError(`Some comparison data is unavailable: ${failures.map(result=>result.reason.message).join(' · ')}. Successful forecasts have been saved.`);
   } catch (error) {
     showFormError(error.message);
   } finally {
     button.disabled = false;
-    button.innerHTML = "Generate forecast <span>↗</span>";
+    button.innerHTML = "Compare fighters <span>↗</span>";
+    $('forecast-result').setAttribute('aria-busy','false');
   }
 });
+function comparisonDistribution(predictions) {
+  const series=predictions.map(p=>(p?.distribution||[]).filter(d=>Number.isFinite(d.count)&&Number.isFinite(d.probability)));
+  if(!series.some(s=>s.length))return '<p class="panel-description">Count-distribution detail is unavailable.</p>';
+  const w=760,h=265,l=48,r=20,t=20,b=45;
+  const maxX=Math.max(20,...series.flat().map(d=>d.count));
+  const maxY=Math.max(.001,...series.flat().map(d=>d.probability));
+  const x=v=>l+v/maxX*(w-l-r),y=v=>h-b-v/maxY*(h-t-b);
+  const colors=['#f18a85','#81b6f4'];
+  return `<svg class="comparison-pmf" viewBox="0 0 ${w} ${h}" role="img" aria-label="Two athlete significant-strike count probability distributions on identical axes">${[0,.25,.5,.75,1].map(v=>`<line x1="${l}" x2="${w-r}" y1="${y(v*maxY)}" y2="${y(v*maxY)}" stroke="#34424e"/><text x="${l-8}" y="${y(v*maxY)+4}" text-anchor="end" fill="#a2adb3" font-size="10">${number(v*maxY*100,1)}%</text><text x="${x(v*maxX)}" y="${h-24}" text-anchor="middle" fill="#a2adb3" font-size="10">${number(v*maxX,0)}</text>`).join('')}${series.map((s,i)=>s.length?`<path d="M${x(0)},${y(0)} ${s.map(d=>`L${x(d.count)},${y(d.probability)}`).join(' ')} L${x(s.at(-1).count)},${y(0)} Z" fill="${colors[i]}" fill-opacity=".12"/><polyline points="${s.map(d=>`${x(d.count)},${y(d.probability)}`).join(' ')}" fill="none" stroke="${colors[i]}" stroke-width="2"/>${predictions[i]?`<line x1="${x(predictions[i].mean)}" x2="${x(predictions[i].mean)}" y1="${t}" y2="${h-b}" stroke="${colors[i]}" stroke-dasharray="4 5"/>`:''}`:'').join('')}<text x="${w/2}" y="${h-3}" text-anchor="middle" fill="#a2adb3" font-size="10">SIGNIFICANT STRIKES LANDED · FULL BOUT</text></svg>`;
+}
+function renderComparison(predictions, context, request) {
+  const athletes=[request.fighter_id,request.opponent_id].map(id=>state.fighters.find(f=>String(f.fighter_id)===String(id))||{fighter_id:id,name:'Athlete'});
+const card=(athlete,p,i)=>`<article class="comparison-athlete ${i?'blue-side':'red-side'}">${athletePortrait({...athlete,id:athlete.fighter_id})}<p class="eyebrow">${i?'BLUE':'RED'} SIDE</p><h2>${fighterProfileLink(athlete.fighter_id,athlete.name)}</h2>${p?`<div class="comparison-estimate"><strong>${number(p.mean)}</strong><span>Expected significant strikes</span></div><div class="comparison-range"><span>Median <b>${number(p.median,0)}</b></span><span>${percent(p.interval_level??.8)} range <b>${number(p.interval_low,0)}–${number(p.interval_high,0)}</b></span></div><details class="comparison-probabilities"><summary>Probabilities at ${number(p.line)} strikes</summary><p>Over ${percent(p.p_over)} · Under ${percent(p.p_under)} · Push ${percent(p.p_push)}</p><small>Same hypothetical threshold for each athlete; not a market line.</small></details>`:'<p class="error-message">Forecast unavailable. Submit again to retry.</p>'}</article>`;
+  $('forecast-result').innerHTML=`<div class="panel comparison-projections"><div class="comparison-title"><div><p class="eyebrow">MODEL PROJECTIONS</p><h3>${escapeHtml(request.scheduled_rounds)}-round matchup</h3></div><span class="pill">HYPOTHETICAL SCENARIO</span></div><div class="comparison-hero">${card(athletes[0],predictions[0],0)}<span class="comparison-versus">VS</span>${card(athletes[1],predictions[1],1)}</div><div class="comparison-chart"><h3>How the count outcomes compare</h3><p class="panel-description">Solid curves show count probabilities; dashed lines mark expected counts. Overlap reflects uncertainty, not a win probability.</p><div class="comparison-legend"><span class="red-side">● ${escapeHtml(athletes[0].name)}</span><span class="blue-side">● ${escapeHtml(athletes[1].name)}</span></div>${comparisonDistribution(predictions)}<p class="panel-description">Displayed PMFs are finite excerpts. Remaining probability beyond the chart: ${predictions.map((p,i)=>`${escapeHtml(athletes[i].name)} ${p?percent(p.tail_probability??p.distribution_tail_probability):'—'}`).join(' · ')}.</p></div><details class="forecast-notes"><summary>Forecast warnings and provenance</summary>${predictions.map((p,i)=>p?`<h4>${escapeHtml(athletes[i].name)}</h4><ul class="warnings">${(p.warnings||[]).map(w=>`<li>${escapeHtml(w)}</li>`).join('')}</ul><p class="provenance">Model ${escapeHtml(p.model_version)} · ID ${escapeHtml(p.prediction_id)}<br>Features through ${escapeHtml(date(p.feature_cutoff))} · Data through ${escapeHtml(date(p.data_cutoff))}</p>`:'').join('')}</details></div><div id="comparison-observed" class="panel data-panel"></div>`;
+  bindPortraits($('forecast-result'));
+  const hero=$('forecast-result').querySelector('.comparison-hero');
+  hero.classList.add('comparison-stage');
+  hero.insertBefore($('comparison-observed'),hero.lastElementChild);
+  const recentHistories=['fighter','opponent'].map(side=>(context?.comparison_dashboard?.history?.[side]||[]).slice(0,5));
+  const recentMax=Math.max(1,...recentHistories.flat().map(row=>Number(row.sig_landed)||0));
+  hero.querySelectorAll('.comparison-athlete').forEach((card,index)=>{
+    const rows=recentHistories[index];
+    if(!rows.length)return;
+    card.insertAdjacentHTML('beforeend',`<div class="comparison-recent"><h4>Last ${rows.length} observed counts</h4><svg viewBox="0 0 220 100" role="img" aria-label="Recent observed significant strikes, newest first, shared scale across athletes">${rows.map((row,i)=>`<rect x="${i*44+8}" y="${68-Number(row.sig_landed)/recentMax*52}" width="28" height="${Number(row.sig_landed)/recentMax*52}" fill="currentColor" fill-opacity=".7"><title>${escapeHtml(row.event_date)} vs ${escapeHtml(row.opponent_name)}: ${number(row.sig_landed,0)} landed</title></rect><text x="${i*44+22}" y="${Math.max(10,63-Number(row.sig_landed)/recentMax*52)}" fill="currentColor" text-anchor="middle" font-size="10">${number(row.sig_landed,0)}</text><text x="${i*44+22}" y="85" fill="#a7a9af" text-anchor="middle" font-size="8">${escapeHtml(String(row.event_date).slice(2,7))}</text>`).join('')}</svg><p>Actual landed · newest first</p></div>`);
+  });
+  const historyPanel=document.createElement('div');historyPanel.className='panel data-panel comparison-history-panel';
+  $('forecast-result').append(historyPanel);
+  const dashboard=context?.comparison_dashboard;
+  if(dashboard){
+    const renderWindow=window=>{
+      $('comparison-observed').innerHTML=renderObservedComparison(dashboard,window,athletes);
+      const history=$('comparison-observed').querySelector('.comparison-history');
+      if(history)historyPanel.replaceChildren(history);
+      $('comparison-observed').querySelectorAll('[data-history-window]').forEach(button=>button.addEventListener('click',()=>renderWindow(button.dataset.historyWindow)));
+    };
+    renderWindow('last5');
+  }else {historyPanel.hidden=true;$('comparison-observed').innerHTML='<h3>Observed history unavailable</h3><p class="panel-description">Forecasts remain available. Submit again to retry loading historical comparison data.</p>';}
+  if(context){
+    const details=document.createElement('details');details.className='panel matchup-disclosure';
+    details.innerHTML=`<summary>Why this projection? <span class="text-link">Model sensitivity</span></summary><div class="matchup-context"><h3>Model sensitivity for ${escapeHtml(athletes[0].name)}</h3><p class="panel-description">${escapeHtml(context.explanation_note||'Controlled feature substitutions are model responses, not causal effects or additive attributions. Groups can overlap and must not be summed.')}</p>${(context.explanation||[]).length?`<div class="sensitivity-list">${context.explanation.map(e=>`<div><span>${escapeHtml(e.group)}</span><strong>${Number(e.delta_mean)>0?'+':''}${number(e.delta_mean)} strikes</strong><small>${escapeHtml(e.description)}</small></div>`).join('')}</div>`:'<p class="panel-description">Sensitivity values are unavailable for this artifact.</p>'}</div>`;
+    $('forecast-result').append(details);
+  }
+}
+function renderObservedComparison(dashboard, window, athletes) {
+  const pair=dashboard.windows?.[window]||{},a=pair.fighter||{},b=pair.opponent||{};
+  const specs=[
+    ['sig_landed_per_min','Landed / min','Higher = more output',2],
+    ['sig_absorbed_per_min','Absorbed / min','Lower = fewer strikes absorbed',2],
+    ['net_sig_per_min','Net strikes / min','Landed minus absorbed; higher = better differential',2],
+    ['sig_attempted_per_min','Attempts / min','Higher = more attempts',2],
+    ['accuracy','Accuracy','Landed / attempted',1,'percent'],
+    ['defense','Defense','Share of opponent attempts avoided',1,'percent'],
+    ['mean_duration_minutes','Mean duration','Minutes per covered bout',1],
+    ['full_time_share','Full-duration share','Share reaching scheduled limit',1,'percent'],
+  ];
+  const rows=specs.map(([key,label,note,digits,kind])=>{
+    const av=a[key],bv=b[key],valid=v=>v!==null&&v!==undefined&&Number.isFinite(Number(v));
+    const scale=kind==='percent'?1:Math.max(Math.abs(Number(av)||0),Math.abs(Number(bv)||0),.01);
+    const signed=key==='net_sig_per_min';
+    const format=v=>valid(v)?(kind==='percent'?percent(v):`${signed&&v>0?'+':''}${number(v,digits)}`):'—';
+    const bar=(v,side)=>{
+      const width=valid(v)?Math.min(100,Math.abs(v)/scale*100):0;
+      if(signed)return `<div class="metric-track signed"><span class="zero-marker"></span><i class="${side}" style="left:${v<0?50-width/2:50}%;width:${width/2}%"></i></div>`;
+      return `<div class="metric-track ${side}"><i style="width:${width}%"></i></div>`;
+    };
+    return `<div class="mirrored-metric"><div class="metric-value red-side">${format(av)}</div><div class="metric-name"><strong>${escapeHtml(label)}</strong><small>${escapeHtml(note)}</small></div><div class="metric-value blue-side">${format(bv)}</div><div class="left-track">${bar(av,'red-side')}</div><div class="metric-center">${signed?'− ← 0 → +':kind==='percent'?'0–100%':'Shared scale'}</div><div>${bar(bv,'blue-side')}</div></div>`;
+  }).join('');
+  const history=(items,name,side)=>{
+    const rows=(window==='last5'?items.slice(0,5):items);
+    return `<div class="history-column ${side}"><h4>${escapeHtml(name)}</h4>${rows.length?`<div class="table-scroll"><table><thead><tr><th>DATE / OPPONENT</th><th>LANDED</th><th>ABS.</th><th>MIN.</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${escapeHtml(date(row.event_date))}<small>${escapeHtml(row.opponent_name)}</small><small>${escapeHtml(row.method||'')} · ${escapeHtml(row.scheduled_rounds)} rounds</small></td><td>${number(row.sig_landed,0)}</td><td>${number(row.sig_absorbed,0)}</td><td>${number(row.duration_minutes,1)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="panel-description">No covered prior bouts. Rates are unavailable.</p>'}</div>`;
+  };
+  return `<div class="observed-heading"><div><p class="eyebrow">OBSERVED HISTORY · NOT A PROJECTION</p><h3>Striking, side by side</h3></div><div class="history-window" role="group" aria-label="Historical sample"><button type="button" data-history-window="last5" aria-pressed="${window==='last5'}">Last 5</button><button type="button" data-history-window="career" aria-pressed="${window==='career'}">All covered</button></div></div><p class="panel-description">${escapeHtml(dashboard.coverage_label||'Covered UFC bouts since 2013')} · History before ${escapeHtml(date(dashboard.as_of))}. Rates aggregate observed counts and time; these are not full MMA career records.</p><div class="sample-comparison"><span class="red-side"><b>${number(a.covered_bouts,0)}</b> bouts · ${number(a.observed_minutes,1)} observed min</span><span class="blue-side"><b>${number(b.covered_bouts,0)}</b> bouts · ${number(b.observed_minutes,1)} observed min</span></div>${rows}<p class="panel-description comparison-scale-note">Each row uses the same scale for both athletes. Net bars share a zero center; left of zero means more absorbed than landed. No bar alone determines matchup advantage.</p><details class="comparison-history"><summary>Fight-by-fight observed history</summary><div class="comparison-history-grid">${history(dashboard.history?.fighter||[],athletes[0].name,'red-side')}${history(dashboard.history?.opponent||[],athletes[1].name,'blue-side')}</div></details><p class="panel-description">${escapeHtml(dashboard.note||'Historical opponent quality, styles, and sample sizes can differ. These summaries are descriptive.')}</p>`;
+}
 function distributionChart(prediction) {
   let points = (prediction.distribution || [])
     .map((p) => ({ x: Number(p.count), p: Number(p.probability) }))
@@ -316,7 +522,7 @@ async function loadEvidence() {
       ];
   const splits = report.splits || [];
   $("evidence-content").innerHTML =
-    `<p class="section-copy">Historical report: ${escapeHtml((report.report_period || []).join(" → ") || "See evaluation splits below")}. These metrics evaluate time-separated historical artifacts. The serving artifact is separately versioned; inspect its fitting and calibration cutoffs below.</p><div class="metrics-grid">${metric("HOLDOUT FORECASTS", number(m.n, 0), "Chronological evaluation sample")}${metric("MODEL MAE", number(m.mae, 2), "Strikes per athlete")}${metric("BASELINE MAE", number(baseline.mae ?? baseline.mean_absolute_error, 2), "Compare on the same holdout")}${metric(`${number(m.level * 100, 0)}% INTERVAL COVERAGE`, percent(m.coverage), "Empirical holdout coverage")}</div><div class="evidence-columns"><div class="panel data-panel"><h3>Artifact & provenance</h3><dl class="metadata-list">${metadataRow("Model version", model.model_version || model.current_version || model.version || report.model_version)}${metadataRow("Model family", model.model_type || model.estimator || model.algorithm || model.champion)}${metadataRow("Training cutoff", date(model.training_cutoff || model.train_cutoff || model.data_through || report.training_cutoff))}${metadataRow("Calibration cutoff", date(model.calibration_cutoff))}${metadataRow("Serving channel", model.serving_channel)}${metadataRow("Data cutoff", date(model.data_cutoff || model.data_through))}${metadataRow("Built at", model.trained_at || model.created_at)}${metadataRow("Artifact SHA256", (typeof model.artifact_sha256 === "object" ? model.artifact_sha256?.current : model.artifact_sha256) || model.sha256 || model.artifact_hash)}${metadataRow("Feature schema", model.feature_schema_version || model.feature_version)}</dl></div><div class="panel data-panel"><h3>How to read these results</h3><ul class="limitation-list">${(Array.isArray(limitations) ? limitations : [limitations]).map((l) => `<li>${escapeHtml(l)}</li>`).join("")}</ul><p class="panel-description">MAE is the average absolute count error. Coverage is the fraction of observed outcomes inside the stated interval; compare it with the interval’s nominal level.</p></div></div>${evidenceDiagnostics(report)}${splits.length ? `<div class="panel data-panel"><h3>Time-based evaluation splits</h3><div class="table-scroll"><table><thead><tr><th>SPLIT</th><th>START</th><th>END</th><th>SAMPLES</th></tr></thead><tbody>${splits.map((s) => `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(date(s.start))}</td><td>${escapeHtml(date(s.end))}</td><td>${number(s.n ?? s.count, 0)}</td></tr>`).join("")}</tbody></table></div></div>` : ""}${features.length ? `<div class="panel data-panel"><h3>Inputs available before the fight</h3><p class="panel-description">Feature values are reconstructed using only eligible history before each forecast cutoff.</p><div class="feature-tags">${features.map((f) => `<span class="feature-tag">${escapeHtml(typeof f === "string" ? f : f.name)}</span>`).join("")}</div></div>` : ""}${benchmark && benchmark.status !== "not_measured" ? renderBenchmark(benchmark) : '<div class="panel data-panel"><h3>Runtime benchmark</h3><p class="panel-description">No benchmark artifact is available. Run the benchmark command to record measured latency and throughput.</p></div>'}<div class="panel data-panel"><h3>Inspect the service</h3><p class="panel-description">The same documented endpoints power this interface. Request schemas, validation rules, and response fields are available in the interactive OpenAPI reference.</p><a class="text-link" href="/docs">Open API documentation ↗</a></div>`;
+`<p class="section-copy">Historical report: ${escapeHtml((report.report_period || []).join(" → ") || "See evaluation splits below")}. These metrics evaluate time-separated historical artifacts. The serving artifact is separately versioned; inspect its fitting and calibration cutoffs below.</p><div class="metrics-grid">${metric("HISTORICAL FORECASTS", number(m.n, 0), "Chronological evaluation sample")}${metric("MODEL MAE", number(m.mae, 2), "Strikes per athlete")}${metric("BASELINE MAE", number(baseline.mae ?? baseline.mean_absolute_error, 2), "Compare on the same historical sample")}${metric(`${number(m.level * 100, 0)}% INTERVAL COVERAGE`, percent(m.coverage), "Empirical historical coverage")}</div><div class="evidence-columns"><div class="panel data-panel"><h3>Artifact & provenance</h3><dl class="metadata-list">${metadataRow("Model version", model.model_version || model.current_version || model.version || report.model_version)}${metadataRow("Model family", model.model_type || model.estimator || model.algorithm || model.champion)}${metadataRow("Training cutoff", date(model.training_cutoff || model.train_cutoff || model.data_through || report.training_cutoff))}${metadataRow("Calibration cutoff", date(model.calibration_cutoff))}${metadataRow("Serving channel", model.serving_channel)}${metadataRow("Data cutoff", date(model.data_cutoff || model.data_through))}${metadataRow("Built at", model.trained_at || model.created_at)}${metadataRow("Artifact SHA256", (typeof model.artifact_sha256 === "object" ? model.artifact_sha256?.current : model.artifact_sha256) || model.sha256 || model.artifact_hash)}${metadataRow("Feature schema", model.feature_schema_version || model.feature_version)}</dl></div><div class="panel data-panel"><h3>How to read these results</h3><ul class="limitation-list">${(Array.isArray(limitations) ? limitations : [limitations]).map((l) => `<li>${escapeHtml(l)}</li>`).join("")}</ul><p class="panel-description">MAE is the average absolute count error. Coverage is the fraction of observed outcomes inside the stated interval; compare it with the interval’s nominal level.</p></div></div>${evidenceDiagnostics(report)}${splits.length ? `<div class="panel data-panel"><h3>Time-based evaluation splits</h3><div class="table-scroll"><table><thead><tr><th>SPLIT</th><th>START</th><th>END</th><th>SAMPLES</th></tr></thead><tbody>${splits.map((s) => `<tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(date(s.start))}</td><td>${escapeHtml(date(s.end))}</td><td>${number(s.n ?? s.count, 0)}</td></tr>`).join("")}</tbody></table></div></div>` : ""}${features.length ? `<div class="panel data-panel"><h3>Inputs available before the fight</h3><p class="panel-description">Feature values are reconstructed using only eligible history before each forecast cutoff.</p><div class="feature-tags">${features.map((f) => `<span class="feature-tag">${escapeHtml(typeof f === "string" ? f : f.name)}</span>`).join("")}</div></div>` : ""}${benchmark && benchmark.status !== "not_measured" ? renderBenchmark(benchmark) : '<div class="panel data-panel"><h3>Runtime benchmark</h3><p class="panel-description">No benchmark artifact is available. Run the benchmark command to record measured latency and throughput.</p></div>'}<div class="panel data-panel"><h3>Inspect the service</h3><p class="panel-description">The same documented endpoints power this interface. Request schemas, validation rules, and response fields are available in the interactive OpenAPI reference.</p><a class="text-link" href="/docs">Open API documentation ↗</a></div>`;
 }
 function renderBenchmark(b) {
   return `<div class="panel data-panel"><h3>Measured serving performance</h3><dl class="metadata-list">${metadataRow("Requests", b.requests ?? b.n ?? b.sample_count)}${metadataRow("Concurrency", b.concurrency)}${metadataRow("p50 latency", b.p50_ms !== undefined ? `${number(b.p50_ms)} ms` : undefined)}${metadataRow("p95 latency", b.p95_ms !== undefined ? `${number(b.p95_ms)} ms` : undefined)}${metadataRow("Throughput", b.requests_per_second !== undefined ? `${number(b.requests_per_second)} requests/s` : undefined)}${metadataRow("Error rate", percent(b.error_rate))}${metadataRow("Measured at", b.measured_at)}${metadataRow("Environment", b.environment || b.hardware)}</dl><p class="panel-description">${escapeHtml(b.workload || "Performance is specific to the recorded environment and workload.")} ${escapeHtml(b.notes || "")}</p></div>`;
@@ -415,6 +621,11 @@ function renderMatchupContext(context, prediction) {
   const history = (items, name) => `<div><h3>${escapeHtml(name)} · last ${items.length}</h3>${items.length ? `<div class="history-spark">${items.map(item => `<div><span style="height:${Math.max(3,Math.min(100,Number(item.strikes)/Math.max(...items.map(i=>Number(i.strikes)),1)*100))}%" title="${escapeHtml(date(item.event_date))}: ${escapeHtml(item.strikes)} strikes"></span><small>${number(item.strikes,0)}</small></div>`).join("")}</div><table><thead><tr><th>DATE / OPPONENT</th><th>LANDED</th></tr></thead><tbody>${items.map(item=>`<tr><td>${escapeHtml(date(item.event_date))}<small>${escapeHtml(item.opponent||item.opponent_name)}</small></td><td>${number(item.strikes,0)}</td></tr>`).join("")}</tbody></table>` : '<p class="panel-description">No eligible prior bouts.</p>'}</div>`;
   return `<p class="panel-description">Historical summaries provide context; they do not make this hypothetical matchup a scheduled fixture.</p><div class="history-grid">${history(context.fighter_recent||[],prediction.fighter.name)}${history(context.opponent_recent||[],prediction.opponent.name)}</div>${rows.length?`<div class="table-scroll"><table><thead><tr><th>PRE-FIGHT COMPARISON</th><th>${escapeHtml(prediction.fighter.name)}</th><th>${escapeHtml(prediction.opponent.name)}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.label)}<small>${escapeHtml(r.unit||"")}</small></td><td>${number(r.fighter,2)}</td><td>${number(r.opponent,2)}</td></tr>`).join("")}</tbody></table></div>`:""}${explanations.length?`<h3 class="sensitivity-heading">Model sensitivity, not causal attribution</h3><p class="panel-description">${escapeHtml(context.explanation_note||"Changes in predicted mean under controlled feature substitutions. These are model responses, not causal effects or a decomposition that must sum to the forecast.")}</p><div class="sensitivity-list">${explanations.map(e=>`<div><span>${escapeHtml(e.group)}</span><strong>${Number(e.delta_mean)>0?"+":""}${number(e.delta_mean)} strikes</strong><small>${escapeHtml(e.description)}</small></div>`).join("")}</div>`:""}`;
 }
+function forwardModelComparison(summary) {
+  const rows=Object.entries(summary.by_model||{});
+  if(!rows.length)return '';
+  return `<div class="panel data-panel"><h3>Issued forecasts by model</h3><p class="panel-description">${number(summary.n_issued??summary.issued,0)} saved forecast records cover ${number(summary.unique_fixture_athlete_count,0)} unique fixture/athlete perspectives. Model versions can forecast the same outcomes; these are not independent observations.</p><div class="table-scroll"><table><thead><tr><th>MODEL</th><th>ISSUED</th><th>SETTLED</th><th>MAE</th><th>NLL</th></tr></thead><tbody>${rows.map(([version,m])=>`<tr><td title="${escapeHtml(version)}">${escapeHtml(version.startsWith('v3-')?'V3 duration mixture':version.startsWith('v2-')?'V2 baseline':version)}<small>${escapeHtml(version)}</small></td><td>${number(m.n_issued??m.issued,0)}</td><td>${number(m.n_settled??m.scored_count,0)}</td><td>${number(m.mae,2)}</td><td>${m.nll_status==='infinite'?'∞':number(m.nll,4)}</td></tr>`).join('')}</tbody></table></div><p class="panel-description">Scores remain unavailable until matched outcomes settle. NLL uses validated frozen distributions only; inspect the export for scoring coverage and missing legacy parameters.</p></div>`;
+}
 async function loadForward(force=false) {
   if (state.loaded.has("forward") && !force) return;
   try {
@@ -422,7 +633,8 @@ async function loadForward(force=false) {
     state.loaded.add("forward");
     const summary=report.summary||{}, batches=report.batches||[], upcoming=report.upcoming||{};
     const pending=summary.pending_count??summary.n_pending??summary.pending, scored=summary.scored_count??summary.n_settled??summary.scored;
-    $("forward-content").innerHTML=`<div class="metrics-grid">${metric("FROZEN BATCHES",number(summary.batch_count??batches.length,0),"Persisted before scheduled events")}${metric("PENDING OUTCOMES",number(pending,0),"Unscored predictions")}${metric("SCORED OUTCOMES",number(scored,0),"Observed results linked later")}${metric("FORWARD MAE",number(summary.mae,2),"Unavailable until outcomes are scored")}</div>${batches.length?`<div class="panel data-panel"><h3>Immutable forecast batches</h3><div class="table-scroll"><table><thead><tr><th>BATCH</th><th>FROZEN AT</th><th>FIXTURES</th><th>SCORED</th><th>STATUS</th></tr></thead><tbody>${batches.map(batch=>`<tr><td>${escapeHtml(batch.title||batch.batch_id)}<small>${escapeHtml(batch.batch_id||batch.id)}</small></td><td>${escapeHtml(batch.created_at||batch.recorded_at||batch.frozen_at)}</td><td>${number(batch.fixture_count??batch.n_entries??batch.prediction_count??batch.n,0)}</td><td>${number(batch.scored_count??batch.n_settled,0)}</td><td>${escapeHtml(batch.status||batch.mode||"Recorded")}</td></tr>`).join("")}</tbody></table></div></div>`:`<div class="panel forward-empty"><span class="empty-symbol">↗</span><div><p class="eyebrow">NO FORWARD EVIDENCE YET</p><h3>The clean ledger is the starting point.</h3><p>Verify a future fixture, choose a line and record its source, then freeze the batch below. Results appear only after an observed outcome is linked. The recent replay has not been inserted here.</p></div></div>`}<div class="forward-guide"><span class="outlined-label">RECORD → WAIT → SCORE</span><p>${escapeHtml(factText(report.guide?.description||report.guide?.message||"Scheduled timestamps must be in the future when recorded. Predictions and source labels are frozen; outcomes can be attached later without rewriting the forecast."))}</p></div>${upcoming.fixtures?.length?`<div class="panel data-panel"><h3>Upcoming fixture references</h3><p class="panel-description">Verify scheduled time and athlete identities before creating a batch. Availability does not imply a line feed.</p><div class="table-scroll"><table><thead><tr><th>FIXTURE</th><th>SCHEDULED</th><th>REFERENCE</th></tr></thead><tbody>${upcoming.fixtures.map(f=>`<tr><td>${escapeHtml(f.fighter_name||f.fighter_id)} vs ${escapeHtml(f.opponent_name||f.opponent_id)}</td><td>${escapeHtml(f.scheduled_at||f.event_date)}</td><td>${safeUrl(f.source_url)?`<a href="${escapeHtml(safeUrl(f.source_url))}" target="_blank" rel="noopener">Source ↗</a>`:"Verify source"}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
+$("forward-content").innerHTML=`<div class="metrics-grid">${metric("FROZEN BATCHES",number(summary.batch_count??batches.length,0),"Persisted before scheduled events")}${metric("PENDING FORECASTS",number(pending,0),"Versioned records; outcomes can repeat")}${metric("SCORED FORECASTS",number(scored,0),"Observed results linked later")}${metric("FORWARD MAE",number(summary.mae,2),"Unavailable until outcomes are scored")}</div>${batches.length?`<div class="panel data-panel"><h3>Immutable forecast batches</h3><div class="table-scroll"><table><thead><tr><th>BATCH</th><th>FROZEN AT</th><th>FIXTURES</th><th>SCORED</th><th>STATUS</th></tr></thead><tbody>${batches.map(batch=>`<tr><td>${escapeHtml(batch.title||batch.batch_id)}<small>${escapeHtml(batch.batch_id||batch.id)}</small></td><td>${escapeHtml(batch.created_at||batch.recorded_at||batch.frozen_at)}</td><td>${number(batch.fixture_count??batch.n_entries??batch.prediction_count??batch.n,0)}</td><td>${number(batch.scored_count??batch.n_settled,0)}</td><td>${escapeHtml(batch.status||batch.mode||"Recorded")}</td></tr>`).join("")}</tbody></table></div></div>`:`<div class="panel forward-empty"><span class="empty-symbol">↗</span><div><p class="eyebrow">NO FORWARD EVIDENCE YET</p><h3>The clean ledger is the starting point.</h3><p>Verify a future fixture, choose a line and record its source, then freeze the batch below. Results appear only after an observed outcome is linked. The recent replay has not been inserted here.</p></div></div>`}<div class="forward-guide"><span class="outlined-label">RECORD → WAIT → SCORE</span><p>${escapeHtml(factText(report.guide?.description||report.guide?.message||"Scheduled timestamps must be in the future when recorded. Predictions and source labels are frozen; outcomes can be attached later without rewriting the forecast."))}</p></div>${upcoming.fixtures?.length?`<div class="panel data-panel"><h3>Upcoming fixture references</h3><p class="panel-description">Verify scheduled time and athlete identities before creating a batch. Availability does not imply a line feed.</p><div class="table-scroll"><table><thead><tr><th>FIXTURE</th><th>SCHEDULED</th><th>REFERENCE</th></tr></thead><tbody>${upcoming.fixtures.map(f=>`<tr><td>${escapeHtml(f.fighter_name||f.fighter_id)} vs ${escapeHtml(f.opponent_name||f.opponent_id)}</td><td>${escapeHtml(f.scheduled_at||f.event_date)}</td><td>${safeUrl(f.source_url)?`<a href="${escapeHtml(safeUrl(f.source_url))}" target="_blank" rel="noopener">Source ↗</a>`:"Verify source"}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
+    $('forward-content').querySelector('.metrics-grid')?.insertAdjacentHTML('afterend',forwardModelComparison(summary));
   } catch (error) { $("forward-content").innerHTML=errorPanel(error.message); }
 }
 $("forward-use-scenario").addEventListener("click",()=>{
@@ -457,8 +669,10 @@ $("forward-submit").addEventListener("click",async()=>{
   finally{button.disabled=false;}
 });
 async function loadExperiments() {
-  const container=document.createElement('div');container.id='experiments-content';container.className='panel data-panel';container.innerHTML='<h3>Challenger experiments</h3><p class="panel-description">Loading the saved experiment report…</p>';
-  $('evidence-content').append(container);
+  const details=document.createElement('details');details.className='panel data-panel report-details';
+  const summary=document.createElement('summary');summary.textContent='Earlier feature study (V2)';details.append(summary);
+  const container=document.createElement('div');container.id='experiments-content';container.innerHTML='<p class="panel-description">Loading the saved experiment report…</p>';
+  details.append(container);$('evidence-content').append(details);
   try {
     const report=await api('/api/v1/experiments');
     const rows=report.development_aggregate||report.experiments||report.candidates||report.results||[];
@@ -466,7 +680,41 @@ async function loadExperiments() {
     container.innerHTML=`<h3>Challenger experiments</h3><p class="panel-description">${escapeHtml(factText(report.selection_decision||report.decision||report.summary||'Saved research runs. A candidate is not promoted simply because one metric improves.'))}</p><p class="panel-description">Selection sample: development years ${escapeHtml((report.selection_period||[]).join(" → ")||"see report")}. Lower negative log likelihood is the declared selection rule.</p>${list.length?`<div class="table-scroll"><table><thead><tr><th>CANDIDATE</th><th>SAMPLES</th><th>MAE</th><th>NLL</th><th>80% COVERAGE</th><th>STATUS</th></tr></thead><tbody>${list.map(row=>{const m=row.metrics||row.test||row;return `<tr><td>${escapeHtml(row.name||row.model||row.candidate)}<small>${escapeHtml(row.notes||row.description||'')}</small></td><td>${number(m.n??((report.development||[]).filter(d=>d.candidate===row.name).reduce((sum,d)=>sum+d.n,0)||null),0)}</td><td>${number(m.mae,2)}</td><td>${number(m.nll,3)}</td><td>${percent(m.coverage_80??m.interval_coverage)}</td><td>${escapeHtml(row.status||(row.name===report.selected_candidate?'Selected family':'Not promoted'))}</td></tr>`;}).join('')}</tbody></table></div>`:'<p class="panel-description">No completed candidate rows are present. The current production artifact is unchanged.</p>'}${report.retrospective?`<p class="error-message">${escapeHtml(report.retrospective_comparison_label||"The additional historical comparison reuses already-seen outcomes and is not a fresh holdout.")}</p>`:""}${report.warnings?.length?`<ul class="limitation-list">${report.warnings.map(w=>`<li>${escapeHtml(w)}</li>`).join("")}</ul>`:""}<details class="report-details"><summary>Inspect exact experiment report</summary><pre>${escapeHtml(JSON.stringify(report,null,2))}</pre></details>`;
   } catch(error){container.innerHTML=`<h3>Challenger experiments</h3><p class="panel-description">No saved experiment report is available: ${escapeHtml(error.message)}. Historical evidence above describes the current evaluated model family.</p>`;}
 }
-const evidenceObserver=new MutationObserver(()=>{if(state.loaded.has('evidence')&&!$('experiments-content'))loadExperiments();});
+function studyRows(entries, selected) {
+  return entries.map(([name, metrics]) => {
+    const m=metrics.metrics||metrics;
+    return `<tr><td>${escapeHtml(name.replaceAll('_',' '))}${name===selected?' <small>Selected on development years</small>':''}</td><td>${number(m.n,0)}</td><td>${number(m.nll,4)}</td><td>${number(m.mae,2)}</td><td>${percent(m.coverage_80)}</td><td>${number(m.interval_width_80,2)}</td></tr>`;
+  }).join('');
+}
+function studyTable(entries, selected) {
+  return `<div class="table-scroll"><table><thead><tr><th>CANDIDATE</th><th>FORECASTS</th><th>NLL ↓</th><th>MAE ↓</th><th>80% COVERAGE</th><th>80% WIDTH</th></tr></thead><tbody>${studyRows(entries,selected)}</tbody></table></div>`;
+}
+function studyDifference(label, result) {
+  if(!result)return '';
+  const signed=value=>Number.isFinite(Number(value))?`${Number(value)>0?'+':''}${number(value,4)}`:'—';
+  const interval=Array.isArray(result.ci_95)?result.ci_95.map(signed).join(', '):'unavailable';
+  return `<p class="panel-description">${escapeHtml(label)} difference (mixture − baseline): <strong>${signed(result.difference)}</strong>; paired event-bootstrap 95% interval [${interval}].</p>`;
+}
+async function loadResearch() {
+  const container=document.createElement('div');container.id='research-content';container.className='panel data-panel';
+  container.innerHTML='<h3>Predictive distribution study (V3)</h3><p class="panel-description">Loading the saved study…</p>';
+  $('evidence-content').append(container);
+  try {
+    const report=await api('/api/v1/research');
+    const aggregate=Object.entries(report.development_aggregate||{});
+    const confirmation=report.confirmation||{};
+    const bootstrap=confirmation.paired_event_bootstrap||{};
+    const yearly=(report.development||[]).map(row=>[`${row.year} · ${row.candidate}`,row]);
+    container.innerHTML=`<h3>Predictive distribution study (V3)</h3><p class="panel-description">${escapeHtml(report.selection_decision||'Compare saved predictive distributions using time-separated fitting, calibration, and evaluation periods.')}</p><p class="panel-description">Selection period: ${escapeHtml((report.selection_period||[]).join(' → '))}. Lower negative log likelihood (NLL) rewards probability assigned to observed counts. Interval widths are in strikes per athlete.</p><h4>Development comparison</h4>${aggregate.length?studyTable(aggregate,report.selected_candidate):'<p class="panel-description">No completed development results are available.</p>'}<h4>${escapeHtml(confirmation.year||2024)} confirmation comparison</h4>${studyTable(Object.entries(confirmation.metrics||{}))}${studyDifference('NLL',bootstrap.nll)}${studyDifference('MAE',bootstrap.mae)}<p class="panel-description">${number(bootstrap.events,0)} paired events; ${number(bootstrap.resamples,0)} bootstrap resamples. A negative difference favors the mixture. These results do not establish an MAE improvement. This historical year was previously inspected; it is not an untouched holdout. Prospective performance remains pending.</p>${report.warnings?.length?`<ul class="limitation-list">${report.warnings.map(w=>`<li>${escapeHtml(factText(w))}</li>`).join('')}</ul>`:''}${yearly.length?`<details class="report-details"><summary>Results by development year</summary>${studyTable(yearly)}</details>`:''}<a class="text-link" href="/api/v1/research">Download the preserved study report ↗</a>`;
+  } catch(error) {
+    container.innerHTML=`<h3>Predictive distribution study (V3)</h3><p class="panel-description">The saved study is unavailable: ${escapeHtml(error.message)}. The historical evaluation below remains available.</p>`;
+  }
+}
+const evidenceObserver=new MutationObserver(()=>{
+  if(!state.loaded.has('evidence'))return;
+  if(!$('research-content'))loadResearch();
+  if(!$('experiments-content'))loadExperiments();
+});
 evidenceObserver.observe($('evidence-content'),{childList:true});
 function rememberPhoto(fighter) {
   const id = fighter?.fighter_id || fighter?.id;
@@ -529,7 +777,7 @@ function upcomingFightCard(fixture) {
   const confidence=fixture.time_confidence||fixture.schedule_confidence||fixture.schedule_kind;
   const exactTime=fixture.scheduled_at && !['date_only','unknown','tba'].includes(String(confidence).toLowerCase());
   const time=exactTime?new Date(fixture.scheduled_at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'Time TBA';
-  return `<article class="fight-card"><div class="fight-card-top"><span>${escapeHtml(fixture.division||fixture.weight_class||'UFC MATCHUP')}</span><span>${rounds?`${escapeHtml(rounds)} ROUNDS`:'ROUNDS TBA'}</span></div><div class="fight-athletes"><div class="fight-athlete">${athletePortrait(fighter)}<h3>${escapeHtml(fighter.name)}</h3>${fighterForecast(fixture,fighter,0)}</div><span class="card-versus">VS</span><div class="fight-athlete">${athletePortrait(opponent)}<h3>${escapeHtml(opponent.name)}</h3>${fighterForecast(fixture,opponent,1)}</div></div>${fixture.projection_status==='unsupported'?`<p class="card-omission">${escapeHtml(fixture.omission_reason||'This announced matchup does not yet have enough verified information for a forecast.')}</p>`:''}<div class="fight-card-footer"><span title="${escapeHtml(confidence||'Published card or segment time')}">Card start · ${escapeHtml(time)}</span>${source?`<a href="${escapeHtml(source)}" target="_blank" rel="noopener">Fight source ↗</a>`:'<span>Source unavailable</span>'}</div></article>`;
+return `<article class="fight-card"><div class="fight-card-top"><span>${escapeHtml(fixture.division||fixture.weight_class||'UFC MATCHUP')}</span><span>${rounds?`${escapeHtml(rounds)} ROUNDS`:'ROUNDS TBA'}</span></div><div class="fight-athletes"><div class="fight-athlete">${athletePortrait(fighter)}<h3>${fighterProfileLink(fighter.id,fighter.name)}</h3>${fighterForecast(fixture,fighter,0)}</div><span class="card-versus">VS</span><div class="fight-athlete">${athletePortrait(opponent)}<h3>${fighterProfileLink(opponent.id,opponent.name)}</h3>${fighterForecast(fixture,opponent,1)}</div></div>${fixture.projection_status==='unsupported'?`<p class="card-omission">${escapeHtml(fixture.omission_reason||'This announced matchup does not yet have enough verified information for a forecast.')}</p>`:''}<div class="fight-card-footer"><span title="${escapeHtml(confidence||'Published card or segment time')}">Card start · ${escapeHtml(time)}</span>${source?`<a href="${escapeHtml(source)}" target="_blank" rel="noopener">Fight source ↗</a>`:'<span>Source unavailable</span>'}</div></article>`;
 }
 function renderUpcoming(report) {
   let fixtures=report.fixtures||[];
@@ -560,5 +808,5 @@ async function loadUpcoming() {
   try {const report=await api('/api/v1/upcoming');state.upcoming=report;renderUpcoming(report);state.loaded.add('upcoming');}
   catch(error){$('upcoming-content').innerHTML=`<div class="panel upcoming-empty"><h3>The upcoming schedule couldn’t be loaded.</h3><p>${escapeHtml(error.message)}</p><p class="panel-description">Matchup Lab and Recent Results remain available. No placeholder fights have been added.</p><button class="secondary-button" id="retry-upcoming">Try again</button></div>`;$('retry-upcoming').addEventListener('click',loadUpcoming);}
 }
-initialize();
-loadUpcoming();
+const initialization=initialize();
+routeLocation();

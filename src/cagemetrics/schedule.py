@@ -18,7 +18,18 @@ SCOREBOARD_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates={start}-{end}&limit=1000"
 )
 ATHLETE_URL = "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/athletes/{athlete_id}"
-PHOTO_EXTRAS = {"2614933": "Max Holloway", "4350812": "Ilia Topuria"}
+PHOTO_EXTRAS = {
+    "2614933": "Max Holloway",
+    "4350812": "Ilia Topuria",
+    "3022345": "Justin Gaethje",
+    "4008549": "Paddy Pimblett",
+    "2335639": "Jon Jones",
+    "3022677": "Conor McGregor",
+    "3332412": "Islam Makhachev",
+    "2611557": "Khabib Nurmagomedov",
+    "4285679": "Israel Adesanya",
+    "2506549": "Dustin Poirier",
+}
 
 
 def normalise_name(value):
@@ -77,6 +88,79 @@ def _photo_url(profile):
         and parsed.hostname in {"a.espncdn.com", "a1.espncdn.com", "a2.espncdn.com"}
         else None
     )
+
+
+def _valid_saved_photo(entry, canonical):
+    """Preserve only attributable images linked to a current canonical identity."""
+    if not isinstance(entry, dict):
+        return False
+    identity = entry.get("fighter_id")
+    if identity not in canonical or normalise_name(str(entry.get("name", ""))) != normalise_name(
+        canonical[identity]
+    ):
+        return False
+    athlete_id = str(entry.get("espn_id", ""))
+    if (
+        not athlete_id.isdigit()
+        or _photo_url({"headshot": {"href": entry.get("photo_url")}}) != entry.get("photo_url")
+        or not entry.get("photo_url")
+    ):
+        return False
+    if not re.search(
+        rf"/headshots/mma/players/(?:full/)?{re.escape(athlete_id)}\.png(?:\?|$)", entry["photo_url"]
+    ):
+        return False
+    if urlparse(str(entry.get("source_url", ""))).hostname not in {
+        "sports.core.api.espn.com",
+        "site.web.api.espn.com",
+        "www.espn.com",
+        "site.api.espn.com",
+    }:
+        return False
+    try:
+        _utc(entry["observed_at"])
+    except (KeyError, ValueError, TypeError):
+        return False
+    return bool(re.fullmatch(r"[a-f0-9]{64}", str(entry.get("sha256", ""))))
+
+
+def _merge_photo_index(existing, fresh, fighters, generated_at):
+    canonical = dict(zip(fighters.fighter_id.astype(str), fighters.name))
+    merged = {**existing, "fighters": {}, "athletes": dict(existing.get("athletes", {}))}
+    for identity, entry in existing.get("fighters", {}).items():
+        if (
+            isinstance(entry, dict)
+            and identity == entry.get("fighter_id")
+            and _valid_saved_photo(entry, canonical)
+        ):
+            merged["fighters"][identity] = entry
+    # The broad source audit remains intact; current merged coverage is separate.
+    for athlete_id, entry in list(merged["athletes"].items()):
+        if not isinstance(entry, dict) or (
+            entry.get("fighter_id") is not None and not _valid_saved_photo(entry, canonical)
+        ):
+            del merged["athletes"][athlete_id]
+    for athlete_id, entry in fresh.items():
+        identity = entry.get("fighter_id")
+        if _valid_saved_photo(entry, canonical):
+            merged["fighters"][identity] = entry
+            merged["athletes"][athlete_id] = entry
+        elif athlete_id not in merged["athletes"] and identity is None:
+            # Explicitly unresolved schedule identities are kept out of the canonical map.
+            merged["athletes"][athlete_id] = entry
+    observations = [_utc(entry["observed_at"]) for entry in merged["fighters"].values()]
+    merged.update(
+        source=existing.get("source", "ESPN athlete profile/search APIs"),
+        generated_at=generated_at,
+        observed_at=max(observations).isoformat() if observations else None,
+        current_coverage={
+            "canonical_fighters": len(canonical),
+            "portrait_count": len(merged["fighters"]),
+            "without_verified_portrait": len(canonical) - len(merged["fighters"]),
+            "generated_at": generated_at,
+        },
+    )
+    return merged
 
 
 def parse_announced_schedule(
@@ -276,6 +360,9 @@ def refresh_schedule(
 
     with ThreadPoolExecutor(max_workers=8) as pool:
         photos = dict(pool.map(profile, athletes.items()))
+    photo_path = Path(data_dir) / "fighter_photos.json"
+    existing_photos = json.loads(photo_path.read_text()) if photo_path.exists() else {}
+    merged_photos = _merge_photo_index(existing_photos, photos, fighters, observed)
     result = parse_announced_schedule(
         payload,
         fighters,
@@ -284,7 +371,7 @@ def refresh_schedule(
         sha256=meta["sha256"],
         start_date=start_date,
         end_date=end_date,
-        photos=photos,
+        photos=merged_photos["athletes"],
     )
     (folder / "upcoming.json").write_text(json.dumps(result, indent=2, allow_nan=False))
     (folder / "provenance.json").write_text(
@@ -297,17 +384,5 @@ def refresh_schedule(
             indent=2,
         )
     )
-    (Path(data_dir) / "fighter_photos.json").write_text(
-        json.dumps(
-            {
-                "observed_at": observed,
-                "source": "ESPN athlete profile API",
-                "fighters": {
-                    p["fighter_id"]: p for p in photos.values() if p.get("fighter_id") and p.get("photo_url")
-                },
-                "athletes": photos,
-            },
-            indent=2,
-        )
-    )
+    photo_path.write_text(json.dumps(merged_photos, indent=2))
     return result

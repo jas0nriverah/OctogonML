@@ -163,6 +163,7 @@ def main(argv=None):
             "benchmark",
             "bootstrap",
             "experiment",
+            "research",
             "forward-issue",
             "forward-settle",
             "forward-export",
@@ -273,7 +274,9 @@ def main(argv=None):
         ]
         if not fixtures:
             parser.error("No supported announced forecasts are available to issue")
-        key = args.idempotency_key or "announced-" + report["schedule_sha256"][:24]
+        key = args.idempotency_key or (
+            "announced-" + report["schedule_sha256"][:24] + "-" + report["artifact_sha256"][:16]
+        )
         with httpx.Client(base_url=args.url, timeout=120) as client:
             metadata_response = client.get("/api/v1/models/current")
             metadata_response.raise_for_status()
@@ -425,6 +428,18 @@ def main(argv=None):
                     "stage": "experiment",
                     "selected_candidate": report["selected_candidate"],
                     "model_version": report["model_version"],
+                }
+            )
+        if args.command == "research":
+            from .research import run_research
+
+            report = run_research(repository.dataset(), settings.artifact_dir / "v3", settings.report_dir)
+            _output(
+                {
+                    "stage": "research",
+                    "selected_candidate": report["selected_candidate"],
+                    "promotion_passed": report["promotion_passed"],
+                    "model_version": report.get("model_version"),
                 }
             )
         if args.command == "features":

@@ -1,0 +1,404 @@
+{
+  "model_version": "v3-5108e9766d66f10b",
+  "model_type": "duration_negative_binomial_mixture",
+  "selected_candidate": "duration_mixture",
+  "training_cutoff_exclusive": "2026-07-01",
+  "calibration_start_inclusive": "2026-07-01",
+  "calibration_cutoff_exclusive": "2026-10-18",
+  "train_rows": 12900,
+  "calibration_rows": 378,
+  "data_through": "2026-10-17",
+  "feature_schema_version": "v3-base33-duration-regimes",
+  "feature_names": [
+    "scheduled_rounds",
+    "own_prior_bouts",
+    "own_career_mean_strikes",
+    "own_last5_mean_strikes",
+    "own_career_landed_per_min",
+    "own_last5_landed_per_min",
+    "own_career_absorbed_per_min",
+    "own_last5_absorbed_per_min",
+    "own_career_attempted_per_min",
+    "own_last5_attempted_per_min",
+    "own_career_accuracy",
+    "own_last5_accuracy",
+    "own_career_mean_duration",
+    "own_last5_mean_duration",
+    "own_career_finish_rate",
+    "own_last5_finish_rate",
+    "own_layoff_days",
+    "opponent_prior_bouts",
+    "opponent_career_mean_strikes",
+    "opponent_last5_mean_strikes",
+    "opponent_career_landed_per_min",
+    "opponent_last5_landed_per_min",
+    "opponent_career_absorbed_per_min",
+    "opponent_last5_absorbed_per_min",
+    "opponent_career_attempted_per_min",
+    "opponent_last5_attempted_per_min",
+    "opponent_career_accuracy",
+    "opponent_last5_accuracy",
+    "opponent_career_mean_duration",
+    "opponent_last5_mean_duration",
+    "opponent_career_finish_rate",
+    "opponent_last5_finish_rate",
+    "opponent_layoff_days"
+  ],
+  "seed": 42,
+  "sklearn_version": "1.9.1",
+  "trained_at": "2026-10-22T19:06:50.229119+00:00",
+  "artifact_sha256": "e76f705eafd37457319f87d988f10271b2d79d26d274bb18bc3d2917de74ba13",
+  "fingerprint_input": {
+    "protocol": {
+      "name": "v3-duration-mixture-dev2021-2023",
+      "candidate_definitions": {
+        "baseline_nb": {
+          "mean": "base",
+          "dispersion": "global",
+          "scale_mean": false
+        },
+        "regularized_nb": {
+          "mean": "regularized",
+          "dispersion": "global",
+          "scale_mean": false
+        },
+        "shallow_nb": {
+          "mean": "shallow",
+          "dispersion": "global",
+          "scale_mean": false
+        },
+        "blend_nb": {
+          "mean": "blend_50_50",
+          "dispersion": "global",
+          "scale_mean": false
+        },
+        "round_nb": {
+          "mean": "base",
+          "dispersion": "round_shrunk",
+          "scale_mean": false
+        },
+        "scaled_nb": {
+          "mean": "base",
+          "dispersion": "global",
+          "scale_mean": true
+        },
+        "scaled_round_nb": {
+          "mean": "base",
+          "dispersion": "round_shrunk",
+          "scale_mean": true
+        },
+        "duration_mixture": {
+          "mean": "duration_regimes",
+          "dispersion": "regime_conditional",
+          "scale_mean": false
+        }
+      },
+      "mean_parameters": {
+        "regularized": {
+          "max_iter": 120,
+          "max_leaf_nodes": 7,
+          "min_samples_leaf": 80,
+          "l2_regularization": 25,
+          "learning_rate": 0.05
+        },
+        "shallow": {
+          "max_iter": 240,
+          "max_leaf_nodes": 3,
+          "min_samples_leaf": 60,
+          "l2_regularization": 15,
+          "learning_rate": 0.03
+        }
+      },
+      "baseline_mean_parameters": {
+        "loss": "poisson",
+        "max_iter": 120,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 30,
+        "l2_regularization": 5,
+        "learning_rate": 0.05,
+        "random_state": 42,
+        "early_stopping": false
+      },
+      "gate_parameters": {
+        "max_iter": 120,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 30,
+        "l2_regularization": 5,
+        "learning_rate": 0.05,
+        "random_state": 42,
+        "early_stopping": false
+      },
+      "gate_symmetry": "Mean of the gate predictions under the two athlete perspectives; clipped to [0.005,0.995].",
+      "duration_label": "observed duration_seconds >= scheduled_rounds * 300; auxiliary training label only",
+      "mean_scaling": "clip(sum(calibration targets)/sum(calibration predictions),0.75,1.25)",
+      "round_dispersion": "Calibration-only round MLE, log-space shrinkage n/(n+100) toward global alpha.",
+      "selection_years": [
+        2021,
+        2022,
+        2023
+      ],
+      "selection_metric": "sample-weighted negative log likelihood",
+      "confirmation_year": 2024,
+      "promotion_gate": {
+        "minimum_development_nll_gain": 0.005,
+        "maximum_relative_mae_increase": 0.01,
+        "confirmation_requires_lower_nll": true
+      },
+      "annual_split": "Mean train before July 1 of preceding year; calibrate July\u2013December; test following year.",
+      "retrospective_period": [
+        "2025-01-01",
+        "2026-10-07"
+      ],
+      "deployment_mean_train_before": "2026-07-01",
+      "deployment_calibration_before": "2026-10-18",
+      "seed": 42
+    },
+    "sklearn": "1.9.1",
+    "features": [
+      "scheduled_rounds",
+      "own_prior_bouts",
+      "own_career_mean_strikes",
+      "own_last5_mean_strikes",
+      "own_career_landed_per_min",
+      "own_last5_landed_per_min",
+      "own_career_absorbed_per_min",
+      "own_last5_absorbed_per_min",
+      "own_career_attempted_per_min",
+      "own_last5_attempted_per_min",
+      "own_career_accuracy",
+      "own_last5_accuracy",
+      "own_career_mean_duration",
+      "own_last5_mean_duration",
+      "own_career_finish_rate",
+      "own_last5_finish_rate",
+      "own_layoff_days",
+      "opponent_prior_bouts",
+      "opponent_career_mean_strikes",
+      "opponent_last5_mean_strikes",
+      "opponent_career_landed_per_min",
+      "opponent_last5_landed_per_min",
+      "opponent_career_absorbed_per_min",
+      "opponent_last5_absorbed_per_min",
+      "opponent_career_attempted_per_min",
+      "opponent_last5_attempted_per_min",
+      "opponent_career_accuracy",
+      "opponent_last5_accuracy",
+      "opponent_career_mean_duration",
+      "opponent_last5_mean_duration",
+      "opponent_career_finish_rate",
+      "opponent_last5_finish_rate",
+      "opponent_layoff_days"
+    ],
+    "sources": {
+      "nlbair/ufc-data/data/ufc_all_fights_wide.csv": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448,
+        "observed_at": "2026-10-22T15:57:32.386326+00:00"
+      },
+      "nlbair/ufc-data/data/id_crosswalk_all.csv": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/id_crosswalk_all.csv",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "449523ce63c7cb17d8b1915cc39c2c031115cf00c4e72f56647433e8a29f571b",
+        "bytes": 1585852,
+        "observed_at": "2026-10-22T15:57:32.815773+00:00"
+      },
+      "nlbair/ufc-data/codebook/codebook_fights_wide.csv": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/codebook/codebook_fights_wide.csv",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "b259c136363aa348d20aaab204bf4166344911edc9e3e5098f74d0cd8721dca3",
+        "bytes": 70808,
+        "observed_at": "2026-10-22T15:57:32.966090+00:00"
+      },
+      "nlbair/ufc-data/LICENSE": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+        "bytes": 663,
+        "observed_at": "2026-10-22T15:57:33.088437+00:00"
+      },
+      "nlbair/ufc-data/SOURCES.md": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+        "bytes": 805,
+        "observed_at": "2026-10-22T15:57:33.184809+00:00"
+      },
+      "nlbair/ufc-data/CITATION.cff": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+        "bytes": 708,
+        "observed_at": "2026-10-22T15:57:33.323904+00:00"
+      },
+      "nlbair/ufc-data/README.md": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/README.md",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "29f0965d241aeffd87e4e07bcc677e5f66e0114ff480bf5cc928d6b1fe50626e",
+        "bytes": 4558,
+        "observed_at": "2026-10-22T15:57:33.462285+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fight_results.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_results.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "da1d46420a13419f1afa28653e9b08c7aa1173005138e5f87fe7dea904cd98e2",
+        "bytes": 2107396,
+        "observed_at": "2026-10-22T15:57:33.844436+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fight_stats.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_stats.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "bdbb8cd050ccf0a3ee329bf16d361e87997853ab21703682f720fe7aa013767b",
+        "bytes": 7671898,
+        "observed_at": "2026-10-22T15:57:34.617503+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_event_details.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_event_details.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "beb80dd902d44446399bf1753c650beed2cbc0af2cb791848796a238313a247e",
+        "bytes": 102765,
+        "observed_at": "2026-10-22T15:57:34.751556+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fighter_tott.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_tott.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "3296e67941f984cd5484488226e5a5d94de3249c63fe289fbc66d98546311ea1",
+        "bytes": 508399,
+        "observed_at": "2026-10-22T15:57:34.898566+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fighter_details.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_details.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "a1f6e4326217fab9734ac42f1958cd07b0b2b98f3caa5da08497ec7648eb6f70",
+        "bytes": 340441,
+        "observed_at": "2026-10-22T15:57:35.033537+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/LICENSE": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/LICENSE",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+        "bytes": 35149,
+        "observed_at": "2026-10-22T15:57:35.108422+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/README.md": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/README.md",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "c06ba3cc5d4586ebab9485f08b8f444d8171c364281fc01a97a63302405e979f",
+        "bytes": 2047,
+        "observed_at": "2026-10-22T15:57:35.171927+00:00"
+      }
+    },
+    "training_rows_sha256": "7d78b47b25bc65ffa96403c09bf901fea1df38ac7698f8ba4d26fc3fec9e345a",
+    "calibration_rows_sha256": "f80326aaea579e64f46b611d76cab2fe54eb76a7dfeca582262367b8a8ce2b21"
+  },
+  "provenance": {
+    "nlbair/ufc-data/data/ufc_all_fights_wide.csv": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+      "bytes": 11337448,
+      "observed_at": "2026-10-22T15:57:32.386326+00:00"
+    },
+    "nlbair/ufc-data/data/id_crosswalk_all.csv": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/id_crosswalk_all.csv",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "449523ce63c7cb17d8b1915cc39c2c031115cf00c4e72f56647433e8a29f571b",
+      "bytes": 1585852,
+      "observed_at": "2026-10-22T15:57:32.815773+00:00"
+    },
+    "nlbair/ufc-data/codebook/codebook_fights_wide.csv": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/codebook/codebook_fights_wide.csv",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "b259c136363aa348d20aaab204bf4166344911edc9e3e5098f74d0cd8721dca3",
+      "bytes": 70808,
+      "observed_at": "2026-10-22T15:57:32.966090+00:00"
+    },
+    "nlbair/ufc-data/LICENSE": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+      "bytes": 663,
+      "observed_at": "2026-10-22T15:57:33.088437+00:00"
+    },
+    "nlbair/ufc-data/SOURCES.md": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+      "bytes": 805,
+      "observed_at": "2026-10-22T15:57:33.184809+00:00"
+    },
+    "nlbair/ufc-data/CITATION.cff": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+      "bytes": 708,
+      "observed_at": "2026-10-22T15:57:33.323904+00:00"
+    },
+    "nlbair/ufc-data/README.md": {
+      "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/README.md",
+      "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+      "sha256": "29f0965d241aeffd87e4e07bcc677e5f66e0114ff480bf5cc928d6b1fe50626e",
+      "bytes": 4558,
+      "observed_at": "2026-10-22T15:57:33.462285+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/ufc_fight_results.csv": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_results.csv",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "da1d46420a13419f1afa28653e9b08c7aa1173005138e5f87fe7dea904cd98e2",
+      "bytes": 2107396,
+      "observed_at": "2026-10-22T15:57:33.844436+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/ufc_fight_stats.csv": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_stats.csv",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "bdbb8cd050ccf0a3ee329bf16d361e87997853ab21703682f720fe7aa013767b",
+      "bytes": 7671898,
+      "observed_at": "2026-10-22T15:57:34.617503+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/ufc_event_details.csv": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_event_details.csv",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "beb80dd902d44446399bf1753c650beed2cbc0af2cb791848796a238313a247e",
+      "bytes": 102765,
+      "observed_at": "2026-10-22T15:57:34.751556+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/ufc_fighter_tott.csv": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_tott.csv",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "3296e67941f984cd5484488226e5a5d94de3249c63fe289fbc66d98546311ea1",
+      "bytes": 508399,
+      "observed_at": "2026-10-22T15:57:34.898566+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/ufc_fighter_details.csv": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_details.csv",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "a1f6e4326217fab9734ac42f1958cd07b0b2b98f3caa5da08497ec7648eb6f70",
+      "bytes": 340441,
+      "observed_at": "2026-10-22T15:57:35.033537+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/LICENSE": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/LICENSE",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149,
+      "observed_at": "2026-10-22T15:57:35.108422+00:00"
+    },
+    "Greco1899/scrape_ufc_stats/README.md": {
+      "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/README.md",
+      "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+      "sha256": "c06ba3cc5d4586ebab9485f08b8f444d8171c364281fc01a97a63302405e979f",
+      "bytes": 2047,
+      "observed_at": "2026-10-22T15:57:35.171927+00:00"
+    }
+  },
+  "warnings": [
+    "2024 was already inspected in earlier research; this temporal confirmation is not an untouched holdout.",
+    "2025\u20132026 diagnostics reuse already-seen outcomes and never select candidates or parameters.",
+    "Event-bootstrap intervals are conditional on fitted models; they omit training and selection uncertainty.",
+    "Future accuracy and interval coverage remain unvalidated until issued forecasts settle.",
+    "The duration gate is a mixture weight; its standalone probability calibration is not established."
+  ],
+  "research_report": "research.json",
+  "promotion_passed": true
+}

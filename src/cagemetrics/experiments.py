@@ -374,7 +374,7 @@ class V2Engine:
         self.metadata = json.loads((artifact_dir / "metadata.json").read_text())
         path = artifact_dir / "model.joblib"
         if hashlib.sha256(path.read_bytes()).hexdigest() != self.metadata["artifact_sha256"]:
-            raise ValueError("V2 artifact checksum mismatch")
+            raise ValueError("Model artifact checksum mismatch")
         self.artifact = joblib.load(path)
         self._state = None
         self._bundle = None

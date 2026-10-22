@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#111c25" />
+    <meta name="theme-color" content="#090a0d" />
     <title>OctogonML · UFC strike forecasts</title>
     <link rel="stylesheet" href="/static/styles.css" />
     <script src="/static/app.js" defer></script>
@@ -49,6 +49,7 @@
           <span>Upcoming Fights</span></button
         ><button class="tab" data-view="explorer" aria-selected="false">
           <span>Matchup Lab</span></button
+        ><button class="tab" data-view="fighters" aria-selected="false"><span>Fighters</span></button
         ><button class="tab" data-view="recent" aria-selected="false">
           <span>Recent Results</span>
         </button>
@@ -59,6 +60,18 @@
         <p class="section-copy">Announced matchups with forecasts for each athlete’s significant strikes landed. Ranges show uncertainty across the full fight.</p>
         <div id="upcoming-content" aria-live="polite"><div class="panel loading-state">Loading announced fights…</div></div>
       </section>
+      <section id="view-fighters" class="view" hidden>
+        <div class="section-heading directory-heading"><div><p class="eyebrow">THE ATHLETES BEHIND THE NUMBERS</p><h2 id="directory-title">Browse fighters</h2></div><span id="directory-total" class="date-badge">UFC HISTORY · SINCE 2013</span></div>
+        <p class="section-copy">UFC bouts covered since 2013. Explore an athlete’s striking history, then build your matchup.</p>
+        <form id="directory-form" class="panel directory-controls" role="search" aria-label="Find a fighter">
+          <div><label for="directory-query">Fighter name</label><input id="directory-query" type="search" placeholder="Search every covered fighter…" autocomplete="off"></div>
+          <div><label for="directory-division">Last covered division</label><select id="directory-division"><option value="">All divisions</option></select></div>
+          <button class="primary-button" type="submit">Find fighters <span>↗</span></button>
+        </form>
+        <div id="directory-content" aria-live="polite"><div class="panel loading-state">Loading fighter profiles…</div></div>
+        <details class="panel data-panel directory-source-note"><summary>Coverage and photography</summary><p class="panel-description">Profiles show the UFC bouts included in this project’s history since 2013. They are not complete MMA records or current rankings. Athlete photos come from matched ESPN profiles; missing or unavailable photos use initials. Photography remains the rights holders’ property and does not imply an affiliation with UFC or ESPN.</p></details>
+      </section>
+      <section id="view-profile" class="view" hidden><div id="profile-content" aria-live="polite"><div class="panel loading-state">Loading athlete history…</div></div></section>
       <section id="view-explorer" class="view" hidden>
         <div class="explorer-layout">
           <form id="forecast-form" class="panel matchup-panel">
@@ -66,8 +79,8 @@
               <span class="eyebrow">BUILD A SCENARIO</span
               ><span class="small-label">PRE-FIGHT / FULL BOUT</span>
             </div>
-            <h2>The matchup</h2>
-            <label for="fighter">Forecast athlete</label
+            <h2>Compare fighters</h2>
+            <div class="comparison-select red-side"><label for="fighter">Red side</label
             ><input
               class="fighter-search"
               id="fighter-search"
@@ -77,9 +90,9 @@
               autocomplete="off"
             /><select id="fighter" name="fighter_id" required disabled>
               <option>Loading athletes…</option>
-            </select>
+            </select></div>
             <div class="versus"><span></span>VS<span></span></div>
-            <label for="opponent">Opponent</label
+            <div class="comparison-select blue-side"><label for="opponent">Blue side</label
             ><input
               class="fighter-search"
               id="opponent-search"
@@ -89,7 +102,7 @@
               autocomplete="off"
             /><select id="opponent" name="opponent_id" required disabled>
               <option>Loading athletes…</option>
-            </select>
+            </select></div>
             <div class="form-row">
               <fieldset>
                 <legend>Scheduled rounds</legend>
@@ -130,7 +143,7 @@
               type="submit"
               disabled
             >
-              Generate forecast <span>↗</span>
+              Compare fighters <span>↗</span>
             </button>
             <p class="form-note">
               The line is your scenario input. Probabilities describe the

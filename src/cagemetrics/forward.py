@@ -52,6 +52,9 @@ class ForecastEntry(Base):
     __tablename__ = "forecast_entries"
     entry_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     batch_id: Mapped[str] = mapped_column(ForeignKey("forecast_batches.batch_id"), index=True)
+    model_version: Mapped[str] = mapped_column(
+        String(200), ForeignKey("model_versions.model_version", name="fk_forward_entry_model")
+    )
     fixture_id: Mapped[str] = mapped_column(String(160))
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     event_date: Mapped[str] = mapped_column(String(10), index=True)
@@ -70,7 +73,9 @@ class ForecastEntry(Base):
     settled_bout_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     score_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     __table_args__ = (
-        UniqueConstraint("fixture_id", "fighter_id", name="uq_forward_fixture_fighter"),
+        UniqueConstraint(
+            "fixture_id", "fighter_id", "model_version", name="uq_forward_fixture_fighter_model"
+        ),
         CheckConstraint("fighter_id <> opponent_id", name="ck_forward_distinct_fighters"),
         CheckConstraint("scheduled_rounds IN (3, 5)", name="ck_forward_rounds"),
         CheckConstraint("line >= 0", name="ck_forward_line"),
@@ -317,6 +322,7 @@ def _create_batch_once(
                     select(ForecastEntry).where(
                         ForecastEntry.fixture_id == row["fixture_id"],
                         ForecastEntry.fighter_id == row["fighter_id"],
+                        ForecastEntry.model_version == model_version,
                     )
                 )
                 if issued is not None:
@@ -342,10 +348,15 @@ def _create_batch_once(
                     raise ValueError("Forecaster returned invalid count probabilities")
                 _canonical(prediction)
                 _canonical(features)
+                if prediction.get("distribution_parameters") is not None:
+                    status = _frozen_nll(prediction, 0)["distribution_score_status"]
+                    if status in ("invalid_parameters", "unsupported_family"):
+                        raise ValueError("Frozen distribution parameters are invalid or unsupported")
                 session.add(
                     ForecastEntry(
                         entry_id=uuid4().hex,
                         batch_id=batch_id,
+                        model_version=model_version,
                         **{**row, "scheduled_at": _utc(row["scheduled_at"])},
                         recorded_at=now,
                         features_json=features,
@@ -413,6 +424,7 @@ def _entry_json(entry):
     return {
         "entry_id": entry.entry_id,
         "fixture_id": entry.fixture_id,
+        "model_version": entry.model_version,
         "scheduled_at": _stored_utc(entry.scheduled_at).isoformat(),
         "event_date": entry.event_date,
         "fighter_id": entry.fighter_id,
@@ -471,6 +483,73 @@ def list_batches(repository):
     return [get_batch(repository, identity) for identity in identities]
 
 
+def _frozen_nll(prediction, actual):
+    """Score serialized distributions only; never infer tails from a drawn PMF.
+
+    JSON cannot represent infinity. An impossible supported outcome therefore
+    keeps nll=null with explicit infinite status; aggregate NLL cannot silently
+    drop that outcome and report an artificially improved finite mean.
+    """
+    from scipy.special import logsumexp
+    from scipy.stats import nbinom, poisson
+
+    def result(status, value=None):
+        return {"negative_log_likelihood": value, "distribution_score_status": status}
+
+    params = prediction.get("distribution_parameters")
+    if params is None:
+        return result("missing_parameters")
+    if not isinstance(params, dict):
+        return result("invalid_parameters")
+    family = params.get("family")
+    if family not in ("poisson", "negative_binomial", "duration_negative_binomial_mixture"):
+        return result("unsupported_family")
+
+    def number(value):
+        if isinstance(value, bool):
+            raise ValueError("Boolean is not a distribution parameter")
+        value = float(value)
+        if not math.isfinite(value) or value < 0:
+            raise ValueError("Nonfinite or negative distribution parameter")
+        return value
+
+    def logmass(mean, alpha):
+        return float(
+            poisson.logpmf(actual, mean)
+            if alpha == 0
+            else nbinom.logpmf(actual, 1 / alpha, 1 / (1 + alpha * mean))
+        )
+
+    try:
+        if family == "duration_negative_binomial_mixture":
+            components = params["components"]
+            if not isinstance(components, list) or len(components) != 2:
+                raise ValueError("Two frozen duration components are required")
+            weights, terms = [], []
+            for component in components:
+                weight = number(component["weight"])
+                mean, alpha = number(component["mean"]), number(component["alpha"])
+                if weight > 1:
+                    raise ValueError("Invalid mixture weight")
+                weights.append(weight)
+                if weight:
+                    terms.append(math.log(weight) + logmass(mean, alpha))
+            if not math.isclose(sum(weights), 1.0, rel_tol=0, abs_tol=1e-9):
+                raise ValueError("Mixture weights must sum to one")
+            value = -float(logsumexp(terms))
+        else:
+            mean = number(prediction["mean"])
+            alpha = number(params["alpha"]) if family == "negative_binomial" else 0.0
+            value = -logmass(mean, alpha)
+        if math.isnan(value) or value == -math.inf:
+            return result("invalid_parameters")
+        if value == math.inf:
+            return result("infinite")
+        return result("exact", value)
+    except (KeyError, TypeError, ValueError, OverflowError, ZeroDivisionError):
+        return result("invalid_parameters")
+
+
 def _scores(entry, actual):
     prediction = entry.predicted_json
     over = actual > entry.line
@@ -484,7 +563,13 @@ def _scores(entry, actual):
         "brier_over": (p - float(over)) ** 2,
     }
     if "interval_low" in prediction and "interval_high" in prediction:
-        scores["interval_covered"] = bool(prediction["interval_low"] <= actual <= prediction["interval_high"])
+        try:
+            low, high = float(prediction["interval_low"]), float(prediction["interval_high"])
+            if math.isfinite(low) and math.isfinite(high) and 0 <= low <= high:
+                scores["interval_covered"] = bool(low <= actual <= high)
+        except (TypeError, ValueError):
+            pass
+    scores.update(_frozen_nll(prediction, actual))
     return scores
 
 
@@ -527,10 +612,34 @@ def settle_batch(repository, batch_id, *, clock=utc_now):
 
 def forward_metrics(repository):
     batches = list_batches(repository)
+    metrics = _metrics_for_batches(batches)
+    versions = sorted({b["model_version"] for b in batches})
+    metrics["by_model"] = {
+        version: _metrics_for_batches([b for b in batches if b["model_version"] == version])
+        | {"model_version": version}
+        for version in versions
+    }
+    metrics["scope"] = (
+        "Pooled across model versions; repeated fixture/athlete perspectives are not independent. Use by_model for version comparisons."
+    )
+    metrics["unique_fixture_athlete_count"] = len(
+        {(e["fixture_id"], e["fighter_id"]) for b in batches for e in b["entries"]}
+    )
+    return metrics
+
+
+def _metrics_for_batches(batches):
     settled = [
         e for b in batches if b["mode"] == "prospective" for e in b["entries"] if e["actual"] is not None
     ]
     n = len(settled)
+    exact = [e for e in settled if e["scores"].get("distribution_score_status") == "exact"]
+    infinite = [e for e in settled if e["scores"].get("distribution_score_status") == "infinite"]
+    covered80 = [
+        e
+        for e in settled
+        if e["prediction"].get("interval_level") == 0.8 and "interval_covered" in e["scores"]
+    ]
     metrics = {
         "n_batches": len(batches),
         "n_issued": sum(b["n_entries"] for b in batches),
@@ -539,6 +648,17 @@ def forward_metrics(repository):
         "mae": None,
         "rmse": None,
         "brier_over": None,
+        "n_distribution_scored": len(exact) + len(infinite),
+        "n_distribution_infinite": len(infinite),
+        "nll": None
+        if infinite or not exact
+        else sum(e["scores"]["negative_log_likelihood"] for e in exact) / len(exact),
+        "nll_status": "infinite" if infinite else ("exact_supported_subset" if exact else "not_available"),
+        "nll_scope": "Validated frozen-parameter subset only; missing/unsupported legacy distributions are unscored. Infinite loss is null with explicit infinite count, never silently dropped.",
+        "n_interval80_scored": len(covered80),
+        "coverage80": sum(e["scores"]["interval_covered"] for e in covered80) / len(covered80)
+        if covered80
+        else None,
         "warning": "Prospective ledger only. Synthetic lines are not historical market lines; no return-on-investment claim. User-attested schedules are not independently verified.",
     }
     if n:

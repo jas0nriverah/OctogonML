@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta, timezone
 import csv
+import gzip
+import hashlib
+import json
+from copy import deepcopy
 from types import SimpleNamespace
 
 import pandas as pd
@@ -140,3 +144,66 @@ def test_csv_preserves_both_perspectives_values_and_issuance_lineage(tmp_path):
         assert csv_row["source_url"] == original["source_url"]
         assert csv_row["line_kind"] == "synthetic"
     assert not list(tmp_path.glob(".upcoming-*.tmp"))
+
+
+def test_regeneration_archives_exact_previous_published_json_bytes(tmp_path):
+    settings, model, repo, schedule = setup_case(tmp_path)
+    previous = (
+        b'{ "model_version" : "old-v2", "predictions": [ {"mean": 17.123400, "name":"Jos\\u00e9"} ] }\r\n'
+    )
+    destination = tmp_path / "upcoming_predictions.json"
+    destination.write_bytes(previous)
+    generated = generate_upcoming(settings, model, repo, schedule)
+    digest = hashlib.sha256(previous).hexdigest()
+    archive = tmp_path / "upcoming_archive" / (digest + ".json.gz")
+    assert archive.exists()
+    assert gzip.decompress(archive.read_bytes()) == previous
+    assert json.loads(destination.read_bytes()) == generated
+    assert destination.read_bytes() != previous
+    assert not list((tmp_path / "upcoming_archive").glob(".archive-*"))
+    assert not list(tmp_path.glob(".upcoming-*.tmp"))
+
+
+def test_regeneration_preserves_old_forecast_objects_and_archive_across_versions(tmp_path):
+    settings, model, repo, schedule = setup_case(tmp_path)
+    first = generate_upcoming(settings, model, repo, schedule)
+    original = deepcopy(first)
+    original_schedule = deepcopy(schedule)
+    first_bytes = (tmp_path / "upcoming_predictions.json").read_bytes()
+    first_archive = tmp_path / "upcoming_archive" / (hashlib.sha256(first_bytes).hexdigest() + ".json.gz")
+    # A changed forecast is a new issuance, not an edit to the old snapshot.
+    model.metadata = {"model_version": "v3-new-test"}
+    old_predict = model.predict
+    model.predict = lambda frame, line: {
+        **old_predict(frame, line),
+        "mean": 75.0,
+        "model_version": "v3-new-test",
+    }
+    second = generate_upcoming(settings, model, repo, schedule)
+    archived_bytes = first_archive.read_bytes()
+    second_bytes = (tmp_path / "upcoming_predictions.json").read_bytes()
+    assert second["predictions"][0]["mean"] == 75.0
+    assert first == original
+    assert schedule == original_schedule
+    assert gzip.decompress(archived_bytes) == first_bytes
+    assert json.loads(gzip.decompress(archived_bytes))["predictions"][0]["mean"] == 40.0
+    generate_upcoming(settings, model, repo, schedule)
+    assert first_archive.read_bytes() == archived_bytes
+    second_archive = tmp_path / "upcoming_archive" / (hashlib.sha256(second_bytes).hexdigest() + ".json.gz")
+    assert gzip.decompress(second_archive.read_bytes()) == second_bytes
+
+
+def test_existing_content_addressed_archive_is_not_rewritten(tmp_path):
+    settings, model, repo, schedule = setup_case(tmp_path)
+    previous = b'{"model_version":"old","predictions":[]}\n'
+    (tmp_path / "upcoming_predictions.json").write_bytes(previous)
+    archive = tmp_path / "upcoming_archive"
+    archive.mkdir()
+    path = archive / (hashlib.sha256(previous).hexdigest() + ".json.gz")
+    # Different valid gzip metadata is also part of the already stored artifact.
+    compressed = gzip.compress(previous, mtime=123456)
+    path.write_bytes(compressed)
+    original_mtime = path.stat().st_mtime_ns
+    generate_upcoming(settings, model, repo, schedule)
+    assert path.read_bytes() == compressed
+    assert path.stat().st_mtime_ns == original_mtime

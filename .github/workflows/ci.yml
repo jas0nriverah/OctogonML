@@ -31,7 +31,7 @@ jobs:
           python-version: "3.12.14"
           cache: pip
       - run: pip install -c requirements-lock.txt -e '.[dev,postgres]'
-      - run: ruff check src tests migrations
+      - run: ruff check src tests migrations scripts
       - run: pytest --cov=cagemetrics --cov-report=term-missing
       - run: node --check src/cagemetrics/web/app.js
   container:
@@ -50,7 +50,7 @@ jobs:
                   with urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2) as response:
                       health = json.load(response)
                   assert health['status'] == 'ready'
-                  assert health['model_version'].startswith('v2-')
+                  assert health['model_version'].startswith('v3-')
                   break
               except Exception:
                   if attempt == 59:

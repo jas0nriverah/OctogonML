@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from datetime import datetime
 import json
+import gzip
 import logging
 import math
 from pathlib import Path
@@ -73,6 +74,7 @@ class PredictionResponse(BaseModel):
     data_cutoff: str
     history: dict
     distribution: list[DistributionPoint]
+    distribution_parameters: dict | None = None
     tail_probability: float
     warnings: list[str]
     forecast_date: str | None = None
@@ -92,7 +94,7 @@ def _read_json(path: Path, default=None):
 @lru_cache(maxsize=2)
 def _upcoming_snapshot(path: Path, modified_ns: int):
     """Atomic report replacements invalidate this bounded read cache."""
-    return _read_json(path)
+    return json.loads(gzip.decompress(path.read_bytes())) if path.suffix == ".gz" else _read_json(path)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -186,6 +188,51 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         values = repository.list_fighters(q, limit)
         return {"fighters": values, "total": len(values)}
 
+    def profile_catalog():
+        repository, model = ready()
+        from .fighters import FighterCatalog
+
+        catalog = getattr(app.state, "fighter_catalog", None)
+        if catalog is None or catalog.snapshot_id != model.snapshot_id:
+            catalog = FighterCatalog(model.bundle, model.snapshot_id)
+            app.state.fighter_catalog = catalog
+        return catalog
+
+    def profile_asof(value):
+        today = datetime.now(ZoneInfo("America/New_York")).date()
+        if value is None:
+            return today.isoformat()
+        try:
+            chosen = datetime.fromisoformat(value).date()
+            if chosen.isoformat() != value or chosen > today:
+                raise ValueError("Invalid observed-history date")
+        except ValueError as exc:
+            raise HTTPException(422, "as_of must be an ISO date no later than today") from exc
+        return chosen.isoformat()
+
+    @app.get("/api/v1/fighter-directory")
+    def fighter_directory(
+        q: str = Query(default="", max_length=100),
+        page: int = Query(default=1, ge=1),
+        per_page: int = Query(default=24, ge=1, le=60),
+        division: str | None = Query(default=None, max_length=80),
+        as_of: str | None = Query(default=None, max_length=10),
+    ):
+        from .fighters import public_photos
+
+        return profile_catalog().directory(
+            profile_asof(as_of), public_photos(settings), q, page, per_page, division
+        )
+
+    @app.get("/api/v1/fighters/{fighter_id}")
+    def fighter_profile(fighter_id: str, as_of: str | None = Query(default=None, max_length=10)):
+        from .fighters import public_photos
+
+        try:
+            return profile_catalog().profile(fighter_id, profile_asof(as_of), public_photos(settings))
+        except KeyError as exc:
+            raise HTTPException(404, "Unknown canonical fighter ID") from exc
+
     @app.get("/api/v1/overview")
     def overview():
         repository, model = ready()
@@ -270,6 +317,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "data_cutoff": latest_date,
                 "history": {"fighter_bouts": own_count, "opponent_bouts": opponent_count},
                 "distribution": distribution,
+                "distribution_parameters": {
+                    key: value for key, value in dist.items() if key not in ("pmf", "tail_probability")
+                }
+                if isinstance(dist, dict)
+                else None,
                 "tail_probability": float(dist.get("tail_probability", 0)) if isinstance(dist, dict) else 0,
                 "warnings": warnings,
             }
@@ -301,6 +353,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ready()
         return _read_json(settings.report_dir / "experiments.json", {"status": "not_run", "experiments": []})
 
+    @app.get("/api/v1/research")
+    def research():
+        return _read_json(settings.report_dir / "research.json", {"status": "not_run", "development": []})
+
+    @app.get("/api/v1/research/predictions.csv.gz")
+    def research_predictions():
+        path = settings.report_dir / "research_predictions.csv.gz"
+        if not path.exists():
+            raise HTTPException(404, "Run cagemetrics research to generate row-level predictions")
+        return FileResponse(path, media_type="application/gzip", filename=path.name)
+
     @app.get("/api/v1/release")
     def release():
         repository, model = ready()
@@ -311,10 +374,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/v1/fighter-photos")
     def fighter_photos():
         ready()
-        path = settings.data_dir / "fighter_photos.json"
-        if not path.exists():
-            path = settings.project_dir / "data" / "fighter_photos.json"
-        return _read_json(path, {"fighters": {}, "source": "No sourced headshots available"})
+        from .fighters import public_photos
+
+        return public_photos(settings)
 
     def upcoming_report():
         _, model = ready()
@@ -332,6 +394,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             or report.get("artifact_sha256") != model.sha256
             or report.get("source_snapshot_sha256") != model.snapshot_id
         ):
+            # Rollback channels retain their original issued snapshot, rather
+            # than relabeling current-model projections as older predictions.
+            archive = settings.report_dir / "upcoming_archive"
+            for archived in sorted(
+                archive.glob("*.json.gz"), key=lambda p: p.stat().st_mtime_ns, reverse=True
+            ):
+                prior = _upcoming_snapshot(archived, archived.stat().st_mtime_ns)
+                if (
+                    prior.get("model_version") == model.metadata["model_version"]
+                    and prior.get("artifact_sha256") == model.sha256
+                    and prior.get("source_snapshot_sha256") == model.snapshot_id
+                ):
+                    return prior
             raise HTTPException(
                 409, "Upcoming projections use a different model or source snapshot; regenerate them"
             )
@@ -532,6 +607,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/", include_in_schema=False)
     def index():
+        return FileResponse(web / "index.html")
+
+    @app.get("/fighters", include_in_schema=False)
+    def fighter_directory_page():
+        return FileResponse(web / "index.html")
+
+    @app.get("/fighters/{fighter_id}", include_in_schema=False)
+    def fighter_profile_page(fighter_id: str):
+        if fighter_id not in profile_catalog().names:
+            raise HTTPException(404, "Unknown canonical fighter ID")
         return FileResponse(web / "index.html")
 
     return app

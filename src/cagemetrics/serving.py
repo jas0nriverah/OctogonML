@@ -14,12 +14,21 @@ from .modeling import ForecastEngine
 class LiveForecaster:
     def __init__(self, settings, repository):
         channel = os.environ.get("CAGEMETRICS_MODEL_CHANNEL", "auto")
-        if channel not in ("auto", "v1", "v2"):
-            raise ValueError("CAGEMETRICS_MODEL_CHANNEL must be auto, v1, or v2")
+        if channel not in ("auto", "v1", "v2", "v3"):
+            raise ValueError("CAGEMETRICS_MODEL_CHANNEL must be auto, v1, v2, or v3")
         v2_dir = settings.artifact_dir / "v2"
-        self.channel = "v2" if channel != "v1" and (v2_dir / "metadata.json").exists() else "v1"
-        if channel == "v2" and self.channel != "v2":
-            raise ValueError("V2 requested but no verified V2 artifact exists; run cagemetrics experiment")
+        v3_dir = settings.artifact_dir / "v3"
+        self.channel = channel
+        if channel == "auto":
+            self.channel = next(
+                (name for name in ("v3", "v2") if (settings.artifact_dir / name / "metadata.json").exists()),
+                "v1",
+            )
+        if (
+            self.channel in ("v2", "v3")
+            and not (settings.artifact_dir / self.channel / "metadata.json").exists()
+        ):
+            raise ValueError(f"{self.channel.upper()} requested but no verified artifact exists")
         self.repository = repository
         self.bundle = repository.dataset()
         self.snapshot_id = hashlib.sha256(
@@ -28,10 +37,11 @@ class LiveForecaster:
         if repository.latest_snapshot_id() != self.snapshot_id:
             raise ValueError("Source data changed while loading; restart to load a consistent snapshot")
         self.data_through = str(self.bundle.bouts.event_date.max()) if len(self.bundle.bouts) else None
-        if self.channel == "v2":
+        if self.channel in ("v2", "v3"):
             from .experiments import V2Engine
+            from .duration import V3Engine
 
-            self.engine = V2Engine(v2_dir)
+            self.engine = V3Engine(v3_dir) if self.channel == "v3" else V2Engine(v2_dir)
             self.engine.prepare(self.bundle)
             self.metadata = dict(self.engine.metadata)
             self.sha256 = self.metadata["artifact_sha256"]
@@ -69,7 +79,7 @@ class LiveForecaster:
             raise ValueError("The loaded observations must precede the requested history cutoff")
         if forecast_date < history_asof:
             raise ValueError("Forecast date cannot precede its history cutoff")
-        if self.channel == "v2":
+        if self.channel in ("v2", "v3"):
             return self.engine.feature_frame(self.bundle, fighter_id, opponent_id, rounds, forecast_date)
         states = self.repository.feature_states([fighter_id, opponent_id], history_asof, self.snapshot_id)
         frame = pd.DataFrame(

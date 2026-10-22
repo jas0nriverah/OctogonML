@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import csv
+import gzip
 import hashlib
 import json
 import os
@@ -222,6 +223,23 @@ def generate_upcoming(settings, forecaster, repository, schedule):
         ],
     }
     settings.report_dir.mkdir(parents=True, exist_ok=True)
+    existing = settings.report_dir / "upcoming_predictions.json"
+    if existing.exists():
+        # Preserve the exact published bytes before advancing the current view.
+        # Issued SQL ledger entries are independent and never changed here.
+        payload = existing.read_bytes()
+        archive = settings.report_dir / "upcoming_archive"
+        archive.mkdir(exist_ok=True)
+        sha = hashlib.sha256(payload).hexdigest()
+        destination = archive / (sha + ".json.gz")
+        if not destination.exists():
+            with tempfile.NamedTemporaryFile(dir=archive, prefix=".archive-", delete=False) as handle:
+                temporary_archive = Path(handle.name)
+                handle.write(gzip.compress(payload, mtime=0))
+            try:
+                os.replace(temporary_archive, destination)
+            finally:
+                temporary_archive.unlink(missing_ok=True)
     # Readers see either the old complete snapshot or the new complete snapshot.
     temporary = None
     try:
