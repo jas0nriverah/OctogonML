@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-22T20:07:12.001112+00:00",
+  "observed_at": "2026-10-22T19:58:41.206045+00:00",
+  "canonical_fighters": 2074,
+  "portrait_count": 2036,
+  "without_verified_portrait": 38,
+  "ufc_verified_additions": 192,
+  "ufc_unresolved": 36,
+  "ambiguous_local_ids": [
+    "12ebd7d157e91701",
+    "294aa73dbf37d281"
+  ],
+  "policy": "Existing portraits unchanged. Additional official UFC H1 matches canonical/source-linked names or primary structured name and exact retained birth date; named athlete PNGs observed in source HTML, bound to all verified-name filename tokens and verified HTTP200 image headers. No fuzzy-only identity matches or media rehosting.",
+  "ufc_source_cache": "ufc_portraits.jsonl.gz",
+  "asset_identity_audit": "ufc_image_identity_audit.json",
+  "previous_index_archive": "fighter_profiles/photo_index_archive/d8403c06eea90fe39169a6e8c3a7616a880f597b843d4f77ef15b0c365f9ee93.json.gz"
+}

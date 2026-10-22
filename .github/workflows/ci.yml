@@ -51,11 +51,43 @@ jobs:
                       health = json.load(response)
                   assert health['status'] == 'ready'
                   assert health['model_version'].startswith('v3-')
+                  assert health['winner_model_version'].startswith('winner-')
+                  assert health['rounds_model_version'].startswith('rounds-')
                   break
               except Exception:
                   if attempt == 59:
                       raise
                   time.sleep(1)
+          base = 'http://127.0.0.1:8000'
+          athletes = []
+          for name in ('Justin%20Gaethje', 'Paddy%20Pimblett'):
+              with urllib.request.urlopen(base + '/api/v1/fighters?q=' + name + '&limit=1') as response:
+                  athletes.extend(json.load(response)['fighters'])
+          request = urllib.request.Request(
+              base + '/api/v1/predict-winner',
+              data=json.dumps({'fighter_a_id': athletes[0]['fighter_id'],
+                               'fighter_b_id': athletes[1]['fighter_id'],
+                               'scheduled_rounds': 3}).encode(),
+              headers={'Content-Type': 'application/json'})
+          with urllib.request.urlopen(request) as response:
+              result = json.load(response)
+          assert abs(result['p_fighter_win'] + result['p_opponent_win'] - 1) < 1e-12
+          assert result['scope'] == 'conditional on a decisive outcome'
+          with urllib.request.urlopen(base + '/api/v1/winner-predictions/' + result['prediction_id']) as response:
+              assert json.load(response) == result
+          request = urllib.request.Request(
+              base + '/api/v1/predict-rounds',
+              data=json.dumps({'fighter_a_id': athletes[0]['fighter_id'],
+                               'fighter_b_id': athletes[1]['fighter_id'],
+                               'scheduled_rounds': 3, 'line': 3}).encode(),
+              headers={'Content-Type': 'application/json'})
+          with urllib.request.urlopen(request) as response:
+              duration = json.load(response)
+          assert duration['p_over'] == 0
+          assert duration['p_push'] == duration['p_complete_scheduled_time']
+          assert len(duration['round_thresholds']) == 6
+          with urllib.request.urlopen(base + '/api/v1/rounds-predictions/' + duration['prediction_id']) as response:
+              assert json.load(response) == duration
           PY
       - if: always()
         run: docker logs cagemetrics-smoke

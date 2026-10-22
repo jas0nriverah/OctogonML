@@ -1,0 +1,23 @@
+{
+  "candidates": [
+    "scheduled_empirical",
+    "hgb"
+  ],
+  "seed": 42,
+  "categories": "20: half-round interior followed by its exact 150-second boundary atom",
+  "interior_assumption": "Uniform probability over the 149 integer seconds inside each half-round",
+  "hgb": {
+    "max_iter": 60,
+    "max_leaf_nodes": 7,
+    "min_samples_leaf": 60,
+    "l2_regularization": 10.0,
+    "learning_rate": 0.05,
+    "early_stopping": false
+  },
+  "smoothing": "Jeffreys 0.5 per legal category; HGB mixed with 0.005 training empirical probability",
+  "calibration": "One positive temperature on reserved category log probabilities; legal masking before normalization",
+  "selection": "Lowest pooled 2021\u20132023 categorical log loss; annual train before prior July 1, calibrate until January 1",
+  "report": "2024 retrospective temporal evaluation; this period was already inspected in other project studies",
+  "deployment_train_before": "2026-07-01",
+  "deployment_calibration_before": "2026-10-18"
+}

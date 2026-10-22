@@ -17,13 +17,6 @@
           ><small>UFC / STRIKE FORECASTS</small></span
         ></a
       >
-      <div class="header-status">
-        <span class="status-dot"></span
-        ><span id="service-status">CONNECTING TO MODEL</span>
-      </div>
-      <a class="api-link" href="/docs"
-        >API DOCS <span aria-hidden="true">↗</span></a
-      >
     </header>
     <main>
       <section class="intro">
@@ -55,6 +48,7 @@
         </button>
         <details class="research-menu"><summary>Research <span>⌄</span></summary><div><button class="tab" data-view="evidence" aria-selected="false">Model Evidence</button><button class="tab" data-view="forward" aria-selected="false">Forward Tracker</button></div></details>
       </nav>
+      <aside class="research-use-note" role="note"><strong>Research only · Not betting advice</strong><span>Model estimates can be wrong.</span></aside>
       <section id="view-upcoming" class="view">
         <div class="section-heading upcoming-heading"><div><p class="eyebrow">ON THE CALENDAR</p><h2>Upcoming UFC fights</h2></div><span class="date-badge">THROUGH DECEMBER 2026</span></div>
         <p class="section-copy">Announced matchups with forecasts for each athlete’s significant strikes landed. Ranges show uncertainty across the full fight.</p>
@@ -69,7 +63,7 @@
           <button class="primary-button" type="submit">Find fighters <span>↗</span></button>
         </form>
         <div id="directory-content" aria-live="polite"><div class="panel loading-state">Loading fighter profiles…</div></div>
-        <details class="panel data-panel directory-source-note"><summary>Coverage and photography</summary><p class="panel-description">Profiles show the UFC bouts included in this project’s history since 2013. They are not complete MMA records or current rankings. Athlete photos come from matched ESPN profiles; missing or unavailable photos use initials. Photography remains the rights holders’ property and does not imply an affiliation with UFC or ESPN.</p></details>
+        <details class="panel data-panel directory-source-note"><summary>Coverage and photography</summary><p class="panel-description">Profiles show the UFC bouts included in this project’s history since 2013. They are not complete MMA records or current rankings. Athlete photos come from matched official UFC and ESPN profiles; missing or unavailable photos use initials. Photography remains the rights holders’ property and does not imply an affiliation with UFC or ESPN.</p></details>
       </section>
       <section id="view-profile" class="view" hidden><div id="profile-content" aria-live="polite"><div class="panel loading-state">Loading athlete history…</div></div></section>
       <section id="view-explorer" class="view" hidden>
@@ -90,7 +84,7 @@
               autocomplete="off"
             /><select id="fighter" name="fighter_id" required disabled>
               <option>Loading athletes…</option>
-            </select></div>
+            </select><p id="fighter-division" class="selection-division">Last covered division · Checking…</p></div>
             <div class="versus"><span></span>VS<span></span></div>
             <div class="comparison-select blue-side"><label for="opponent">Blue side</label
             ><input
@@ -102,7 +96,7 @@
               autocomplete="off"
             /><select id="opponent" name="opponent_id" required disabled>
               <option>Loading athletes…</option>
-            </select></div>
+            </select><p id="opponent-division" class="selection-division">Last covered division · Checking…</p></div>
             <div class="form-row">
               <fieldset>
                 <legend>Scheduled rounds</legend>
@@ -137,6 +131,7 @@
                 />
               </div>
             </div>
+            <div class="matchup-eligibility" id="matchup-eligibility" role="status" aria-live="polite"><span class="eligibility-badge">CHECKING DIVISIONS</span><p>Based on last covered UFC division; same or neighboring divisions only.</p></div>
             <button
               id="forecast-button"
               class="primary-button"
@@ -166,15 +161,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="method-note">
-          <span class="outlined-label">WHAT COUNTS?</span>
-          <p>
-            Significant strikes landed by the selected athlete across the entire
-            fight. Early finishes and opponent style both affect the outcome. A
-            prediction interval describes possible outcomes, not certainty about
-            the mean.
-          </p>
         </div>
       </section>
       <section id="view-forward" class="view" hidden>

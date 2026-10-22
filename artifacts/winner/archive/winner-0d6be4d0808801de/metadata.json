@@ -1,0 +1,272 @@
+{
+  "model_version": "winner-0d6be4d0808801de",
+  "artifact_sha256": "73de24f81f4bb2aedadb604acd6f845258d47d5b7254c719707f967c2036959c",
+  "implementation_sha256": "832cd9076d6494790946ddd41dbf9011498679a007463779e2e4f8838d9fb8a3",
+  "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+  "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+  "data_through": "2026-10-17",
+  "training_cutoff_exclusive": "2026-07-01",
+  "calibration_cutoff_exclusive": "2026-10-18",
+  "candidate": "hgb",
+  "selected_candidate": "hgb",
+  "model_type": "symmetric_decisive_winner_classifier",
+  "feature_schema_version": "winner-46-contrast-lagged-elo-weight-v2",
+  "feature_names": [
+    "difference_prior_bouts",
+    "difference_career_mean_strikes",
+    "difference_last5_mean_strikes",
+    "difference_career_landed_per_min",
+    "difference_last5_landed_per_min",
+    "difference_career_absorbed_per_min",
+    "difference_last5_absorbed_per_min",
+    "difference_career_attempted_per_min",
+    "difference_last5_attempted_per_min",
+    "difference_career_accuracy",
+    "difference_last5_accuracy",
+    "difference_career_mean_duration",
+    "difference_last5_mean_duration",
+    "difference_career_finish_rate",
+    "difference_last5_finish_rate",
+    "difference_layoff_days",
+    "elo_difference",
+    "win_rate_difference",
+    "decisive_experience_difference",
+    "lagged_weight_limit_difference",
+    "lagged_weight_missing_difference",
+    "weight_gap_experience_interaction",
+    "weight_context_pace_difference",
+    "five_round_difference_prior_bouts",
+    "five_round_difference_career_mean_strikes",
+    "five_round_difference_last5_mean_strikes",
+    "five_round_difference_career_landed_per_min",
+    "five_round_difference_last5_landed_per_min",
+    "five_round_difference_career_absorbed_per_min",
+    "five_round_difference_last5_absorbed_per_min",
+    "five_round_difference_career_attempted_per_min",
+    "five_round_difference_last5_attempted_per_min",
+    "five_round_difference_career_accuracy",
+    "five_round_difference_last5_accuracy",
+    "five_round_difference_career_mean_duration",
+    "five_round_difference_last5_mean_duration",
+    "five_round_difference_career_finish_rate",
+    "five_round_difference_last5_finish_rate",
+    "five_round_difference_layoff_days",
+    "five_round_elo_difference",
+    "five_round_win_rate_difference",
+    "five_round_decisive_experience_difference",
+    "five_round_lagged_weight_limit_difference",
+    "five_round_lagged_weight_missing_difference",
+    "five_round_weight_gap_experience_interaction",
+    "five_round_weight_context_pace_difference"
+  ],
+  "train_rows": 6402,
+  "calibration_rows": 188,
+  "trained_at": "2026-10-22T20:02:27.997365+00:00",
+  "evaluation": {
+    "n_bouts": 507,
+    "log_loss": 0.6746318575122134,
+    "brier_score": 0.2409645639444907,
+    "accuracy": 0.5779092702169625,
+    "calibration": [
+      {
+        "predicted": 0.19603464963498887,
+        "observed": 0.0,
+        "n": 1
+      },
+      {
+        "predicted": 0.26419110751642244,
+        "observed": 0.21428571428571427,
+        "n": 14
+      },
+      {
+        "predicted": 0.3563731364409124,
+        "observed": 0.4588235294117647,
+        "n": 85
+      },
+      {
+        "predicted": 0.44982713417771625,
+        "observed": 0.4954954954954955,
+        "n": 111
+      },
+      {
+        "predicted": 0.547945971259346,
+        "observed": 0.5492957746478874,
+        "n": 142
+      },
+      {
+        "predicted": 0.6455038678010087,
+        "observed": 0.6481481481481481,
+        "n": 108
+      },
+      {
+        "predicted": 0.7268917997879866,
+        "observed": 0.6666666666666666,
+        "n": 45
+      },
+      {
+        "predicted": 0.8232858599392565,
+        "observed": 1.0,
+        "n": 1
+      }
+    ],
+    "ece": 0.03557451903914187,
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "retrospective winner temporal comparison; weight-feature revision selected on2021\u20132023 only;2024 was previously inspected"
+  },
+  "protocol": {
+    "revision": "prior-division-weight-contrasts-v2",
+    "weight_features": "Strictly earlier observed division limits from shared parse_division; signed limit difference/100, antisymmetric missingness, signed gap times symmetric mean log-experience, mean known limit/200 times last5 pace contrast; no upcoming bout division or measured-bodyweight inference.",
+    "candidates": [
+      "elo",
+      "logistic",
+      "hgb"
+    ],
+    "seed": 42,
+    "elo": {
+      "initial_rating": 1500.0,
+      "k": 32.0,
+      "scale": 400.0,
+      "draw_policy": "exclude from rating updates"
+    },
+    "logistic": {
+      "C": 0.1,
+      "fit_intercept": false,
+      "max_iter": 1000,
+      "scaler": "standard deviation only; no centering"
+    },
+    "hgb": {
+      "max_iter": 120,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 60,
+      "l2_regularization": 10.0,
+      "learning_rate": 0.05,
+      "early_stopping": false
+    },
+    "symmetry": "Fit mirrored contrasts and labels; average p(x) with1-p(-x); zero-intercept temperature calibration preserves complements.",
+    "calibration": "Minimize calibration log loss over log-temperature in[-1.5,1.5]; mean models never fit calibration rows.",
+    "development_years": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection": "minimum pooled development log loss",
+    "test_year": 2024,
+    "annual_split": "Train before preceding July1; calibrate July\u2013December; evaluate next calendar year.",
+    "deployment_train_before": "2026-07-01",
+    "deployment_calibration_before": "2026-10-18",
+    "label_scope": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+  },
+  "warnings": [
+    "Win probabilities are conditional on a decisive result; draw/no-contest probability is not modeled.",
+    "Only covered UFC history is available; missing earlier history and sparse histories limit reliability.",
+    "2024 winner outcomes were inspected in the initial38-feature study; this weight-feature revision is a retrospective temporal comparison, not a fresh holdout.",
+    "Weight inputs are prior observed division limits, not measured current body weights; cross-division winner evidence is limited.",
+    "Future winner accuracy and calibration require prospective evaluation; this is not a market probability or betting recommendation."
+  ],
+  "fingerprint_input": {
+    "protocol": {
+      "revision": "prior-division-weight-contrasts-v2",
+      "weight_features": "Strictly earlier observed division limits from shared parse_division; signed limit difference/100, antisymmetric missingness, signed gap times symmetric mean log-experience, mean known limit/200 times last5 pace contrast; no upcoming bout division or measured-bodyweight inference.",
+      "candidates": [
+        "elo",
+        "logistic",
+        "hgb"
+      ],
+      "seed": 42,
+      "elo": {
+        "initial_rating": 1500.0,
+        "k": 32.0,
+        "scale": 400.0,
+        "draw_policy": "exclude from rating updates"
+      },
+      "logistic": {
+        "C": 0.1,
+        "fit_intercept": false,
+        "max_iter": 1000,
+        "scaler": "standard deviation only; no centering"
+      },
+      "hgb": {
+        "max_iter": 120,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 60,
+        "l2_regularization": 10.0,
+        "learning_rate": 0.05,
+        "early_stopping": false
+      },
+      "symmetry": "Fit mirrored contrasts and labels; average p(x) with1-p(-x); zero-intercept temperature calibration preserves complements.",
+      "calibration": "Minimize calibration log loss over log-temperature in[-1.5,1.5]; mean models never fit calibration rows.",
+      "development_years": [
+        2021,
+        2022,
+        2023
+      ],
+      "selection": "minimum pooled development log loss",
+      "test_year": 2024,
+      "annual_split": "Train before preceding July1; calibrate July\u2013December; evaluate next calendar year.",
+      "deployment_train_before": "2026-07-01",
+      "deployment_calibration_before": "2026-10-18",
+      "label_scope": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+    },
+    "features": [
+      "difference_prior_bouts",
+      "difference_career_mean_strikes",
+      "difference_last5_mean_strikes",
+      "difference_career_landed_per_min",
+      "difference_last5_landed_per_min",
+      "difference_career_absorbed_per_min",
+      "difference_last5_absorbed_per_min",
+      "difference_career_attempted_per_min",
+      "difference_last5_attempted_per_min",
+      "difference_career_accuracy",
+      "difference_last5_accuracy",
+      "difference_career_mean_duration",
+      "difference_last5_mean_duration",
+      "difference_career_finish_rate",
+      "difference_last5_finish_rate",
+      "difference_layoff_days",
+      "elo_difference",
+      "win_rate_difference",
+      "decisive_experience_difference",
+      "lagged_weight_limit_difference",
+      "lagged_weight_missing_difference",
+      "weight_gap_experience_interaction",
+      "weight_context_pace_difference",
+      "five_round_difference_prior_bouts",
+      "five_round_difference_career_mean_strikes",
+      "five_round_difference_last5_mean_strikes",
+      "five_round_difference_career_landed_per_min",
+      "five_round_difference_last5_landed_per_min",
+      "five_round_difference_career_absorbed_per_min",
+      "five_round_difference_last5_absorbed_per_min",
+      "five_round_difference_career_attempted_per_min",
+      "five_round_difference_last5_attempted_per_min",
+      "five_round_difference_career_accuracy",
+      "five_round_difference_last5_accuracy",
+      "five_round_difference_career_mean_duration",
+      "five_round_difference_last5_mean_duration",
+      "five_round_difference_career_finish_rate",
+      "five_round_difference_last5_finish_rate",
+      "five_round_difference_layoff_days",
+      "five_round_elo_difference",
+      "five_round_win_rate_difference",
+      "five_round_decisive_experience_difference",
+      "five_round_lagged_weight_limit_difference",
+      "five_round_lagged_weight_missing_difference",
+      "five_round_weight_gap_experience_interaction",
+      "five_round_weight_context_pace_difference"
+    ],
+    "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+    "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+    "implementation_sha256": "832cd9076d6494790946ddd41dbf9011498679a007463779e2e4f8838d9fb8a3",
+    "dependencies": {
+      "python": "3.12.14",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1"
+    }
+  }
+}

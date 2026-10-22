@@ -1,68 +1,99 @@
 # Engineering decisions
 
-## A complete path from data to an auditable response
+## Service boundaries
 
 ```mermaid
 flowchart TD
-  Raw[Pinned source revisions + SHA256 manifests] --> Ingest[Normalize identities, rounds, exclusions]
-  Ingest --> SQL[(SQL source + athlete + bout tables)]
-  SQL --> Features[Strictly prior-event features]
-  Features --> Fit[Chronological mean fitting]
-  Fit --> Cal[Separate dispersion calibration]
-  Cal --> Eval[Development selection + historical report]
-  Eval --> Artifacts[Versioned model artifacts + reports]
-  SQL --> States[(Materialized athlete feature states)]
+  Raw[Pinned raw sources and SHA manifests] --> Validate[Exact identity, round and correction checks]
+  Validate --> SQL[(Canonical SQL history)]
+  SQL --> History[Strictly prior-event features]
+  History --> Train[Chronological fitting and reserved calibration]
+  Train --> Artifacts[Versioned strike, winner and duration artifacts]
   Artifacts --> API[FastAPI service]
-  States --> API
-  Browser[Vanilla responsive dashboard] --> API
-  API --> Audit[(Feature snapshot + prediction + model hash)]
-  API --> Context[Separate history + sensitivity request]
-  API --> Forward[(Pre-event ledger)]
-  Outcomes[Later observed outcomes] --> Forward
+  SQL --> API
+  API --> Predictions[(Immutable feature and forecast snapshots)]
+  Browser[Responsive dashboard] --> API
+  Predictions --> Facts[Server-authored evidence]
+  Rankings[Separately observed official rankings] --> Facts
+  Facts --> LLM[Optional local LLM / configured OpenAI]
+  LLM --> Guard[Grounding and bounded-guidance validation]
+  Guard --> Analyses[(Immutable analysis and experimental overlay)]
+  API --> Ledger[(Pre-event forecast ledger)]
+  Outcomes[Later exact-ID outcomes] --> Ledger
 ```
 
-The application is one Python service. A static dashboard shares its origin, eliminating a separate frontend deployment and CORS configuration. Synchronous endpoints fit the SQLAlchemy/scikit-learn workload. Native numerical thread limits prevent each HTTP worker from creating an oversized numerical thread pool.
+One Python service serves the static dashboard and API from the same origin. SQLAlchemy supports SQLite and PostgreSQL; Alembic manages schema changes. Synchronous handlers fit the SQL/CPU inference workload. Native numerical thread limits avoid creating excessive nested numerical pools.
 
-## Database choice and serving cost
+Requests never scrape, download weights, train models, or refresh source observations. Network jobs are explicit scripts/CLI stages. Local LLM generation is a separate, bounded optional request and does not block basic forecast availability when its provider is unavailable.
 
-SQLite supplies a zero-account local path with real relational constraints and persisted provenance. PostgreSQL 17 exercises the same repository against a server database. Alembic records schema evolution, including materialized athlete states. The PostgreSQL test target must be a dedicated test database, selected by `CAGEMETRICS_TEST_DATABASE_URL`.
+## Canonical history and source integrity
 
-The first serving implementation retrieved fight history and performed pandas merges per forecast. Startup now prepares snapshot/as-of-keyed historical summaries. The V1 path reads two SQL state rows and assembles matchup features. V2 and V3 use prepared historical state and a bounded matchup-frame cache; the API still reads two SQL rows for metadata. Each channel predicts and persists the full audit record without rebuilding full history merges per request. Exact-parity tests guard the optimization. Rich historical context is a separate on-demand endpoint, keeping it out of the inference benchmark. Restart after ingestion or artifact changes to refresh loaded state. `CAGEMETRICS_MODEL_CHANNEL` accepts `auto`, `v1`, `v2`, and `v3`; auto prefers an available V3 artifact, then V2, then V1.
+The normalized snapshot uses stable UFCStats bout and fighter identifiers. Each retained bout has exactly two athlete-stat records. Source round aggregation and labels are validated before SQL import. No-contest, overturned, and unsupported-format exclusions remain explicit. Incremental source revisions are operator-selected 40-hex commits; raw files are cached under owner/commit/file paths and checked against manifest hashes. Legacy cache migration requires the recorded commit and bytes to agree, preserving the source observation timestamp.
 
-The ORM and feature table make lineage and invalidation explicit. The service fits within one process and a relational database; model artifacts and source snapshots are versioned alongside the application.
+Repeated identical ingestion is idempotent. Conflicting strike targets or feature-relevant event/bout fields are rejected rather than silently ignored. The manifest, source observation times, licenses, and transformed rows are separate artifacts. Sporting event time is not the time the source was observed, and reconstructed history does not prove historical publication availability.
 
-## Time semantics and model selection
+The public Git repository excludes raw downloads. Packaged normalized records, frozen model artifacts, and reports support offline serving; the prepared project archive also retains raw files. An independent refit must recover the exact raw sources it needs, not infer missing labels from the dashboard.
 
-Feature eligibility uses strictly earlier completed events. Same-day events do not become inputs for one another. Raw snapshot retrieval timestamps remain distinct from event dates; reconstructing a historical statistic cannot prove contemporaneous availability of a later-collected dataset.
+## Prepared features and independent models
 
-Development folds select the model family before the reporting period. Mean fitting and count-dispersion calibration are separate temporal stages. The legacy current artifact’s full-data refit reused a dispersion estimate; the V2 experiment creates a disjoint mean/calibration pairing. Neither construction has untouched future coverage evidence merely because it can be serialized and served. The model card and generated metadata distinguish these artifacts.
+All sporting observations are eligible only when `event_date < history_cutoff`. Same-day updates are excluded. Startup prepares snapshot-specific historical states; V1 strike inference reads two materialized SQL summary rows, while V2/V3 use prepared states and a bounded matchup-frame cache. No request rebuilds full-history pandas merges. Parity tests compare prepared and direct feature construction. A source-snapshot mismatch returns 503 until the service reloads matching state.
 
-The richer candidate adds historical context, recency/shrinkage, and interaction features under an explicit experiment protocol. It is not promoted when the declared development objective does not improve. Later inspected outcomes are labeled retrospective, and a genuine new test belongs in the forward ledger.
+Strike, winner, and elapsed-time targets have separate artifact identities, label checksums, feature contracts, calibration, evaluation, and persisted forecast kinds. A strike count is not an outcome probability. The independent duration classifier does not consume the current bout's realized elapsed time, and its full-time probability does not establish a decision.
 
-The separate V3 `research` pipeline keeps the 33 pre-fight inputs and compares eight bounded candidates on 2021–2023 annual folds. Each fold fits means before July of the preceding year and calibrates on the following July–December period. Candidate identity is frozen before the 2024 confirmation comparison. This year was already inspected during earlier work, so it is not an untouched holdout. Already-seen 2025–2026 diagnostics never select the candidate or decide promotion.
+The strike V3 model evaluates a genuine two-regime negative-binomial mixture: a symmetric full-duration gate and two conditional count distributions. Quantiles use the uncapped distribution; rendered PMF truncation has explicit tail mass. The gate's shared regime weight does not create a joint model of both athletes' counts.
 
-V3 uses a full-scheduled-duration versus early-stop auxiliary label only during fitting. Two conditional gradient-boosted means and separately calibrated negative-binomial dispersions form a genuine mixture. The gate averages its predictions under both athlete perspectives, giving the pair a shared symmetric regime probability. Inference receives only pre-fight features; it does not know realized duration. Mixture PMF/CDF, probabilities, and quantiles are evaluated directly rather than replacing the mixture with a single moment-matched distribution. The shared gate does not make the two athlete count distributions a joint outcome model.
+Winner V2 extends the preserved 46-feature baseline to 99 contrasts. It adds lagged grappling/control, dated rank evidence with missingness, retrospectively observed bios, and prior-result recency/opposition strength. Mirrored fitting and symmetrized zero-intercept temperature calibration preserve complementary swapped probabilities. A separately frozen auxiliary context uses exact canonical pair IDs; no current full ranking observation is backfilled into that history.
 
-Promotion requires at least 0.005 lower development NLL, no more than 1% higher MAE, and lower confirmation NLL with the same MAE tolerance. The saved report and compressed row-level predictions are exposed at `/api/v1/research` and `/api/v1/research/predictions.csv.gz`. Historical NLL improvement is evidence about distribution quality, not established MAE improvement or future performance. Event-bootstrap intervals condition on the fitted models and omit training/selection uncertainty.
+The independent duration model uses symmetric athlete summaries and 20 half-round interior/boundary categories. Legal time categories are masked by scheduled rounds. Exact boundary atoms survive the over/under/push calculation, including the full-time atom. Interior probability is uniform over integer seconds; approximate means use bin midpoints. The API checks finite partitions, chronological threshold order, nonincreasing survival, compatible completion mass, and bounded mean before SQL persistence.
 
-## Forward evidence and failure behavior
+`DivisionHistory` supplies one dated policy context to model adapters and HTTP guards. Latest same-day conflicts remain unknown; an older known class is not silently substituted. Live hypothetical scenarios require the same or adjacent covered classes within the same competition category. These limits are class ceilings, not athlete body weights or official matchmaking approval.
 
-A retrospective prediction can be regenerated after observing an outcome. A forward entry must instead be recorded before its verified scheduled event and freeze the model, inputs, line kind/source, and creation time. An idempotency key supports safe retry; a result is attached later without rewriting the forecast. Empty forward results are a truthful state. Fixture uncertainty and clock validation belong in the backend, not just in a browser date picker.
+## Selection, calibration, and artifact reuse
 
-Migration `0003` stores this lifecycle in `forecast_batches` and `forecast_entries`. Migration `0004` backfills registered model identity onto each entry and scopes fixture/athlete uniqueness by model version. This permits prospective comparisons while preserving every earlier prediction and recording time. Downgrade refuses to discard distinct versions that would collide. Full CSV and structured JSON exports preserve feature/prediction payloads and lineage. A source-hash guard returns 503 when ingestion changes the snapshot underneath a loaded service; restarting prepares matching state. Inference requires its history cutoff to be later than the latest loaded completed-bout date, preventing use of a partial same-day dataset as if it were complete pre-event history.
+Winner V2 and duration studies select fixed candidates using 2021–2023 only. Annual folds train before the preceding July 1, calibrate on July–December, and score the next year. Winner V2 promotion uses development log loss, Brier nonregression, ECE tolerance, annual consistency, and paired event-bootstrap uncertainty. The stored report records every gate. 2024 was already inspected in other project studies; it remains a retrospective comparison and never selects/promotes Winner V2.
 
-New payloads retain serialized distribution parameters, enabling exact NLL on later outcomes beyond the rendered PMF. Legacy entries with missing parameters remain unscored for NLL. Per-model metrics, explicit scored-subset counts, and separately flagged infinite losses avoid pooling incompatible evidence or dropping hard outcomes.
+The strike V3 study similarly freezes selection before its 2024 comparison and has explicit development NLL/MAE gates. Its probability-quality improvement does not establish improved mean-count MAE. Already-seen 2025–2026 diagnostics never decide promotion. Bootstrap intervals condition on fitted models and omit fitting/selection uncertainty. Prospective performance remains pending for every objective.
 
-The original 118 issued V2 forecasts remain immutable. A V3 issuance is a separate versioned batch, not an update to those forecasts. Before regenerating the upcoming projection report, preserve its exact prior bytes in a gzip archive under `reports/upcoming_archive/`. This preserves the distinction between a replaceable display report and the append-only issuance ledger.
+Deployed winner and duration artifacts train before July 1, 2026 and calibrate on July 1–October 17. Metadata freezes implementation fingerprints, dependency versions, source/label/context hashes, feature schemas, and cutoffs. Load only trusted joblib artifacts.
 
-The UI shows loading, unavailable-report, empty-ledger, sparse-history, stale-data, and invalid-request states. It never substitutes a plausible chart for missing data. User-supplied JSON is parsed locally before submission, then independently validated by the API. Matchup history and sensitivity are fetched separately from the forecast endpoint; sensitivity remains labeled noncausal inside its disclosure.
+`train-winner` and `train-rounds` reuse existing artifacts after engine verification. `train-winner-v2` also verifies the source/protocol/dependency fingerprint before reuse. Reuse is not a new refit, and reproducibility does not mean arbitrary joblib refits have identical bytes. For independent fitting, select fresh `CAGEMETRICS_ARTIFACT_DIR` and report directories, populate the winner baseline prerequisite, and retain the resulting new artifacts separately.
 
-The fighter catalog uses the same frozen SQL-loaded snapshot. Directory requests paginate stable name/ID ordering and filter by the most recently covered division. Individual profiles reuse the observed matchup-stat aggregation, with strict date cutoffs and ratio-of-sums rates. No full MMA record or unverified physical attributes are inferred. `/fighters/{id}` deep links serve the application shell; the profile API returns 404 for unknown canonical IDs. A bounded file-version cache exposes compact sourced portrait metadata without returning the duplicate raw search manifest to the browser. Network portrait refresh is an explicit script, never a serving or startup operation.
+Strike channel selection is `CAGEMETRICS_MODEL_CHANNEL=auto|v1|v2|v3`; auto prefers an available V3 artifact. Winner selection is independently `CAGEMETRICS_WINNER_CHANNEL=auto|v1|v2`; auto uses verified V2 only after its stored gates pass. The rounds artifact is independent. Restart after channel, data, or artifact changes. The checked-in Compose service also uses `auto`, matching the native default.
 
-## Reproducibility and performance evidence
+## Grounded AI and immutable analyses
 
-The constrained dependency file, deterministic seeds, source revision/hashes, model metadata, immutable model IDs, SQL feature snapshots, and saved reports make the result inspectable. Joblib artifacts are trusted local inputs; this is not an arbitrary uploaded-model execution service.
+`POST /api/v1/matchup-analysis` accepts saved forecast IDs, never client facts or supplied probabilities. Forecast family, athlete orientation, scheduled rounds, feature cutoff, scenario date, data cutoff, and SQL feature-snapshot lineage must agree. The winner baseline's source must match the loaded model. These checks happen before building facts or invoking an LLM.
 
-Measure both serial and concurrent workloads and retain every relevant report. The benchmark includes HTTP, SQL state lookup, feature assembly, inference, distribution generation, and persisted audit history. Loopback measurements exclude external networking and service startup; per-request timing excludes the client semaphore wait. Report throughput and error rate alongside p50/p95, database engine, workload, and hardware. A fast serial request is not a capacity claim.
+Evidence derives from saved ML outputs, strictly prior observations, frozen outcome history, and clearly dated display rankings. All server facts are retained and hashed; a deterministic bounded subset is sent to the local narrator, with `evidence_used_ids` recording that selection. Eligible ranking facts additionally freeze structured `ranking_snapshot` metadata: primary source SHA, cache reference, observation time, and published-board-date status. Provider/model identity and prompt version participate in the cache key. The prompt version hashes the entire analysis implementation as well as prompt/schema/policy, invalidating cached selection behavior after implementation changes. Ollama's reported model digest identifies the local narrator. Identical requests reuse the saved analysis; a bounded single-flight/capacity mechanism limits duplicate or competing local generation.
 
-The [CI workflow](../.github/workflows/ci.yml) runs unit and API tests with PostgreSQL, then builds the Docker image and verifies model readiness in a separate job. Docker Compose provides persistent PostgreSQL and application volumes. The Render manifest supplies an alternative hosting configuration.
+The LLM selects sourced advantages and an exact comparison plus a route from a server-authored, evidence-linked tactical catalogue. Route eligibility requires relevant positive observations: zero takedowns never establish takedown defense, and missing support enables explicit abstention. Rationale and the bounded probability proposal remain LLM outputs. There is no fabricated narrative fallback on generation failure. Validation checks schema, exact athlete identities, original fact references/numbers, supported advantage statements, and exact eligible route selection. It rejects unsupported guarantees and invented injury claims. This is partial semantic validation, not proof that every interpretation is correct. Provider errors and timeouts yield 503; invalid grounded output yields 502. There is no fabricated narrative fallback.
+
+The requested AI influence is an **experimental overlay**: a cited proposal of zero to five percentage points toward either athlete, clipped to [0, 1] and complemented for the opponent. The original ML forecast is immutable. The ±5-point bound is policy, not a fitted ensemble weight; no validation metric is assigned to the overlay. ML accuracy figures describe ML alone.
+
+Alembic `0005` adds `matchup_analyses`. Each immutable record retains original forecast IDs, source snapshot, evidence, provider/model and prompt metadata, generated claims, experimental guidance, and creation time. Update guards reject mutation. A saved analysis remains retrievable without regenerating it. API tests use fake providers and verify no writes on invalid output; the 10.7-second basic JSON check is distinct from the complete local checks in both fighter orientations, which passed in 37.5 and 56.6 seconds under the catalogue workflow. Both proposed zero adjustment and provide workflow evidence only, not AI accuracy or universal semantic guarantees.
+
+Provider configuration is server-only. Ollama defaults to loopback `OLLAMA_URL` and `qwen3:4b`; local cloud access is disabled in the prepared runtime. Optional OpenAI uses the official HTTPS Responses API and requires explicit `OPENAI_MODEL` and `OPENAI_API_KEY`. Keys never belong in browser code or Git. A Docker container's loopback is not the host Ollama server; the default local setup assumes the Python service and Ollama share the host.
+
+## Observations, media, and interface
+
+The current official ranking snapshot preserves exact HTML bytes, SHA, source URL, observed UTC, and unique exact identity mappings. Because the page publishes no explicit weekly board date, that field stays null. It is display evidence, distinct from stale-masked historical ranking inputs. Absence is not proof of being unranked.
+
+The directory covers all 2,074 canonical athletes. Observed profiles and comparison windows report covered bouts/minutes, ratio-of-sums rates, and unavailable metrics for zero denominators. Last-five/all-covered windows refer to retained UFC history since 2013, not full MMA careers.
+
+2,036 verified portraits reference original ESPN/UFC media URLs; 38 unavailable/ambiguous cases use initials. UFC pages can contain opponent headshots, so a qualifying profile heading alone is insufficient: decoded asset filenames must bind to verified names. The full asset audit removed 96 unverified/opponent/placeholder URLs, preserved prior index bytes, and retained replacements/quarantines. Refresh merges broad verified coverage rather than overwriting it with upcoming-card photos. Compact public metadata avoids exposing duplicate raw manifests. Images are neither generated nor rehosted.
+
+The interface emphasizes forecast outputs, useful observed comparisons, and explicit unavailable states. Research reports and the forward tracker remain separate navigation views. Technical API schemas remain accessible directly at `/docs`.
+
+## Prospective ledger
+
+Migrations `0003` and `0004` implement versioned `forecast_batches`/`forecast_entries`. Issuance requires real verified future fixtures, server-clock validation, exact athlete IDs, model/source registration, and atomic all-or-nothing commit. Idempotency supports retries. Outcomes attach later by exact bout ID or exact athlete pair/event date; unresolved records remain pending rather than fabricated.
+
+Original V2 forecasts remain intact; V3 issuance creates a distinct versioned batch. CSV/JSON exports retain full feature/prediction payloads and lineage. Serialized count-distribution parameters support later exact NLL beyond rendered PMF limits; legacy entries without parameters remain explicitly unscored for that metric. Scored-subset counts and per-model metrics avoid silently pooling incompatible evidence.
+
+Upcoming projection reports are replaceable display artifacts, archived byte-for-byte before regeneration. The append-only ledger is the prospective evidence. Preserved issued forecasts currently have no settled outcomes; an empty new local ledger is valid. See [the workflow guide](FORWARD_GUIDE.md).
+
+## Verification and performance
+
+Tests exercise ingestion conflicts, source identity, same-day isolation, training/serving parity, count mixtures, time atoms, complementary outcomes, model channels, migrations, immutable SQL, source guards, mocked providers, and PostgreSQL integration. The [CI workflow](../.github/workflows/ci.yml) also builds and checks the container. Optional PostgreSQL tests require a dedicated `CAGEMETRICS_TEST_DATABASE_URL`.
+
+Current controlled latency reports measure the strike endpoint with persisted audit writes, one Uvicorn worker, 100 warmup requests, 50 scenarios, and Apple M4 hardware. All services were ready and no LLM generation ran during measurement. They exclude startup/external network latency and do not measure LLM calls. Preserve serial and concurrent results with error rates and version identities; do not treat a fast single request as a capacity claim. Regenerate benchmarks after changing a channel, database, or environment.

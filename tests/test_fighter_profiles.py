@@ -153,6 +153,8 @@ def test_photo_public_manifest_is_trimmed_sourced_and_invalidates_on_file_change
                 "credit": "Source",
                 "observed_at": "2026-10-22T00:00:00Z",
                 "espn_id": "123",
+                "provider": "ESPN",
+                "alternate_photo_urls": ["https://example.com/alternate.png"],
                 "sha256": "private-large-source-metadata",
             }
         },
@@ -161,6 +163,9 @@ def test_photo_public_manifest_is_trimmed_sourced_and_invalidates_on_file_change
     public = public_photos(settings)
     assert set(public) == {"observed_at", "source", "fighters"}
     assert "sha256" not in public["fighters"]["a"]
+    assert public["fighters"]["a"]["fighter_id"] == "a"
+    assert public["fighters"]["a"]["provider"] == "ESPN"
+    assert public["fighters"]["a"]["alternate_photo_urls"] == ["https://example.com/alternate.png"]
     profile = FighterCatalog(bundle, "source").profile("a", "2020-02-01", public)
     assert profile["fighter"]["photo_url"] == "https://example.com/a.png"
     assert profile["profile_sources"]["photo"]["observed_at"] == "2026-10-22T00:00:00Z"

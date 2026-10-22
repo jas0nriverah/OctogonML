@@ -1,0 +1,192 @@
+{
+  "model_version": "rounds-8f9fc4ebaff2963e",
+  "artifact_sha256": "6a267aa79cde914b4f37b84caeaad61e3d256b3e2d0587951db692e9361eb669",
+  "duration_labels_sha256": "70b5f2081b2e0770ac11085655ff09f6dd7edff6baacea77b66c983fd296222d",
+  "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+  "data_through": "2026-10-17",
+  "training_cutoff_exclusive": "2026-07-01",
+  "calibration_cutoff_exclusive": "2026-10-18",
+  "selected_candidate": "hgb",
+  "feature_names": [
+    "scheduled_rounds",
+    "mean_prior_bouts",
+    "mean_career_mean_strikes",
+    "mean_last5_mean_strikes",
+    "mean_career_landed_per_min",
+    "mean_last5_landed_per_min",
+    "mean_career_absorbed_per_min",
+    "mean_last5_absorbed_per_min",
+    "mean_career_attempted_per_min",
+    "mean_last5_attempted_per_min",
+    "mean_career_accuracy",
+    "mean_last5_accuracy",
+    "mean_career_mean_duration",
+    "mean_last5_mean_duration",
+    "mean_career_finish_rate",
+    "mean_last5_finish_rate",
+    "mean_layoff_days",
+    "gap_prior_bouts",
+    "gap_career_mean_strikes",
+    "gap_last5_mean_strikes",
+    "gap_career_landed_per_min",
+    "gap_last5_landed_per_min",
+    "gap_career_absorbed_per_min",
+    "gap_last5_absorbed_per_min",
+    "gap_career_attempted_per_min",
+    "gap_last5_attempted_per_min",
+    "gap_career_accuracy",
+    "gap_last5_accuracy",
+    "gap_career_mean_duration",
+    "gap_last5_mean_duration",
+    "gap_career_finish_rate",
+    "gap_last5_finish_rate",
+    "gap_layoff_days"
+  ],
+  "fingerprint_input": {
+    "protocol": {
+      "candidates": [
+        "scheduled_empirical",
+        "hgb"
+      ],
+      "seed": 42,
+      "categories": "20: half-round interior followed by its exact 150-second boundary atom",
+      "interior_assumption": "Uniform probability over the 149 integer seconds inside each half-round",
+      "hgb": {
+        "max_iter": 60,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 60,
+        "l2_regularization": 10.0,
+        "learning_rate": 0.05,
+        "early_stopping": false
+      },
+      "smoothing": "Jeffreys 0.5 per legal category; HGB mixed with 0.005 training empirical probability",
+      "calibration": "One positive temperature on reserved category log probabilities; legal masking before normalization",
+      "selection": "Lowest pooled 2021\u20132023 categorical log loss; annual train before prior July 1, calibrate until January 1",
+      "report": "2024 retrospective temporal evaluation; this period was already inspected in other project studies",
+      "deployment_train_before": "2026-07-01",
+      "deployment_calibration_before": "2026-10-18"
+    },
+    "feature_names": [
+      "scheduled_rounds",
+      "mean_prior_bouts",
+      "mean_career_mean_strikes",
+      "mean_last5_mean_strikes",
+      "mean_career_landed_per_min",
+      "mean_last5_landed_per_min",
+      "mean_career_absorbed_per_min",
+      "mean_last5_absorbed_per_min",
+      "mean_career_attempted_per_min",
+      "mean_last5_attempted_per_min",
+      "mean_career_accuracy",
+      "mean_last5_accuracy",
+      "mean_career_mean_duration",
+      "mean_last5_mean_duration",
+      "mean_career_finish_rate",
+      "mean_last5_finish_rate",
+      "mean_layoff_days",
+      "gap_prior_bouts",
+      "gap_career_mean_strikes",
+      "gap_last5_mean_strikes",
+      "gap_career_landed_per_min",
+      "gap_last5_landed_per_min",
+      "gap_career_absorbed_per_min",
+      "gap_last5_absorbed_per_min",
+      "gap_career_attempted_per_min",
+      "gap_last5_attempted_per_min",
+      "gap_career_accuracy",
+      "gap_last5_accuracy",
+      "gap_career_mean_duration",
+      "gap_last5_mean_duration",
+      "gap_career_finish_rate",
+      "gap_last5_finish_rate",
+      "gap_layoff_days"
+    ],
+    "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+    "implementations": {
+      "rounds": "9c6f061a8b59a8ed0a532d16ba36dfbfc1a26c24aa4b58135462e10ad4b5844f",
+      "features": "ec7d2c312600035a34778f00e014a93b68fb24da5088d41175786e79d4dcdbef",
+      "experiments": "e47c681feb2ec7bb3d7ec971ee6b3d6de614bfd9dc03d2a01a85ce9e84ac53c5"
+    },
+    "duration_labels_sha256": "70b5f2081b2e0770ac11085655ff09f6dd7edff6baacea77b66c983fd296222d",
+    "dependencies": {
+      "python": "3.12.14",
+      "numpy": "2.5.4",
+      "sklearn": "1.9.1",
+      "scipy": "1.18.1"
+    }
+  },
+  "trained_at": "2026-10-22T20:16:28.833390+00:00",
+  "evaluation": {
+    "n_bouts": 507,
+    "category_log_loss": 1.5348269770505811,
+    "integer_second_log_loss": 3.7555132074997495,
+    "multiclass_brier": 0.6560434261688193,
+    "survival_brier": 0.1804958734540501,
+    "completion_brier": 0.2381921068783363,
+    "mae_rounds": 0.971926399050253,
+    "interval_coverage": 0.9368836291913215,
+    "interval_level": 0.8,
+    "calibration": [
+      {
+        "predicted": 0.1630867196037325,
+        "observed": 0.0,
+        "n": 6
+      },
+      {
+        "predicted": 0.267998380968199,
+        "observed": 0.43333333333333335,
+        "n": 30
+      },
+      {
+        "predicted": 0.35978417448201555,
+        "observed": 0.3855421686746988,
+        "n": 83
+      },
+      {
+        "predicted": 0.4546776380308707,
+        "observed": 0.5386904761904762,
+        "n": 336
+      },
+      {
+        "predicted": 0.5538713607949661,
+        "observed": 0.6217303822937625,
+        "n": 497
+      },
+      {
+        "predicted": 0.6511192822298129,
+        "observed": 0.7115716753022453,
+        "n": 579
+      },
+      {
+        "predicted": 0.7477815552365914,
+        "observed": 0.7996389891696751,
+        "n": 554
+      },
+      {
+        "predicted": 0.8500826757748666,
+        "observed": 0.8805309734513275,
+        "n": 452
+      },
+      {
+        "predicted": 0.9231323548680351,
+        "observed": 0.9724770642201835,
+        "n": 218
+      }
+    ],
+    "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit",
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "2024 retrospective temporal evaluation; this period was already inspected in other project studies"
+  },
+  "warnings": [
+    "Elapsed time is modeled separately from strikes and winner probability.",
+    "Completes scheduled time means elapsed seconds equal the scheduled limit, including a stoppage recorded at the final bell; it does not establish a decision.",
+    "Interior half-round probabilities assume uniform integer seconds; exact half-round boundary atoms are modeled separately.",
+    "2024 results are retrospective; future calibration requires prospective evaluation.",
+    "Only covered UFC history is available; sparse and missing earlier histories limit reliability."
+  ],
+  "train_rows": 6450,
+  "calibration_rows": 189
+}

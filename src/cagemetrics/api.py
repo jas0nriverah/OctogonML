@@ -7,6 +7,8 @@ import json
 import gzip
 import logging
 import math
+import os
+import hashlib
 from pathlib import Path
 import time
 from typing import Literal
@@ -26,9 +28,14 @@ from . import forward as forward_ledger
 from .serving import LiveForecaster
 from collections import Counter, deque
 from uuid import uuid4
+from threading import BoundedSemaphore
 import numpy as np
 
 LOGGER = logging.getLogger("cagemetrics.api")
+RESEARCH_NOTICE = (
+    "Research only, not betting advice. Model estimates can be wrong; "
+    "do not use them to place bets or risk money. You are responsible for how you use these estimates."
+)
 
 
 class PredictionRequest(BaseModel):
@@ -87,6 +94,95 @@ class ForwardBatchRequest(BaseModel):
     fixtures: list[dict] = Field(min_length=1, max_length=100)
 
 
+class WinnerPredictionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    fighter_a_id: str = Field(min_length=1, max_length=64)
+    fighter_b_id: str = Field(min_length=1, max_length=64)
+    scheduled_rounds: Literal[3, 5] = 3
+    as_of: str | None = Field(default=None, min_length=10, max_length=10)
+    forecast_date: str | None = Field(default=None, min_length=10, max_length=10)
+
+    @model_validator(mode="after")
+    def distinct_fighters(self):
+        if self.fighter_a_id == self.fighter_b_id:
+            raise ValueError("Choose two different fighters")
+        return self
+
+
+class WinnerPredictionResponse(BaseModel):
+    prediction_id: str
+    fighter: FighterLabel
+    opponent: FighterLabel
+    scheduled_rounds: Literal[3, 5]
+    p_fighter_win: float = Field(ge=0, le=1, allow_inf_nan=False)
+    p_opponent_win: float = Field(ge=0, le=1, allow_inf_nan=False)
+    scope: Literal["conditional on a decisive outcome"]
+    model_version: str
+    artifact_sha256: str
+    source_snapshot_sha256: str
+    outcome_labels_sha256: str
+    feature_cutoff: str
+    data_cutoff: str
+    forecast_date: str
+    history: dict
+    weight_context: dict
+    fighter_context: dict | None = None
+    evaluation: dict
+    warnings: list[str]
+
+    @model_validator(mode="after")
+    def complementary_probabilities(self):
+        if not math.isclose(self.p_fighter_win + self.p_opponent_win, 1.0, abs_tol=1e-12):
+            raise ValueError("Decisive-outcome probabilities must sum to one")
+        return self
+
+
+class RoundsPredictionRequest(WinnerPredictionRequest):
+    line: Literal[0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0] = 1.5
+
+    @model_validator(mode="after")
+    def supported_line(self):
+        if self.line > self.scheduled_rounds:
+            raise ValueError("Elapsed-round threshold cannot exceed scheduled rounds")
+        return self
+
+
+class RoundsPredictionResponse(BaseModel):
+    prediction_id: str
+    fighter: FighterLabel
+    opponent: FighterLabel
+    scheduled_rounds: Literal[3, 5]
+    line: float
+    p_over: float = Field(ge=0, le=1, allow_inf_nan=False)
+    p_under: float = Field(ge=0, le=1, allow_inf_nan=False)
+    p_push: float = Field(ge=0, le=1, allow_inf_nan=False)
+    p_complete_scheduled_time: float = Field(ge=0, le=1, allow_inf_nan=False)
+    p_finish_early: float = Field(ge=0, le=1, allow_inf_nan=False)
+    expected_duration_minutes: float = Field(gt=0, allow_inf_nan=False)
+    mean_approximation: str
+    round_thresholds: list[dict]
+    round_reach: list[dict]
+    model_version: str
+    artifact_sha256: str
+    source_snapshot_sha256: str
+    duration_labels_sha256: str
+    feature_cutoff: str
+    data_cutoff: str
+    forecast_date: str
+    history: dict
+    weight_context: dict
+    evaluation: dict
+    warnings: list[str]
+
+
+class MatchupAnalysisRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    winner_prediction_id: str = Field(min_length=1, max_length=36)
+    rounds_prediction_id: str | None = Field(default=None, min_length=1, max_length=36)
+    fighter_prediction_id: str | None = Field(default=None, min_length=1, max_length=36)
+    opponent_prediction_id: str | None = Field(default=None, min_length=1, max_length=36)
+
+
 def _read_json(path: Path, default=None):
     return json.loads(path.read_text()) if path.exists() else default
 
@@ -106,6 +202,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.thread_limiter = threadpool_limits(limits=1)
         app.state.repository = Repository(settings.database_url)
         app.state.forecaster = None
+        app.state.winner = None
+        app.state.winner_startup_error = "Run cagemetrics train-winner to install the outcome model"
+        app.state.rounds = None
+        app.state.rounds_startup_error = "Run cagemetrics train-rounds to install the duration model"
         app.state.startup_error = None
         app.state.started_at = datetime.now(ZoneInfo("UTC")).isoformat()
         try:
@@ -125,6 +225,45 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except (FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
             app.state.startup_error = str(exc)
             LOGGER.warning("Model unavailable: %s", exc)
+        if app.state.forecaster is not None and app.state.startup_error is None:
+            try:
+                channel = os.getenv("CAGEMETRICS_WINNER_CHANNEL", "auto")
+                if channel not in {"auto", "v1", "v2"}:
+                    raise ValueError("Winner channel must be auto, v1, or v2")
+                challenger_path = settings.artifact_dir / "winner_v2"
+                challenger = _read_json(challenger_path / "metadata.json", {})
+                if channel == "v2" or (channel == "auto" and challenger.get("promotion_passed")):
+                    from .winner_v2 import WinnerV2Engine
+
+                    winner = WinnerV2Engine(challenger_path)
+                else:
+                    from .winner import WinnerEngine
+
+                    winner = WinnerEngine(settings.artifact_dir / "winner")
+                if winner.metadata["source_snapshot_sha256"] != app.state.forecaster.snapshot_id:
+                    raise ValueError("Winner model and SQL history use different source snapshots")
+                if len(warm_ids) == 2:
+                    winner.predict_matchup(app.state.forecaster.bundle, *warm_ids, 3, as_of)
+                app.state.repository.register_model(winner.metadata, winner.sha256)
+                app.state.winner = winner
+                app.state.winner_startup_error = None
+            except (ImportError, FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
+                app.state.winner_startup_error = str(exc)
+                LOGGER.warning("Winner model unavailable: %s", exc)
+            try:
+                from .rounds import RoundsEngine
+
+                rounds = RoundsEngine(settings.artifact_dir / "rounds")
+                if rounds.metadata["source_snapshot_sha256"] != app.state.forecaster.snapshot_id:
+                    raise ValueError("Duration model and SQL history use different source snapshots")
+                if len(warm_ids) == 2:
+                    rounds.predict_matchup(app.state.forecaster.bundle, *warm_ids, 3, as_of)
+                app.state.repository.register_model(rounds.metadata, rounds.sha256)
+                app.state.rounds = rounds
+                app.state.rounds_startup_error = None
+            except (ImportError, FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
+                app.state.rounds_startup_error = str(exc)
+                LOGGER.warning("Duration model unavailable: %s", exc)
         yield
         app.state.repository.engine.dispose()
         app.state.thread_limiter.restore_original_limits()
@@ -133,12 +272,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="OctogonML",
         version=__version__,
         lifespan=lifespan,
-        description="UFC significant-strike forecasts with SQL provenance and chronological evaluation.",
+        description="UFC strike, win-probability, and elapsed-duration forecasts with SQL provenance.",
     )
     app.state.settings = settings
     app.state.request_latencies = deque(maxlen=2000)
     app.state.request_statuses = Counter()
     app.state.process_started = time.perf_counter()
+    app.state.analysis_capacity = BoundedSemaphore(1)
 
     @app.middleware("http")
     async def request_timing(request: Request, call_next):
@@ -180,6 +320,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "status": "ready",
             "model_version": model.metadata.get("model_version"),
             "database": app.state.repository.engine.dialect.name,
+            "winner_model_version": (
+                app.state.winner.metadata["model_version"] if app.state.winner else None
+            ),
+            "rounds_model_version": (
+                app.state.rounds.metadata["model_version"] if app.state.rounds else None
+            ),
         }
 
     @app.get("/api/v1/fighters")
@@ -252,11 +398,56 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "recent_metrics": recent.get("metrics", {}) if isinstance(recent, dict) else {},
         }
 
+    def eligibility(fighter_id, opponent_id, *, enforce=False):
+        _, model = ready()
+        if fighter_id not in app.state.fighters or opponent_id not in app.state.fighters:
+            raise HTTPException(404, "Unknown fighter ID; use /api/v1/fighters")
+        from .divisions import DivisionHistory
+
+        history = getattr(app.state, "division_history", None)
+        if history is None:
+            history = DivisionHistory(model.bundle)
+            app.state.division_history = history
+        today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+        context = history.matchup(fighter_id, opponent_id, today)
+        if enforce and context["status"] != "compatible":
+            raise HTTPException(
+                422,
+                detail={
+                    "message": "Unrealistic matchup" if context["status"] == "unrealistic"
+                    else "Weight class unavailable",
+                    "reason": context["reason"],
+                    "weight_context": context,
+                },
+            )
+        return context
+
+    @app.get("/api/v1/matchup-eligibility")
+    def matchup_eligibility(fighter_id: str, opponent_id: str):
+        return eligibility(fighter_id, opponent_id)
+
+    def scenario_dates(body):
+        today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+        if body.as_of is not None and body.as_of != today:
+            raise HTTPException(422, "as_of must be today; historical evaluation uses frozen research folds")
+        forecast_date = body.forecast_date or today
+        try:
+            parsed = datetime.fromisoformat(forecast_date).date().isoformat()
+            if parsed != forecast_date or forecast_date < today:
+                raise ValueError("Invalid forecast date")
+        except ValueError as exc:
+            raise HTTPException(422, "forecast_date must be an ISO date no earlier than today") from exc
+        latest_date = str(app.state.counts["date_end"])
+        if latest_date >= today:
+            raise HTTPException(503, "Loaded observations must precede the forecast history cutoff")
+        return today, forecast_date, latest_date
+
     def compute_prediction(body: PredictionRequest, forecast_date=None, persist=True, history_cutoff=None):
         repository, model = ready()
         labels = app.state.fighters
         if body.fighter_id not in labels or body.opponent_id not in labels:
             raise HTTPException(404, "Unknown fighter ID; use /api/v1/fighters")
+        weight_context = eligibility(body.fighter_id, body.opponent_id, enforce=True)
         latest_date = str(app.state.counts["date_end"])
         as_of = history_cutoff or datetime.now(ZoneInfo("America/New_York")).date().isoformat()
         if latest_date >= as_of:
@@ -264,7 +455,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         forecast_date = forecast_date or as_of
         if forecast_date < as_of:
             raise ValueError("Current deployment cannot reconstruct past forecasts; use the replay view")
-        states = repository.feature_states([body.fighter_id, body.opponent_id], as_of, model.snapshot_id)
+        repository.feature_states([body.fighter_id, body.opponent_id], as_of, model.snapshot_id)
         feature_frame = model.feature_frame(
             body.fighter_id, body.opponent_id, body.scheduled_rounds, forecast_date, as_of
         )
@@ -276,7 +467,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ]
         own_count = int(feature_frame.iloc[0].get("own_prior_bouts", 0))
         opponent_count = int(feature_frame.iloc[0].get("opponent_prior_bouts", 0))
-        warnings = ["The supplied strike line is not a live market feed."]
+        warnings = [RESEARCH_NOTICE, "The supplied strike line is not a live market feed."]
         if persist:
             warnings.insert(0, "Hypothetical matchup scenario; no confirmed booking is implied.")
         warnings.extend(result.get("warnings", []))
@@ -284,8 +475,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             warnings.append(
                 "One or both fighters have fewer than three prior UFC bouts; uncertainty is higher."
             )
-        if len({s.get("division", "Unknown") for s in states.values()}) > 1:
-            warnings.append("The fighters most recently competed in different divisions.")
+        if not weight_context["same_division"]:
+            warnings.append(weight_context["reason"] + " " + weight_context["note"])
         if (datetime.fromisoformat(as_of) - datetime.fromisoformat(latest_date)).days > 14:
             warnings.append(
                 f"The pinned data ends on {latest_date}; refresh sources before current-card use."
@@ -335,11 +526,319 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def predict(body: PredictionRequest):
         return compute_prediction(body)
 
+    def winner_ready():
+        repository, forecaster = ready()
+        if app.state.winner is None:
+            raise HTTPException(
+                503,
+                detail={
+                    "message": "The winner model is unavailable; strike forecasts remain available",
+                    "reason": app.state.winner_startup_error,
+                },
+            )
+        return repository, forecaster, app.state.winner
+
+    @app.get("/api/v1/winner-model")
+    def winner_model():
+        _, _, model = winner_ready()
+        return model.metadata
+
+    @app.get("/api/v1/winner-evaluation")
+    def winner_evaluation():
+        _, _, model = winner_ready()
+        name = "winner_v2_evaluation.json" if model.metadata.get("promotion_passed") else "winner_evaluation.json"
+        report = _read_json(settings.report_dir / name)
+        if report is None:
+            raise HTTPException(404, "Run cagemetrics train-winner to generate the evaluation")
+        if report.get("model_version") != model.metadata["model_version"]:
+            raise HTTPException(409, "Winner evaluation changed; restart the service to load its model")
+        return report
+
+    @app.post("/api/v1/predict-winner", response_model=WinnerPredictionResponse, status_code=201)
+    def predict_winner(body: WinnerPredictionRequest):
+        repository, forecaster, model = winner_ready()
+        labels = app.state.fighters
+        fighter_id, opponent_id = body.fighter_a_id, body.fighter_b_id
+        if fighter_id not in labels or opponent_id not in labels:
+            raise HTTPException(404, "Unknown fighter ID; use /api/v1/fighters")
+        weight_context = eligibility(fighter_id, opponent_id, enforce=True)
+        today, forecast_date, latest_date = scenario_dates(body)
+        result = model.predict_matchup(
+            forecaster.bundle, fighter_id, opponent_id, body.scheduled_rounds, forecast_date
+        )
+        probabilities = [result["p_fighter_win"], result["p_opponent_win"]]
+        if (
+            not all(math.isfinite(p) and 0 <= p <= 1 for p in probabilities)
+            or not math.isclose(sum(probabilities), 1.0, abs_tol=1e-12)
+        ):
+            raise HTTPException(503, "Winner model returned invalid probabilities")
+        warnings = [RESEARCH_NOTICE, "Hypothetical matchup scenario; no confirmed booking is implied."]
+        warnings.extend(result.get("warnings", []))
+        if not weight_context["same_division"]:
+            warnings.append(weight_context["reason"] + " " + weight_context["note"])
+        if (datetime.fromisoformat(today) - datetime.fromisoformat(latest_date)).days > 14:
+            warnings.append(f"The pinned data ends on {latest_date}; refresh sources before current-card use.")
+        response = {
+            "fighter": {"id": fighter_id, "name": labels[fighter_id]["name"]},
+            "opponent": {"id": opponent_id, "name": labels[opponent_id]["name"]},
+            "scheduled_rounds": body.scheduled_rounds,
+            "p_fighter_win": float(probabilities[0]),
+            "p_opponent_win": float(probabilities[1]),
+            "scope": "conditional on a decisive outcome",
+            "model_version": model.metadata["model_version"],
+            "artifact_sha256": model.sha256,
+            "source_snapshot_sha256": forecaster.snapshot_id,
+            "outcome_labels_sha256": model.outcome_labels_sha256,
+            "feature_cutoff": today,
+            "data_cutoff": latest_date,
+            "forecast_date": forecast_date,
+            "history": result["history"],
+            "weight_context": weight_context,
+            "fighter_context": result.get("fighter_context"),
+            "evaluation": model.metadata.get("evaluation", {}),
+            "warnings": list(dict.fromkeys(warnings)),
+        }
+        return repository.record_prediction(
+            result["features"], response, today, forecaster.snapshot_id, kind="winner_hypothetical"
+        )
+
+    @app.get("/api/v1/winner-predictions/{prediction_id}", response_model=WinnerPredictionResponse)
+    def saved_winner_prediction(prediction_id: str):
+        repository, _ = ready()
+        result = repository.get_prediction(prediction_id, kind="winner_hypothetical")
+        if result is None:
+            raise HTTPException(404, "Winner prediction not found")
+        return result
+
+    def rounds_ready():
+        repository, forecaster = ready()
+        if app.state.rounds is None:
+            raise HTTPException(
+                503,
+                detail={
+                    "message": "The duration model is unavailable; other forecasts remain available",
+                    "reason": app.state.rounds_startup_error,
+                },
+            )
+        return repository, forecaster, app.state.rounds
+
+    @app.get("/api/v1/rounds-model")
+    def rounds_model():
+        _, _, model = rounds_ready()
+        return model.metadata
+
+    @app.get("/api/v1/rounds-evaluation")
+    def rounds_evaluation():
+        _, _, model = rounds_ready()
+        report = _read_json(settings.report_dir / "rounds_evaluation.json")
+        if report is None:
+            raise HTTPException(404, "Run cagemetrics train-rounds to generate the evaluation")
+        if report.get("model_version") != model.metadata["model_version"]:
+            raise HTTPException(409, "Duration evaluation changed; restart the service to load its model")
+        return report
+
+    @app.post("/api/v1/predict-rounds", response_model=RoundsPredictionResponse, status_code=201)
+    def predict_rounds(body: RoundsPredictionRequest):
+        repository, forecaster, model = rounds_ready()
+        labels = app.state.fighters
+        a, b = body.fighter_a_id, body.fighter_b_id
+        if a not in labels or b not in labels:
+            raise HTTPException(404, "Unknown fighter ID; use /api/v1/fighters")
+        weight_context = eligibility(a, b, enforce=True)
+        today, forecast_date, latest_date = scenario_dates(body)
+        result = model.predict_matchup(
+            forecaster.bundle, a, b, body.scheduled_rounds, forecast_date, line=body.line
+        )
+        thresholds = []
+        expected_lines = [index / 2 for index in range(1, body.scheduled_rounds * 2 + 1)]
+        survival = result["survival"]
+        if [point["rounds"] for point in survival] != expected_lines:
+            raise HTTPException(503, "Duration model returned invalid time thresholds")
+        previous_over, previous_under = 1.0, 0.0
+        for point in survival:
+            over, under, push = [point[key] for key in ("p_over", "p_under", "p_push")]
+            if (
+                not all(math.isfinite(p) and 0 <= p <= 1 for p in (over, under, push))
+                or not math.isclose(over + under + push, 1.0, abs_tol=1e-12)
+                or over > previous_over + 1e-12 or under < previous_under - 1e-12
+            ):
+                raise HTTPException(503, "Duration model returned invalid survival probabilities")
+            thresholds.append({"line": point["rounds"], "minutes": point["rounds"] * 5,
+                               "p_over": float(over), "p_under": float(under), "p_push": float(push)})
+            previous_over, previous_under = over, under
+        completion, mean_rounds = result["completion_probability"], result["mean_rounds"]
+        if (
+            not math.isfinite(completion) or not 0 <= completion <= 1
+            or not math.isclose(thresholds[-1]["p_over"], 0, abs_tol=1e-12)
+            or not math.isclose(thresholds[-1]["p_push"], completion, abs_tol=1e-12)
+            or not math.isfinite(mean_rounds) or not 0 < mean_rounds <= body.scheduled_rounds
+        ):
+            raise HTTPException(503, "Duration model returned invalid completion or mean duration")
+        selected = next(point for point in thresholds if point["line"] == body.line)
+        reaches = [{"round": 1, "probability": 1.0}] + [
+            {"round": index, "probability": next(p["p_over"] for p in thresholds if p["line"] == index - 1)}
+            for index in range(2, body.scheduled_rounds + 1)
+        ]
+        warnings = [RESEARCH_NOTICE, "Hypothetical matchup scenario; no confirmed booking is implied."]
+        warnings.extend(result.get("warnings", []))
+        if not weight_context["same_division"]:
+            warnings.append(weight_context["reason"] + " " + weight_context["note"])
+        if (datetime.fromisoformat(today) - datetime.fromisoformat(latest_date)).days > 14:
+            warnings.append(f"The pinned data ends on {latest_date}; refresh sources before current-card use.")
+        response = {
+            "fighter": {"id": a, "name": labels[a]["name"]},
+            "opponent": {"id": b, "name": labels[b]["name"]},
+            "scheduled_rounds": body.scheduled_rounds,
+            "line": body.line,
+            **{key: selected[key] for key in ("p_over", "p_under", "p_push")},
+            "p_complete_scheduled_time": float(completion),
+            "p_finish_early": float(1 - completion),
+            "expected_duration_minutes": float(mean_rounds * 5),
+            "mean_approximation": result.get(
+                "mean_approximation_note", "Interior time bins use midpoint estimates; boundary atoms are exact."
+            ),
+            "round_thresholds": thresholds,
+            "round_reach": reaches,
+            "model_version": model.metadata["model_version"],
+            "artifact_sha256": model.sha256,
+            "source_snapshot_sha256": forecaster.snapshot_id,
+            "duration_labels_sha256": model.duration_labels_sha256,
+            "feature_cutoff": today,
+            "data_cutoff": latest_date,
+            "forecast_date": forecast_date,
+            "history": result["history"],
+            "weight_context": weight_context,
+            "evaluation": model.metadata.get("evaluation", {}),
+            "warnings": list(dict.fromkeys(warnings)),
+        }
+        return repository.record_prediction(
+            result["features"], response, today, forecaster.snapshot_id, kind="rounds_hypothetical"
+        )
+
+    @app.get("/api/v1/rounds-predictions/{prediction_id}", response_model=RoundsPredictionResponse)
+    def saved_rounds_prediction(prediction_id: str):
+        repository, _ = ready()
+        result = repository.get_prediction(prediction_id, kind="rounds_hypothetical")
+        if result is None:
+            raise HTTPException(404, "Duration prediction not found")
+        return result
+
+    @app.post("/api/v1/matchup-analysis", status_code=201)
+    def matchup_analysis(body: MatchupAnalysisRequest):
+        repository, forecaster, winner = winner_ready()
+        from .analysis import MatchupAnalyst, AnalysisUnavailable, AnalysisValidationError
+        from .analysis_facts import build_evidence
+
+        records = {}
+        for key, identity, kind in (
+            ("winner", body.winner_prediction_id, "winner_hypothetical"),
+            ("rounds", body.rounds_prediction_id, "rounds_hypothetical"),
+            ("fighter_strikes", body.fighter_prediction_id, "hypothetical"),
+            ("opponent_strikes", body.opponent_prediction_id, "hypothetical"),
+        ):
+            if identity is not None:
+                result = repository.get_prediction(identity, kind=kind)
+                if result is None:
+                    raise HTTPException(404, f"Saved {key} prediction not found")
+                if repository.prediction_snapshot_id(identity) != forecaster.snapshot_id:
+                    raise HTTPException(422, "Analysis inputs must use the same source snapshot")
+                records[key] = result
+        baseline = records["winner"]
+        a, b = baseline["fighter"]["id"], baseline["opponent"]["id"]
+        if baseline["source_snapshot_sha256"] != forecaster.snapshot_id:
+            raise HTTPException(409, "The saved winner forecast uses a different source snapshot")
+        for key, result in records.items():
+            expected = (b, a) if key == "opponent_strikes" else (a, b)
+            if (
+                (result["fighter"]["id"], result["opponent"]["id"]) != expected
+                or result["scheduled_rounds"] != baseline["scheduled_rounds"]
+                or result["feature_cutoff"] != baseline["feature_cutoff"]
+                or result["forecast_date"] != baseline["forecast_date"]
+                or result["data_cutoff"] != baseline["data_cutoff"]
+                or result.get("source_snapshot_sha256", forecaster.snapshot_id) != forecaster.snapshot_id
+            ):
+                raise HTTPException(422, "Analysis inputs must describe the same frozen matchup and dates")
+        try:
+            analyst = getattr(app.state, "matchup_analyst", None)
+            if analyst is None:
+                analyst = MatchupAnalyst(timeout=90)
+                app.state.matchup_analyst = analyst
+            evidence = build_evidence(forecaster.bundle, winner, records, observed_rankings())
+            if analyst.provider == "ollama":
+                import httpx
+
+                try:
+                    with httpx.Client(timeout=3, trust_env=False) as client:
+                        response = client.get(analyst.base_url + "/api/tags")
+                        response.raise_for_status()
+                        models = response.json().get("models", [])
+                    model = next(item for item in models if item.get("name") == analyst.model)
+                    evidence["model_versions"]["narrator"] = analyst.model + "@" + model["digest"]
+                except (httpx.HTTPError, ValueError, KeyError, StopIteration) as exc:
+                    raise AnalysisUnavailable("The configured local model is not available") from exc
+            key = hashlib.sha256(json.dumps(
+                {"evidence": evidence, "provider": analyst.provider, "model": analyst.model,
+                 "prompt_version": analyst.prompt_version}, sort_keys=True, allow_nan=False
+            ).encode()).hexdigest()
+            existing = repository.get_analysis(request_sha256=key)
+            if existing is not None:
+                return existing
+            if not app.state.analysis_capacity.acquire(blocking=False):
+                raise HTTPException(429, "A local matchup analysis is running; retry shortly", headers={"Retry-After": "5"})
+            try:
+                narrative = analyst.generate(evidence)
+            finally:
+                app.state.analysis_capacity.release()
+        except AnalysisUnavailable as exc:
+            raise HTTPException(503, "Matchup analysis is temporarily unavailable") from exc
+        except AnalysisValidationError as exc:
+            LOGGER.warning("Narrative grounding validation failed: %s", exc)
+            raise HTTPException(502, "The explanation did not pass evidence checks; retry analysis") from exc
+        adjustment = narrative["probability_adjustment"]
+        magnitude = float(adjustment["delta_percentage_points"])
+        if (
+            not math.isfinite(magnitude) or not 0 <= magnitude <= 5
+            or adjustment["favor_fighter_id"] not in (a, b)
+        ):
+            raise HTTPException(502, "The explanation returned invalid experimental guidance")
+        shift = magnitude / 100 * (1 if adjustment["favor_fighter_id"] == a else -1)
+        probability = min(1.0, max(0.0, baseline["p_fighter_win"] + shift))
+        payload = {
+            **narrative,
+            "status": "ready",
+            "ai_guidance": {
+                "status": "experimental", "validated": False,
+                "baseline_p_fighter_win": baseline["p_fighter_win"],
+                "baseline_p_opponent_win": baseline["p_opponent_win"],
+                "p_fighter_win": probability, "p_opponent_win": 1 - probability,
+                "applied_shift_percentage_points": (probability - baseline["p_fighter_win"]) * 100,
+                "max_shift_percentage_points": 5, "policy_version": narrative["guidance_policy"],
+                "explanation": adjustment["rationale"],
+            },
+            "evidence": evidence["facts"],
+            "prediction_ids": evidence["prediction_ids"],
+            "model_versions": evidence["model_versions"],
+            "as_of": evidence["as_of"],
+            "ranking_snapshot": evidence["ranking_snapshot"],
+            "warnings": [RESEARCH_NOTICE, "AI guidance is experimental; its backtest performance is not established."],
+        }
+        return repository.record_analysis(evidence, payload, key, forecaster.snapshot_id)
+
+    @app.get("/api/v1/matchup-analyses/{analysis_id}")
+    def saved_matchup_analysis(analysis_id: str):
+        repository, _ = ready()
+        result = repository.get_analysis(analysis_id=analysis_id)
+        if result is None:
+            raise HTTPException(404, "Matchup analysis not found")
+        return result
+
     @app.get("/api/v1/matchups")
     def matchup(fighter_id: str, opponent_id: str, scheduled_rounds: int = Query(default=3)):
         repository, model = ready()
         if scheduled_rounds not in (3, 5):
             raise HTTPException(422, "Scheduled rounds must be 3 or 5")
+        if fighter_id in app.state.fighters and opponent_id in app.state.fighters:
+            eligibility(fighter_id, opponent_id, enforce=True)
         from .matchups import matchup_context
 
         asof = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
@@ -378,6 +877,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
         return public_photos(settings)
 
+    @app.get("/api/v1/rankings")
+    def observed_rankings():
+        ready()
+        path = settings.data_dir / "rankings" / "current.json"
+        if not path.exists():
+            path = settings.project_dir / "data" / "rankings" / "current.json"
+        if not path.exists():
+            return {"entries": [], "observed_at": None, "published_board_date": None,
+                    "status": "unavailable", "policy": "No sourced ranking snapshot is installed."}
+        return _upcoming_snapshot(path, path.stat().st_mtime_ns)
     def upcoming_report():
         _, model = ready()
         path = settings.report_dir / "upcoming_predictions.json"
@@ -563,7 +1072,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/v1/predictions/{prediction_id}", response_model=PredictionResponse)
     def saved_prediction(prediction_id: str):
         repository, _ = ready()
-        result = repository.get_prediction(prediction_id)
+        result = repository.get_prediction(prediction_id, kind="hypothetical")
         if result is None:
             raise HTTPException(404, "Prediction not found")
         return result

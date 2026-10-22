@@ -1,0 +1,18 @@
+{
+  "canonical_fighters": 2074,
+  "canonical_bouts": 6639,
+  "grappling_observations": 13278,
+  "ranked_board_evidence_rows": 3791,
+  "last_retained_rank_board": "2026-10-06",
+  "missing_bio_fields": {
+    "fighter_id": 0,
+    "birth_date": 6,
+    "height_cm": 9,
+    "reach_cm": 174
+  },
+  "as_of": "2026-10-22",
+  "fighters_with_rank_evidence_within_35days": 14,
+  "ranking_warning": "These are bout-linked dated board observations, not a complete current rankings feed. A stale/absent rank is unknown, never unranked.",
+  "sources_document_sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+  "codebook_sha256": "b259c136363aa348d20aaab204bf4166344911edc9e3e5098f74d0cd8721dca3"
+}

@@ -385,7 +385,8 @@ def test_sourced_photo_map_missing_and_available(client):
     data_dir.mkdir(parents=True, exist_ok=True)
     photos = {"fighters": {"a": {"photo_url": "https://a.espncdn.com/example.png", "credit": "ESPN"}}}
     (data_dir / "fighter_photos.json").write_text(json.dumps(photos))
-    assert client.get("/api/v1/fighter-photos").json() == photos
+    expected = {"fighters": {"a": {**photos["fighters"]["a"], "fighter_id": "a"}}}
+    assert client.get("/api/v1/fighter-photos").json() == expected
 
 
 def test_unknown_materialized_fighter_raises_instead_of_recursing(repository):

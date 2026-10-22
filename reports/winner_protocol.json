@@ -1,0 +1,43 @@
+{
+  "revision": "prior-division-weight-contrasts-v2",
+  "weight_features": "Strictly earlier observed division limits from shared parse_division; signed limit difference/100, antisymmetric missingness, signed gap times symmetric mean log-experience, mean known limit/200 times last5 pace contrast; no upcoming bout division or measured-bodyweight inference.",
+  "candidates": [
+    "elo",
+    "logistic",
+    "hgb"
+  ],
+  "seed": 42,
+  "elo": {
+    "initial_rating": 1500.0,
+    "k": 32.0,
+    "scale": 400.0,
+    "draw_policy": "exclude from rating updates"
+  },
+  "logistic": {
+    "C": 0.1,
+    "fit_intercept": false,
+    "max_iter": 1000,
+    "scaler": "standard deviation only; no centering"
+  },
+  "hgb": {
+    "max_iter": 120,
+    "max_leaf_nodes": 7,
+    "min_samples_leaf": 60,
+    "l2_regularization": 10.0,
+    "learning_rate": 0.05,
+    "early_stopping": false
+  },
+  "symmetry": "Fit mirrored contrasts and labels; average p(x) with 1-p(-x); zero-intercept temperature calibration preserves complements.",
+  "calibration": "Minimize calibration log loss over log-temperature in [-1.5, 1.5]; mean models never fit calibration rows.",
+  "development_years": [
+    2021,
+    2022,
+    2023
+  ],
+  "selection": "minimum pooled development log loss",
+  "test_year": 2024,
+  "annual_split": "Train before preceding July 1; calibrate July\u2013December; evaluate next calendar year.",
+  "deployment_train_before": "2026-07-01",
+  "deployment_calibration_before": "2026-10-18",
+  "label_scope": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+}

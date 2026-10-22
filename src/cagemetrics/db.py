@@ -24,6 +24,7 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy.exc import IntegrityError
 
 
 def utc_now() -> datetime:
@@ -130,6 +131,22 @@ class Prediction(Base):
     kind: Mapped[str] = mapped_column(String(30), default="hypothetical")
     response: Mapped[dict] = mapped_column(JSON)
     __table_args__ = (UniqueConstraint("prediction_id", "model_version", name="uq_prediction_version"),)
+
+
+class MatchupAnalysis(Base):
+    __tablename__ = "matchup_analyses"
+    analysis_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    winner_prediction_id: Mapped[str] = mapped_column(ForeignKey("predictions.prediction_id"), index=True)
+    request_sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    snapshot_id: Mapped[str] = mapped_column(ForeignKey("source_snapshots.snapshot_id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    evidence: Mapped[dict] = mapped_column(JSON)
+    response: Mapped[dict] = mapped_column(JSON)
+
+
+@event.listens_for(MatchupAnalysis, "before_update")
+def immutable_matchup_analysis(_mapper, _connection, _target):
+    raise ValueError("Saved matchup analyses are immutable")
 
 
 def make_engine(database_url: str):
@@ -487,7 +504,8 @@ class Repository:
                 session.add(EvaluationRun(evaluation_id=key, report=report))
 
     def record_prediction(
-        self, features: dict, response: dict, as_of: str, snapshot_id: str | None = None
+        self, features: dict, response: dict, as_of: str, snapshot_id: str | None = None,
+        *, kind: str = "hypothetical",
     ) -> dict:
         payload = json_safe(features)
         source_id = snapshot_id or self.latest_snapshot_id()
@@ -527,15 +545,62 @@ class Repository:
                     prediction_id=prediction_id,
                     model_version=response["model_version"],
                     feature_id=feature_id,
+                    kind=kind,
                     response=json_safe(response),
                 )
             )
         return response
 
-    def get_prediction(self, prediction_id: str) -> dict | None:
+    def get_prediction(self, prediction_id: str, *, kind: str | None = None) -> dict | None:
         with self.sessions() as session:
             obj = session.get(Prediction, prediction_id)
-            return obj.response if obj else None
+            return obj.response if obj and (kind is None or obj.kind == kind) else None
+
+    def prediction_snapshot_id(self, prediction_id):
+        with self.sessions() as session:
+            return session.scalar(
+                select(FeatureSnapshot.snapshot_id)
+                .join(Prediction, Prediction.feature_id == FeatureSnapshot.feature_id)
+                .where(Prediction.prediction_id == prediction_id)
+            )
+
+    def get_analysis(self, *, analysis_id=None, request_sha256=None):
+        with self.sessions() as session:
+            if analysis_id is not None:
+                result = session.get(MatchupAnalysis, analysis_id)
+            else:
+                result = session.scalar(
+                    select(MatchupAnalysis).where(MatchupAnalysis.request_sha256 == request_sha256)
+                )
+            return result.response if result else None
+
+    def record_analysis(self, evidence, response, request_sha256, snapshot_id):
+        try:
+            with self._write_lock, self.sessions.begin() as session:
+                existing = session.scalar(
+                    select(MatchupAnalysis).where(MatchupAnalysis.request_sha256 == request_sha256)
+                )
+                if existing is not None:
+                    return existing.response
+                analysis_id, created = str(uuid4()), utc_now()
+                result = json_safe(response | {"analysis_id": analysis_id, "created_at": created.isoformat()})
+                session.add(MatchupAnalysis(
+                    analysis_id=analysis_id,
+                    winner_prediction_id=evidence["prediction_ids"]["winner"],
+                    request_sha256=request_sha256,
+                    snapshot_id=snapshot_id,
+                    evidence=json_safe(evidence),
+                    response=result,
+                    created_at=created,
+                ))
+                return result
+        except IntegrityError:
+            # Another service worker may have committed the same request while
+            # this worker generated its narrative. Return the first saved result.
+            existing = self.get_analysis(request_sha256=request_sha256)
+            if existing is not None:
+                return existing
+            raise
 
     def counts(self) -> dict:
         with self.sessions() as session:

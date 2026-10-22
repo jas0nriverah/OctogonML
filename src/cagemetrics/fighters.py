@@ -10,7 +10,10 @@ import unicodedata
 
 from .matchups import _observed_comparison
 
-PHOTO_FIELDS = ("name", "photo_url", "profile_url", "source_url", "credit", "observed_at", "espn_id")
+PHOTO_FIELDS = (
+    "name", "photo_url", "profile_url", "source_url", "credit", "observed_at", "espn_id", "provider",
+    "alternate_photo_urls",
+)
 DIVISIONS = {
     "flyweight": "Flyweight",
     "bantamweight": "Bantamweight",
@@ -47,7 +50,10 @@ def _photo_snapshot(path, modified_ns, size):
     return {
         **{key: payload[key] for key in ("observed_at", "source") if key in payload},
         "fighters": {
-            str(identity): {key: record[key] for key in PHOTO_FIELDS if key in record}
+            str(identity): {
+                **{key: record[key] for key in PHOTO_FIELDS if key in record},
+                "fighter_id": str(identity),
+            }
             for identity, record in payload.get("fighters", {}).items()
             if isinstance(record, dict)
         },
@@ -118,6 +124,8 @@ class FighterCatalog:
             "photo_source_url": photo.get("source_url"),
             "photo_observed_at": photo.get("observed_at"),
             "photo_credit": photo.get("credit"),
+            "photo_provider": photo.get("provider"),
+            "alternate_photo_urls": photo.get("alternate_photo_urls", []),
             "photo_status": "sourced" if photo.get("photo_url") else "unavailable",
         }
 

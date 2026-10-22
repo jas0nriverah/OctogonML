@@ -1,0 +1,43 @@
+{
+  "candidates": [
+    "baseline_v1_hgb",
+    "enriched_logistic",
+    "enriched_hgb",
+    "enriched_hgb_regularized"
+  ],
+  "logistic_C": 0.1,
+  "hgb": {
+    "max_iter": 120,
+    "max_leaf_nodes": 7,
+    "min_samples_leaf": 60,
+    "l2_regularization": 10.0,
+    "learning_rate": 0.05,
+    "early_stopping": false
+  },
+  "hgb_regularized": {
+    "max_iter": 180,
+    "max_leaf_nodes": 7,
+    "min_samples_leaf": 60,
+    "l2_regularization": 20.0,
+    "learning_rate": 0.05,
+    "early_stopping": false
+  },
+  "seed": 42,
+  "features": "V1 46 signed contrasts; auxiliary own-minus-opponent numeric inputs with neutral missing fills and separate antisymmetric missingness; squared age distance from 30 contrast; strictly prior recency Elo/opposition/win-quality/streak/finish-win summaries",
+  "strength": "Decayed Elo half-life 730 days, K32; recent form and last5 opponent quality half-life 365 days; observations and opponent prematch strength frozen before same-date updates; draw/NC excluded",
+  "rank": "Only strictly prior ranking board evidence no older than 35 days; unknown distinct from observed unranked; no betting odds",
+  "calibration": "Mirrored training and symmetric predictions, then disjoint zero-intercept temperature calibration logT in [-1.5, 1.5]",
+  "selection": "Minimum pooled decisive-bout log loss on 2021\u20132023 only",
+  "annual_splits": "Train before preceding July 1; calibrate July\u2013December; score next calendar year",
+  "promotion": {
+    "minimum_log_loss_gain": 0.002,
+    "brier_nonregression": true,
+    "max_ece_regression": 0.015,
+    "minimum_improved_years": 2,
+    "maximum_annual_log_loss_regression": 0.005,
+    "event_bootstrap_upper_95_below_zero": true
+  },
+  "report": "2024 retrospective comparison, already inspected previously; never used to choose or promote",
+  "deployment_train_before": "2026-07-01",
+  "deployment_calibration_before": "2026-10-18"
+}

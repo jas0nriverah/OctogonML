@@ -1,4 +1,4 @@
-"""Observed ESPN announced cards and athlete headshots; no inferred bookings."""
+"""Observed ESPN announced cards and verified ESPN/UFC portraits; no inferred bookings."""
 
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -82,10 +82,13 @@ def _photo_url(profile):
     if not isinstance(url, str):
         return None
     parsed = urlparse(url)
+    official_ufc = parsed.hostname in {"ufc.com", "www.ufc.com"} and parsed.path.startswith(
+        ("/images/styles/athlete_bio_full_body/", "/images/styles/event_results_athlete_headshot/")
+    )
     return (
         url
         if parsed.scheme == "https"
-        and parsed.hostname in {"a.espncdn.com", "a1.espncdn.com", "a2.espncdn.com"}
+        and (parsed.hostname in {"a.espncdn.com", "a1.espncdn.com", "a2.espncdn.com"} or official_ufc)
         else None
     )
 
@@ -99,6 +102,34 @@ def _valid_saved_photo(entry, canonical):
         canonical[identity]
     ):
         return False
+    if entry.get("provider") == "UFC":
+        source = urlparse(str(entry.get("source_url", "")))
+        image = urlparse(str(entry.get("photo_url", "")))
+        if (
+            source.scheme != "https"
+            or source.hostname not in {"ufc.com", "www.ufc.com"}
+            or not source.path.startswith("/athlete/")
+            or image.hostname not in {"ufc.com", "www.ufc.com"}
+            or _photo_url({"headshot": {"href": entry.get("photo_url")}}) is None
+        ):
+            return False
+        h1 = normalise_name(str(entry.get("source_profile_name", "")))
+        if h1 != normalise_name(canonical[identity]):
+            evidence = entry.get("identity_evidence", {})
+            aliases = {normalise_name(str(value)) for value in entry.get("verified_aliases", [])}
+            if (
+                not h1
+                or h1 not in aliases
+                or normalise_name(canonical[identity]) not in aliases
+                or evidence.get("ufcstats_profile_url") != f"http://ufcstats.com/fighter-details/{identity}"
+                or not re.fullmatch(r"[a-f0-9]{64}", str(evidence.get("retained_alias_source_sha256", "")))
+            ):
+                return False
+        try:
+            _utc(entry["observed_at"])
+        except (KeyError, ValueError, TypeError):
+            return False
+        return bool(re.fullmatch(r"[a-f0-9]{64}", str(entry.get("sha256", ""))))
     athlete_id = str(entry.get("espn_id", ""))
     if (
         not athlete_id.isdigit()
@@ -303,7 +334,7 @@ def parse_announced_schedule(
         "fixtures": fixtures,
         "unknown_identities": list({x["espn_athlete_id"]: x for x in unknown}.values()),
         "excluded": excluded,
-        "notice": "Announced ESPN card snapshot, subject to changes/cancellations. Schedule timestamps are published card/segment starts, not exact individual bout times. Unknown identities are not eligible for model predictions. Athlete photos link to ESPN-hosted media and remain the rights holders' property.",
+        "notice": "Announced ESPN card snapshot, subject to changes/cancellations. Schedule timestamps are published card/segment starts, not exact individual bout times. Unknown identities are not eligible for model predictions. Athlete photos link to ESPN/UFC-hosted media and remain the rights holders' property.",
     }
 
 

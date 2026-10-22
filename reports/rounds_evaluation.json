@@ -1,0 +1,525 @@
+{
+  "model_version": "rounds-8f9fc4ebaff2963e",
+  "selected_candidate": "hgb",
+  "development": [
+    {
+      "candidate": "scheduled_empirical",
+      "year": 2021,
+      "n_bouts": 500,
+      "category_log_loss": 1.6491733754843678,
+      "integer_second_log_loss": 4.031051817114406,
+      "multiclass_brier": 0.7075194541421298,
+      "survival_brier": 0.19906354060874948,
+      "completion_brier": 0.2547111209041493,
+      "mae_rounds": 1.0401907973996654,
+      "interval_coverage": 0.918,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.3528576152539373,
+          "observed": 0.5094339622641509,
+          "n": 106
+        },
+        {
+          "predicted": 0.42090244445040825,
+          "observed": 0.5660377358490566,
+          "n": 106
+        },
+        {
+          "predicted": 0.5616767457337154,
+          "observed": 0.588,
+          "n": 1000
+        },
+        {
+          "predicted": 0.6709816987728467,
+          "observed": 0.698,
+          "n": 500
+        },
+        {
+          "predicted": 0.7412278327803613,
+          "observed": 0.782,
+          "n": 500
+        },
+        {
+          "predicted": 0.8761133505528957,
+          "observed": 0.896,
+          "n": 500
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    {
+      "candidate": "hgb",
+      "year": 2021,
+      "n_bouts": 500,
+      "category_log_loss": 1.643088314725147,
+      "integer_second_log_loss": 4.024966756355186,
+      "multiclass_brier": 0.7053381782753048,
+      "survival_brier": 0.19645818361580586,
+      "completion_brier": 0.2526703723739203,
+      "mae_rounds": 1.0147969146325935,
+      "interval_coverage": 0.926,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.17686984321702365,
+          "observed": 0.5714285714285714,
+          "n": 7
+        },
+        {
+          "predicted": 0.2590953290362378,
+          "observed": 0.38095238095238093,
+          "n": 63
+        },
+        {
+          "predicted": 0.35471370011446746,
+          "observed": 0.5390625,
+          "n": 128
+        },
+        {
+          "predicted": 0.45514587704871257,
+          "observed": 0.5755395683453237,
+          "n": 278
+        },
+        {
+          "predicted": 0.5512590761253429,
+          "observed": 0.5506072874493927,
+          "n": 494
+        },
+        {
+          "predicted": 0.6499469368030574,
+          "observed": 0.6930533117932148,
+          "n": 619
+        },
+        {
+          "predicted": 0.7479926173973979,
+          "observed": 0.7574074074074074,
+          "n": 540
+        },
+        {
+          "predicted": 0.8501757480070837,
+          "observed": 0.8915094339622641,
+          "n": 424
+        },
+        {
+          "predicted": 0.9149458584081104,
+          "observed": 0.9119496855345912,
+          "n": 159
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    {
+      "candidate": "scheduled_empirical",
+      "year": 2022,
+      "n_bouts": 507,
+      "category_log_loss": 1.6720322406161898,
+      "integer_second_log_loss": 4.297376850836096,
+      "multiclass_brier": 0.7320008389527742,
+      "survival_brier": 0.20926920318474213,
+      "completion_brier": 0.25135060469739545,
+      "mae_rounds": 1.0633517425215613,
+      "interval_coverage": 0.9132149901380671,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.3529378128654531,
+          "observed": 0.5098039215686274,
+          "n": 102
+        },
+        {
+          "predicted": 0.4263911631072304,
+          "observed": 0.6274509803921569,
+          "n": 102
+        },
+        {
+          "predicted": 0.5380684901643487,
+          "observed": 0.5414201183431953,
+          "n": 1014
+        },
+        {
+          "predicted": 0.6561402963624243,
+          "observed": 0.6666666666666666,
+          "n": 507
+        },
+        {
+          "predicted": 0.733861848461252,
+          "observed": 0.73767258382643,
+          "n": 507
+        },
+        {
+          "predicted": 0.8720927311092026,
+          "observed": 0.8757396449704142,
+          "n": 507
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    {
+      "candidate": "hgb",
+      "year": 2022,
+      "n_bouts": 507,
+      "category_log_loss": 1.6610943473679802,
+      "integer_second_log_loss": 4.286438957587886,
+      "multiclass_brier": 0.7161877774903331,
+      "survival_brier": 0.1979303414495351,
+      "completion_brier": 0.23752076318992413,
+      "mae_rounds": 1.0187485034183905,
+      "interval_coverage": 0.9092702169625246,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.16881387817118626,
+          "observed": 0.0,
+          "n": 7
+        },
+        {
+          "predicted": 0.2595969349318296,
+          "observed": 0.22857142857142856,
+          "n": 35
+        },
+        {
+          "predicted": 0.3627630987332826,
+          "observed": 0.40789473684210525,
+          "n": 152
+        },
+        {
+          "predicted": 0.4545690599933203,
+          "observed": 0.506426735218509,
+          "n": 389
+        },
+        {
+          "predicted": 0.5527530351513212,
+          "observed": 0.5666666666666667,
+          "n": 570
+        },
+        {
+          "predicted": 0.6498335842846474,
+          "observed": 0.659963436928702,
+          "n": 547
+        },
+        {
+          "predicted": 0.7465371848283513,
+          "observed": 0.7919191919191919,
+          "n": 495
+        },
+        {
+          "predicted": 0.8554721847459483,
+          "observed": 0.8528678304239401,
+          "n": 401
+        },
+        {
+          "predicted": 0.9149969965886621,
+          "observed": 0.951048951048951,
+          "n": 143
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    {
+      "candidate": "scheduled_empirical",
+      "year": 2023,
+      "n_bouts": 504,
+      "category_log_loss": 1.612446423716838,
+      "integer_second_log_loss": 4.1839188309388105,
+      "multiclass_brier": 0.7187060844599806,
+      "survival_brier": 0.2070856042693242,
+      "completion_brier": 0.2541476497069279,
+      "mae_rounds": 1.065405453871992,
+      "interval_coverage": 0.9047619047619048,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.36902756339356835,
+          "observed": 0.5204081632653061,
+          "n": 98
+        },
+        {
+          "predicted": 0.44211067272373344,
+          "observed": 0.5510204081632653,
+          "n": 98
+        },
+        {
+          "predicted": 0.5318421483718627,
+          "observed": 0.5476190476190477,
+          "n": 1008
+        },
+        {
+          "predicted": 0.6506630091590101,
+          "observed": 0.6765873015873016,
+          "n": 504
+        },
+        {
+          "predicted": 0.7310219819746241,
+          "observed": 0.748015873015873,
+          "n": 504
+        },
+        {
+          "predicted": 0.8723216970336202,
+          "observed": 0.875,
+          "n": 504
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    {
+      "candidate": "hgb",
+      "year": 2023,
+      "n_bouts": 504,
+      "category_log_loss": 1.6019481097021295,
+      "integer_second_log_loss": 4.173420516924102,
+      "multiclass_brier": 0.7113399951797825,
+      "survival_brier": 0.2008615923881831,
+      "completion_brier": 0.2472576575685146,
+      "mae_rounds": 1.033733864591987,
+      "interval_coverage": 0.9126984126984127,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.1471767315505386,
+          "observed": 0.2,
+          "n": 30
+        },
+        {
+          "predicted": 0.2686736158426336,
+          "observed": 0.39285714285714285,
+          "n": 28
+        },
+        {
+          "predicted": 0.3646586101131838,
+          "observed": 0.5,
+          "n": 142
+        },
+        {
+          "predicted": 0.4540650152788146,
+          "observed": 0.47877358490566035,
+          "n": 424
+        },
+        {
+          "predicted": 0.5516311916608281,
+          "observed": 0.5883424408014571,
+          "n": 549
+        },
+        {
+          "predicted": 0.6484474605050667,
+          "observed": 0.6807339449541284,
+          "n": 545
+        },
+        {
+          "predicted": 0.7450772239619243,
+          "observed": 0.7816593886462883,
+          "n": 458
+        },
+        {
+          "predicted": 0.8566447252452973,
+          "observed": 0.85995085995086,
+          "n": 407
+        },
+        {
+          "predicted": 0.9160629179027302,
+          "observed": 0.924812030075188,
+          "n": 133
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    }
+  ],
+  "development_category_log_loss": {
+    "scheduled_empirical": 1.644593005485029,
+    "hgb": 1.6354075703295914
+  },
+  "retrospective_2024": {
+    "scheduled_empirical": {
+      "n_bouts": 507,
+      "category_log_loss": 1.5445794341067207,
+      "integer_second_log_loss": 3.7652656645558893,
+      "multiclass_brier": 0.6688049689034441,
+      "survival_brier": 0.1882629831114048,
+      "completion_brier": 0.2507644256688799,
+      "mae_rounds": 1.015436447305907,
+      "interval_coverage": 0.9309664694280079,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.45404771712852243,
+          "observed": 0.5727272727272728,
+          "n": 220
+        },
+        {
+          "predicted": 0.5706088958369987,
+          "observed": 0.6193952033368092,
+          "n": 959
+        },
+        {
+          "predicted": 0.6726701051078434,
+          "observed": 0.7295373665480427,
+          "n": 562
+        },
+        {
+          "predicted": 0.7497553926460815,
+          "observed": 0.796844181459566,
+          "n": 507
+        },
+        {
+          "predicted": 0.8813149544745653,
+          "observed": 0.9191321499013807,
+          "n": 507
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    },
+    "hgb": {
+      "n_bouts": 507,
+      "category_log_loss": 1.5348269770505811,
+      "integer_second_log_loss": 3.7555132074997495,
+      "multiclass_brier": 0.6560434261688193,
+      "survival_brier": 0.1804958734540501,
+      "completion_brier": 0.2381921068783363,
+      "mae_rounds": 0.971926399050253,
+      "interval_coverage": 0.9368836291913215,
+      "interval_level": 0.8,
+      "calibration": [
+        {
+          "predicted": 0.1630867196037325,
+          "observed": 0.0,
+          "n": 6
+        },
+        {
+          "predicted": 0.267998380968199,
+          "observed": 0.43333333333333335,
+          "n": 30
+        },
+        {
+          "predicted": 0.35978417448201555,
+          "observed": 0.3855421686746988,
+          "n": 83
+        },
+        {
+          "predicted": 0.4546776380308707,
+          "observed": 0.5386904761904762,
+          "n": 336
+        },
+        {
+          "predicted": 0.5538713607949661,
+          "observed": 0.6217303822937625,
+          "n": 497
+        },
+        {
+          "predicted": 0.6511192822298129,
+          "observed": 0.7115716753022453,
+          "n": 579
+        },
+        {
+          "predicted": 0.7477815552365914,
+          "observed": 0.7996389891696751,
+          "n": 554
+        },
+        {
+          "predicted": 0.8500826757748666,
+          "observed": 0.8805309734513275,
+          "n": 452
+        },
+        {
+          "predicted": 0.9231323548680351,
+          "observed": 0.9724770642201835,
+          "n": 218
+        }
+      ],
+      "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit"
+    }
+  },
+  "evaluation": {
+    "n_bouts": 507,
+    "category_log_loss": 1.5348269770505811,
+    "integer_second_log_loss": 3.7555132074997495,
+    "multiclass_brier": 0.6560434261688193,
+    "survival_brier": 0.1804958734540501,
+    "completion_brier": 0.2381921068783363,
+    "mae_rounds": 0.971926399050253,
+    "interval_coverage": 0.9368836291913215,
+    "interval_level": 0.8,
+    "calibration": [
+      {
+        "predicted": 0.1630867196037325,
+        "observed": 0.0,
+        "n": 6
+      },
+      {
+        "predicted": 0.267998380968199,
+        "observed": 0.43333333333333335,
+        "n": 30
+      },
+      {
+        "predicted": 0.35978417448201555,
+        "observed": 0.3855421686746988,
+        "n": 83
+      },
+      {
+        "predicted": 0.4546776380308707,
+        "observed": 0.5386904761904762,
+        "n": 336
+      },
+      {
+        "predicted": 0.5538713607949661,
+        "observed": 0.6217303822937625,
+        "n": 497
+      },
+      {
+        "predicted": 0.6511192822298129,
+        "observed": 0.7115716753022453,
+        "n": 579
+      },
+      {
+        "predicted": 0.7477815552365914,
+        "observed": 0.7996389891696751,
+        "n": 554
+      },
+      {
+        "predicted": 0.8500826757748666,
+        "observed": 0.8805309734513275,
+        "n": 452
+      },
+      {
+        "predicted": 0.9231323548680351,
+        "observed": 0.9724770642201835,
+        "n": 218
+      }
+    ],
+    "survival_brier_scope": "All half-round thresholds strictly before each bout's scheduled limit",
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "2024 retrospective temporal evaluation; this period was already inspected in other project studies"
+  },
+  "protocol": {
+    "candidates": [
+      "scheduled_empirical",
+      "hgb"
+    ],
+    "seed": 42,
+    "categories": "20: half-round interior followed by its exact 150-second boundary atom",
+    "interior_assumption": "Uniform probability over the 149 integer seconds inside each half-round",
+    "hgb": {
+      "max_iter": 60,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 60,
+      "l2_regularization": 10.0,
+      "learning_rate": 0.05,
+      "early_stopping": false
+    },
+    "smoothing": "Jeffreys 0.5 per legal category; HGB mixed with 0.005 training empirical probability",
+    "calibration": "One positive temperature on reserved category log probabilities; legal masking before normalization",
+    "selection": "Lowest pooled 2021\u20132023 categorical log loss; annual train before prior July 1, calibrate until January 1",
+    "report": "2024 retrospective temporal evaluation; this period was already inspected in other project studies",
+    "deployment_train_before": "2026-07-01",
+    "deployment_calibration_before": "2026-10-18"
+  },
+  "warnings": [
+    "Elapsed time is modeled separately from strikes and winner probability.",
+    "Completes scheduled time means elapsed seconds equal the scheduled limit, including a stoppage recorded at the final bell; it does not establish a decision.",
+    "Interior half-round probabilities assume uniform integer seconds; exact half-round boundary atoms are modeled separately.",
+    "2024 results are retrospective; future calibration requires prospective evaluation.",
+    "Only covered UFC history is available; sparse and missing earlier histories limit reliability."
+  ]
+}

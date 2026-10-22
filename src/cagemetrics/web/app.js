@@ -23,6 +23,8 @@ const date = (value) => (value ? String(value).slice(0, 10) : "—");
 const state = { fighters: [], loaded: new Set(), recent: null, prediction: null, photos: new Map(), upcoming: null };
 const directoryState={q:'',division:'',page:1};
 let directoryRequest=0,profileRequest=0,directoryDebounce;
+let eligibilityRequest=0,eligibilityDebounce,matchupSelectionVersion=0,comparisonInFlight=false;
+state.matchupEligibility=null;
 function directoryUrl() {
   const params=new URLSearchParams();
   if(directoryState.q)params.set('q',directoryState.q);
@@ -48,10 +50,10 @@ async function loadDirectory() {
     $('directory-division').value=query.division;
     const cards=rows.map(f=>{
       rememberPhoto(f);
-      return `<a href="/fighters/${encodeURIComponent(f.fighter_id||f.id)}" data-fighter-link class="directory-card"><div class="directory-portrait">${athletePortrait(f)}<span class="directory-division">${escapeHtml(f.latest_division||'Division unavailable')}</span></div><div class="directory-card-copy"><h3>${escapeHtml(f.name)}</h3><div class="directory-card-stats"><span><b>${number(f.covered_bouts,0)}</b> covered ${f.covered_bouts===1?'bout':'bouts'}</span><span>Last covered<br><b>${escapeHtml(date(f.last_fight_date))}</b></span></div><span class="directory-card-action">View fighter profile <span aria-hidden="true">↗</span></span></div></a>`;
+      return `<a href="/fighters/${encodeURIComponent(f.fighter_id||f.id)}" data-fighter-link class="directory-card"><div class="directory-portrait">${athletePortrait(f,true)}<span class="directory-division">${escapeHtml(f.latest_division||'Division unavailable')}</span></div><div class="directory-card-copy"><h3>${escapeHtml(f.name)}</h3><div class="directory-card-stats"><span><b>${number(f.covered_bouts,0)}</b> covered ${f.covered_bouts===1?'bout':'bouts'}</span><span>Last covered<br><b>${escapeHtml(date(f.last_fight_date))}</b></span></div><span class="directory-card-action">View fighter profile <span aria-hidden="true">↗</span></span></div></a>`;
     }).join('');
     const total=pagination.total??rows.length;
-    $('directory-content').innerHTML=`<div class="directory-results-note"><span>${number(total,0)} ${total===1?'athlete':'athletes'}${query.q?` matching “${escapeHtml(query.q)}”`:''}</span><span>UFC history · ESPN athlete photos</span></div>${rows.length?`<div class="fighter-directory-grid">${cards}</div>`:`<div class="panel directory-empty"><p class="eyebrow">NO MATCHES</p><h3>No covered athlete matches these filters.</h3><p>Try a shorter name or choose all divisions.</p><button id="directory-clear" class="secondary-button" type="button">Clear filters</button></div>`}<nav class="directory-pagination" aria-label="Fighter directory pages"><button type="button" class="secondary-button" data-directory-page="${Math.max(1,query.page-1)}" ${pagination.has_previous?'':'disabled'}>← Previous</button><span>Page ${number(pagination.page??query.page,0)} of ${number(Math.max(1,pagination.total_pages||1),0)}</span><button type="button" class="secondary-button" data-directory-page="${query.page+1}" ${pagination.has_next?'':'disabled'}>Next →</button></nav>`;
+$('directory-content').innerHTML=`<div class="directory-results-note"><span>${number(total,0)} ${total===1?'athlete':'athletes'}${query.q?` matching “${escapeHtml(query.q)}”`:''}</span><span>UFC history · UFC / ESPN athlete photos</span></div>${rows.length?`<div class="fighter-directory-grid">${cards}</div>`:`<div class="panel directory-empty"><p class="eyebrow">NO MATCHES</p><h3>No covered athlete matches these filters.</h3><p>Try a shorter name or choose all divisions.</p><button id="directory-clear" class="secondary-button" type="button">Clear filters</button></div>`}<nav class="directory-pagination" aria-label="Fighter directory pages"><button type="button" class="secondary-button" data-directory-page="${Math.max(1,query.page-1)}" ${pagination.has_previous?'':'disabled'}>← Previous</button><span>Page ${number(pagination.page??query.page,0)} of ${number(Math.max(1,pagination.total_pages||1),0)}</span><button type="button" class="secondary-button" data-directory-page="${query.page+1}" ${pagination.has_next?'':'disabled'}>Next →</button></nav>`;
     bindPortraits($('directory-content'));
     $('directory-content').querySelectorAll('[data-directory-page]').forEach(button=>button.addEventListener('click',()=>{
       directoryState.page=Number(button.dataset.directoryPage);history.pushState({},'',directoryUrl());loadDirectory();$('directory-form').scrollIntoView({block:'start',behavior:'instant'});
@@ -93,7 +95,7 @@ async function loadFighterProfile(id) {
     if(token!==profileRequest)return;
     const fighter=report.fighter||{},summary=report.windows?.career||{},photo=safeUrl(fighter.photo_source_url);
     rememberPhoto(fighter);document.title=`${fighter.name||'Fighter profile'} · OctogonML`;
-$('profile-content').innerHTML=`<a class="text-link profile-back" data-fighter-link href="${escapeHtml(directoryUrl())}">← Fighter directory</a><div class="panel fighter-profile-hero"><div class="profile-portrait">${athletePortrait(fighter)}<span class="profile-photo-caption">${fighter.photo_url?'ESPN athlete photo':'Photo unavailable'}</span></div><div class="profile-identity"><p class="eyebrow">FIGHTER PROFILE · UFC HISTORY</p><h1>${escapeHtml(fighter.name)}</h1><div class="profile-tags"><span>Last covered division · ${escapeHtml(fighter.latest_division||'Unavailable')}</span><span>Last covered bout ${escapeHtml(date(fighter.last_fight_date))}</span></div><p class="profile-coverage">UFC bouts covered since 2013.</p><div class="profile-sample-stats"><div><strong>${number(fighter.covered_bouts??summary.covered_bouts,0)}</strong><span>Covered bouts</span></div><div><strong>${number(summary.observed_minutes,1)}</strong><span>Observed minutes</span></div></div><div class="profile-compare-actions"><button type="button" class="primary-button" data-profile-compare="fighter">Compare in red corner <span>↗</span></button><button type="button" class="secondary-button" data-profile-compare="opponent">Compare in blue corner <span>↗</span></button></div><p id="profile-compare-error" class="error-message" role="alert" hidden></p>${photo?`<a class="profile-source text-link" href="${escapeHtml(photo)}" target="_blank" rel="noopener">Photo source ↗</a>`:''}</div></div><section id="profile-observed" class="profile-observed" aria-label="Observed fighter statistics"></section><details class="panel data-panel profile-data-note"><summary>Coverage and source notes</summary><p class="panel-description">${escapeHtml(factText(report.note||'All values describe eligible completed bouts in this dataset. Missing history and photography remain explicitly unavailable.'))}</p><p class="panel-description">Stable athlete ID: ${escapeHtml(fighter.fighter_id||fighter.id)}. Photo source observed ${escapeHtml(date(fighter.photo_observed_at))}. Photography identifies the athlete and does not imply an affiliation with UFC or ESPN.</p></details>`;
+$('profile-content').innerHTML=`<a class="text-link profile-back" data-fighter-link href="${escapeHtml(directoryUrl())}">← Fighter directory</a><div class="panel fighter-profile-hero"><div class="profile-portrait">${athletePortrait(fighter)}<span class="profile-photo-caption">${fighter.photo_url?'Official athlete photo':'Photo unavailable'}</span></div><div class="profile-identity"><p class="eyebrow">FIGHTER PROFILE · UFC HISTORY</p><h1>${escapeHtml(fighter.name)}</h1><div class="profile-tags"><span>Last covered division · ${escapeHtml(fighter.latest_division||'Unavailable')}</span><span>Last covered bout ${escapeHtml(date(fighter.last_fight_date))}</span></div><p class="profile-coverage">UFC bouts covered since 2013.</p><div class="profile-sample-stats"><div><strong>${number(fighter.covered_bouts??summary.covered_bouts,0)}</strong><span>Covered bouts</span></div><div><strong>${number(summary.observed_minutes,1)}</strong><span>Observed minutes</span></div></div><div class="profile-compare-actions"><button type="button" class="primary-button" data-profile-compare="fighter">Compare in red corner <span>↗</span></button><button type="button" class="secondary-button" data-profile-compare="opponent">Compare in blue corner <span>↗</span></button></div><p id="profile-compare-error" class="error-message" role="alert" hidden></p>${photo?`<a class="profile-source text-link" href="${escapeHtml(photo)}" target="_blank" rel="noopener">Photo source ↗</a>`:''}</div></div><section id="profile-observed" class="profile-observed" aria-label="Observed fighter statistics"></section><details class="panel data-panel profile-data-note"><summary>Coverage and source notes</summary><p class="panel-description">${escapeHtml(factText(report.note||'All values describe eligible completed bouts in this dataset. Missing history and photography remain explicitly unavailable.'))}</p><p class="panel-description">Stable athlete ID: ${escapeHtml(fighter.fighter_id||fighter.id)}. Photo source observed ${escapeHtml(date(fighter.photo_observed_at))}. Photography identifies the athlete and does not imply an affiliation with UFC or ESPN.</p></details>`;
     bindPortraits($('profile-content'));
     $('profile-content').querySelector('.profile-data-note').insertAdjacentHTML('beforeend',`<p class="panel-description">Dataset coverage: ${escapeHtml(date(report.data_window?.start))} → ${escapeHtml(date(report.data_window?.end))}. This athlete’s covered dates: ${escapeHtml(date(report.coverage?.fighter_start))} → ${escapeHtml(date(report.coverage?.fighter_end))}. Sources: ${escapeHtml((report.coverage?.source_names||[]).join(' · ')||'See dataset attribution')}.</p>`);
     const render=window=>{
@@ -142,7 +144,7 @@ async function api(path, options = {}) {
         ? detail
         : Array.isArray(detail)
           ? detail.map((x) => x.msg).join("; ")
-          : detail?.message || data.message || `Request failed (${response.status}).`,
+          : detail?.message ? `${detail.message}${typeof detail.reason==='string'?`: ${detail.reason}`:''}` : data.message || `Request failed (${response.status}).`,
     );
   }
   return data;
@@ -214,10 +216,12 @@ async function initialize() {
     api("/api/v1/overview"),
     api("/api/v1/fighters"),
     api("/api/v1/fighter-photos"),
+    api("/api/v1/rankings"),
   ]);
+  if(results[3].status==='fulfilled')state.rankings=results[3].value;
   if(results[2].status==='fulfilled'){
     const photos=results[2].value.fighters||{};
-    (Array.isArray(photos)?photos:Object.values(photos)).forEach(fighter=>rememberPhoto(fighter));
+    ingestFighterPhotos(photos);
   }
   if (results[0].status === "fulfilled") {
     const overview = results[0].value;
@@ -228,12 +232,12 @@ async function initialize() {
     $("summary-date").textContent = date(d.date_end || d.data_cutoff);
     $("summary-model").textContent =
       m.model_version || m.current_version || m.version || "Available";
-    $("service-status").textContent = "MODEL READY";
+    if($("service-status"))$("service-status").textContent = "MODEL READY";
     if (d.source_names?.length)
       $("source-note").textContent =
         `Sources: ${d.source_names.join(" · ")} · Independent historical analysis.`;
   } else {
-    $("service-status").textContent = "SERVICE UNAVAILABLE";
+    if($("service-status"))$("service-status").textContent = "SERVICE UNAVAILABLE";
   }
   if (results[1].status === "fulfilled") {
     state.fighters = results[1].value.fighters || [];
@@ -286,13 +290,54 @@ function enforceDistinct(event) {
     for (const option of $(id).options)
       option.disabled =
         option.value === $(id === "fighter" ? "opponent" : "fighter").value;
+  refreshMatchupEligibility(Boolean(event));
+}
+function updateForecastButton() {
+  $('forecast-button').disabled=comparisonInFlight||state.matchupEligibility?.status!=='compatible';
+}
+function clearComparisonForSelection() {
+  state.prediction=null;state.matchupReport=null;$('form-error').hidden=true;
+  if(state.reportDownloadUrl){URL.revokeObjectURL(state.reportDownloadUrl);state.reportDownloadUrl=null;}
+  $('forecast-result').innerHTML='<div class="panel empty-state"><p class="eyebrow">NEW MATCHUP</p><h2>Choose your fighters.</h2><p>Once their divisions are checked, select Compare fighters for win probabilities and significant-strike forecasts.</p></div>';
+}
+function refreshMatchupEligibility(clearResults=true) {
+  const token=++eligibilityRequest;++matchupSelectionVersion;clearTimeout(eligibilityDebounce);
+  const fighter=$('fighter').value,opponent=$('opponent').value;
+  state.matchupEligibility=null;updateForecastButton();
+  if(clearResults)clearComparisonForSelection();
+  ['fighter','opponent'].forEach(side=>$(side+'-division').textContent='Last covered division · Checking…');
+  $('matchup-eligibility').className='matchup-eligibility';
+  $('matchup-eligibility').innerHTML='<span class="eligibility-badge">CHECKING DIVISIONS</span><p>Based on last covered UFC division; same or neighboring divisions only.</p>';
+  eligibilityDebounce=setTimeout(async()=>{
+    try {
+      const params=new URLSearchParams({fighter_id:fighter,opponent_id:opponent});
+      const result=await api(`/api/v1/matchup-eligibility?${params}`);
+      if(token!==eligibilityRequest)return;
+      state.matchupEligibility=result;
+      const compatible=result.status==='compatible';
+      const label=compatible?(result.same_division?'Same division':'Neighboring divisions'):result.status==='unrealistic'?'Unrealistic matchup':'Division unavailable';
+      $('fighter-division').textContent=`Last covered division · ${result.fighter?.division?.label||'Unavailable'}`;
+      $('opponent-division').textContent=`Last covered division · ${result.opponent?.division?.label||'Unavailable'}`;
+      $('matchup-eligibility').className=`matchup-eligibility ${compatible?'eligibility-compatible':'eligibility-blocked'}`;
+      $('matchup-eligibility').innerHTML=`<span class="eligibility-badge">${escapeHtml(label)}</span><p>${escapeHtml(result.reason||'')}<small>Based on last covered UFC division; same or neighboring divisions only.</small></p>`;
+    } catch(error) {
+      if(token!==eligibilityRequest)return;
+      $('matchup-eligibility').className='matchup-eligibility eligibility-blocked';
+      $('matchup-eligibility').innerHTML=`<span class="eligibility-badge">Division check unavailable</span><p>Matchup compatibility could not be checked.</p><button class="secondary-button" type="button" id="retry-eligibility">Retry division check</button><details><summary>Service details</summary><p>${escapeHtml(error.message)}</p></details>`;
+      $('retry-eligibility').addEventListener('click',()=>refreshMatchupEligibility(false));
+      ['fighter','opponent'].forEach(side=>$(side+'-division').textContent='Last covered division · Unavailable');
+    } finally {if(token===eligibilityRequest)updateForecastButton();}
+  },150);
 }
 $("fighter").addEventListener("change", enforceDistinct);
 $("opponent").addEventListener("change", enforceDistinct);
 $("forecast-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   $("form-error").hidden = true;
+  if(state.matchupEligibility?.status!=='compatible'){showFormError('Choose fighters in the same or neighboring covered UFC divisions before comparing.');updateForecastButton();return;}
+  const selectionVersion=matchupSelectionVersion;
   const button = $("forecast-button");
+  comparisonInFlight=true;
   button.disabled = true;
   button.textContent = "Calculating forecast…";
   $('forecast-result').setAttribute('aria-busy','true');
@@ -310,17 +355,20 @@ $("forecast-form").addEventListener("submit", async (event) => {
       api('/api/v1/predictions',{method:'POST',body:JSON.stringify(request)}),
       api('/api/v1/predictions',{method:'POST',body:JSON.stringify({...request,fighter_id:request.opponent_id,opponent_id:request.fighter_id})}),
       api(`/api/v1/matchups?${params}`),
+      api('/api/v1/predict-winner',{method:'POST',body:JSON.stringify({fighter_a_id:request.fighter_id,fighter_b_id:request.opponent_id,scheduled_rounds:request.scheduled_rounds})}),
+      api('/api/v1/predict-rounds',{method:'POST',body:JSON.stringify({fighter_a_id:request.fighter_id,fighter_b_id:request.opponent_id,scheduled_rounds:request.scheduled_rounds})}),
     ]);
-    if(results[0].status==='rejected'&&results[1].status==='rejected')throw new Error(results[0].reason.message);
+    if(selectionVersion!==matchupSelectionVersion)return;
+    if(results.every(result=>result.status==='rejected'))throw new Error(results[0].reason.message);
     const predictions=results.slice(0,2).map(result=>result.status==='fulfilled'?result.value:null);
     state.prediction=predictions[0]||predictions[1];
-    renderComparison(predictions,results[2].status==='fulfilled'?results[2].value:null,request);
+    renderComparison(predictions,results[2].status==='fulfilled'?results[2].value:null,request,results[3].status==='fulfilled'?results[3].value:null,results[3].status==='rejected'?results[3].reason.message:null,results.map((result,index)=>result.status==='rejected'?{service:['fighter_strikes','opponent_strikes','observed_context','winner','rounds'][index],message:result.reason.message}:null).filter(Boolean),results[4].status==='fulfilled'?results[4].value:null,results[4].status==='rejected'?results[4].reason.message:null);
     const failures=results.filter(result=>result.status==='rejected');
-    if(failures.length)showFormError(`Some comparison data is unavailable: ${failures.map(result=>result.reason.message).join(' · ')}. Successful forecasts have been saved.`);
+    if(failures.length)showFormError(`Some comparison data is unavailable: ${failures.map(result=>result.reason.message).join(' · ')}. Available results are shown below.`);
   } catch (error) {
     showFormError(error.message);
   } finally {
-    button.disabled = false;
+    comparisonInFlight=false;updateForecastButton();
     button.innerHTML = "Compare fighters <span>↗</span>";
     $('forecast-result').setAttribute('aria-busy','false');
   }
@@ -335,11 +383,44 @@ function comparisonDistribution(predictions) {
   const colors=['#f18a85','#81b6f4'];
   return `<svg class="comparison-pmf" viewBox="0 0 ${w} ${h}" role="img" aria-label="Two athlete significant-strike count probability distributions on identical axes">${[0,.25,.5,.75,1].map(v=>`<line x1="${l}" x2="${w-r}" y1="${y(v*maxY)}" y2="${y(v*maxY)}" stroke="#34424e"/><text x="${l-8}" y="${y(v*maxY)+4}" text-anchor="end" fill="#a2adb3" font-size="10">${number(v*maxY*100,1)}%</text><text x="${x(v*maxX)}" y="${h-24}" text-anchor="middle" fill="#a2adb3" font-size="10">${number(v*maxX,0)}</text>`).join('')}${series.map((s,i)=>s.length?`<path d="M${x(0)},${y(0)} ${s.map(d=>`L${x(d.count)},${y(d.probability)}`).join(' ')} L${x(s.at(-1).count)},${y(0)} Z" fill="${colors[i]}" fill-opacity=".12"/><polyline points="${s.map(d=>`${x(d.count)},${y(d.probability)}`).join(' ')}" fill="none" stroke="${colors[i]}" stroke-width="2"/>${predictions[i]?`<line x1="${x(predictions[i].mean)}" x2="${x(predictions[i].mean)}" y1="${t}" y2="${h-b}" stroke="${colors[i]}" stroke-dasharray="4 5"/>`:''}`:'').join('')}<text x="${w/2}" y="${h-3}" text-anchor="middle" fill="#a2adb3" font-size="10">SIGNIFICANT STRIKES LANDED · FULL BOUT</text></svg>`;
 }
-function renderComparison(predictions, context, request) {
+function currentRankBadge(id) {
+  const snapshot=state.rankings;if(!snapshot)return '';
+  const rows=(snapshot.entries||[]).filter(row=>String(row.fighter_id)===String(id));
+  if(!rows.length)return '';
+  return `<div class="observed-rank-badges">${rows.map(row=>`<span>${escapeHtml(row.division)} ${row.is_champion?'Champion':`#${escapeHtml(row.rank)}`}</span>`).join('')}<small>Observed ${escapeHtml(date(snapshot.observed_at))} · <a href="${safeUrl(snapshot.source_url)||'/api/v1/rankings'}" target="_blank" rel="noopener">Official source ↗</a></small></div>`;
+}
+function fundamentalsPanel(report,athletes) {
+  const context=report?.fighter_context;if(!context)return '';
+  const sides=[context.fighter||{},context.opponent||{}];
+  const fmt=(value,digits=1)=>Number.isFinite(value)?number(value,digits):'—';
+  const metrics=[['Age','age',1,1,'years'],['Height','height_cm',1,1,'cm'],['Reach','reach_cm',1,1,'cm'],['Takedowns landed','last5_td_landed_per_minute',15,1,'/ 15 min'],['Submission attempts','last5_sub_attempted_per_minute',15,1,'/ 15 min'],['Control time','last5_control_seconds_per_minute',.25,1,'min / 15 min'],['Knockdowns','last5_knockdowns_per_minute',15,2,'/ 15 min']];
+  return `<section class="panel fundamentals-panel"><div class="winner-heading"><div><p class="eyebrow">MATCHUP CONTEXT</p><h3>Matchup fundamentals</h3></div><span class="winner-scenario">Last 5 covered bouts · Grappling</span></div><div class="fundamentals-names"><strong class="red-side">${escapeHtml(athletes[0].name)}</strong><strong class="blue-side">${escapeHtml(athletes[1].name)}</strong></div><div class="fundamentals-grid">${metrics.map(([label,key,multiplier,digits,unit])=>`<div><strong class="red-side">${fmt(Number.isFinite(sides[0][key])?sides[0][key]*multiplier:null,digits)}</strong><span>${label}<small>${unit}</small></span><strong class="blue-side">${fmt(Number.isFinite(sides[1][key])?sides[1][key]*multiplier:null,digits)}</strong></div>`).join('')}</div><p class="panel-description">Grappling rates use each athlete’s last ${sides.map(side=>Math.min(5,side.grappling_prior_bouts||0)).join(' / ')} covered bouts, normalized by observed fight time. — means unavailable.</p><details class="winner-details"><summary>Ranking inputs & coverage</summary><p class="panel-description">The latest observed rankings displayed by athlete names are a separate official snapshot, not a historical model input. The model uses dated ranking observations only when sufficiently recent; missing or stale rankings remain unknown. The official display snapshot has no explicit weekly publication date.</p>${sides.map((side,i)=>`<p class="panel-description"><strong>${escapeHtml(athletes[i].name)}</strong> · Model ranking ${side.rank_missing||!Number.isFinite(side.rank_observed)?'Unknown':side.champion_observed?'Champion':`#${number(side.rank_observed,0)}`} · Board date ${escapeHtml(side.ranking_board_date||'Unavailable')} · Board age ${fmt(side.rank_board_age_days,0)} days · Grappling sample ${number(side.grappling_prior_bouts,0)} covered bouts.</p>`).join('')}<a class="text-link" href="/api/v1/rankings">Inspect latest observed ranking snapshot ↗</a></details></section>`;
+}
+function winnerPanel(report,athletes,error) {
+  const a=report?.p_fighter_win,b=report?.p_opponent_win;
+  const valid=Number.isFinite(a)&&Number.isFinite(b)&&a>=0&&a<=1&&b>=0&&b<=1&&Math.abs(a+b-1)<1e-6&&String(report.fighter?.id)===String(athletes[0].fighter_id)&&String(report.opponent?.id)===String(athletes[1].fighter_id);
+  if(!valid)return `<section class="panel winner-panel winner-unavailable" aria-label="Win probability"><div class="winner-heading"><div><p class="eyebrow">OUTCOME MODEL · ML BASELINE</p><h3>Win probability</h3></div><span class="pill">UNAVAILABLE</span></div><p class="panel-description">Win probabilities are unavailable for this matchup. Strike forecasts and observed history are shown independently.</p>${error?`<details class="winner-details"><summary>Service details</summary><p class="panel-description">${escapeHtml(error)}</p></details>`:''}</section>`;
+  const evaluation=report.evaluation||{};
+  return `<section class="panel winner-panel" aria-label="Win probability"><div class="winner-heading"><div><p class="eyebrow">OUTCOME MODEL · ML BASELINE</p><h3>Win probability</h3></div><span class="winner-scenario">${escapeHtml(report.scheduled_rounds)} scheduled rounds</span></div><div class="winner-sides"><div class="red-side"><span>${fighterProfileLink(athletes[0].fighter_id,athletes[0].name)}</span><strong>${percent(a)}</strong></div><div class="blue-side"><span>${fighterProfileLink(athletes[1].fighter_id,athletes[1].name)}</span><strong>${percent(b)}</strong></div></div><div class="winner-probability-bar" role="img" aria-label="${escapeHtml(athletes[0].name)} ${percent(a)}, ${escapeHtml(athletes[1].name)} ${percent(b)} win probability"><span class="winner-red" style="width:${a*100}%"></span><span class="winner-blue" style="width:${b*100}%"></span></div><details class="winner-details"><summary>Among decisive outcomes <span>· Model details</span></summary><p class="panel-description">Probabilities are conditional on a decisive outcome; draws and no-contests are excluded. This separate outcome classifier does not derive a winner from projected strike totals. These are model estimates, not market odds.</p><div class="winner-evaluation"><span>Evaluation ${escapeHtml(Array.isArray(evaluation.period)?evaluation.period.join(' → '):evaluation.period||'See model report')} · ${escapeHtml(factText(evaluation.kind||'Historical evaluation'))}</span><span>${number(evaluation.n_bouts,0)} bouts · Log loss ${number(evaluation.log_loss,4)} · Brier ${number(evaluation.brier_score,4)} · Accuracy ${percent(evaluation.accuracy)}</span></div>${report.warnings?.length?`<ul class="limitation-list">${report.warnings.map(w=>`<li>${escapeHtml(w)}</li>`).join('')}</ul>`:''}<dl class="metadata-list">${metadataRow('Prediction ID',report.prediction_id)}${metadataRow('Model version',report.model_version)}${metadataRow('Feature cutoff',date(report.feature_cutoff))}${metadataRow('Data cutoff',date(report.data_cutoff))}${metadataRow('Forecast date',date(report.forecast_date))}${metadataRow('Covered history',`${report.history?.fighter_bouts??'—'} / ${report.history?.opponent_bouts??'—'} bouts`)}${metadataRow('Artifact SHA256',report.artifact_sha256)}${metadataRow('Source snapshot SHA256',report.source_snapshot_sha256)}${metadataRow('Outcome labels SHA256',report.outcome_labels_sha256)}</dl><a class="text-link" href="/api/v1/winner-model">Inspect outcome model report ↗</a></details></section>`;
+}
+function roundsPanel(report,athletes,request,error) {
+  const probability=value=>Number.isFinite(value)&&value>=0&&value<=1;
+  const valid=report&&String(report.fighter?.id)===String(athletes[0].fighter_id)&&String(report.opponent?.id)===String(athletes[1].fighter_id)&&report.scheduled_rounds===request.scheduled_rounds&&Number.isFinite(report.expected_duration_minutes)&&report.expected_duration_minutes>=0&&report.expected_duration_minutes<=request.scheduled_rounds*5&&probability(report.p_complete_scheduled_time)&&probability(report.p_finish_early)&&Math.abs(report.p_complete_scheduled_time+report.p_finish_early-1)<1e-6;
+  if(!valid)return `<section class="panel rounds-panel"><div class="winner-heading"><div><p class="eyebrow">FIGHT TIME MODEL</p><h3>Rounds & duration</h3></div><span class="pill">UNAVAILABLE</span></div><p class="panel-description">Elapsed-time probabilities are unavailable for this matchup. Other models are shown independently.</p>${error?`<details><summary>Service details</summary><p class="panel-description">${escapeHtml(error)}</p></details>`:''}</section>`;
+  const thresholds=(report.round_thresholds||[]).filter(row=>Number.isFinite(row.line)&&row.line>=1&&row.line<request.scheduled_rounds&&Number.isFinite(row.minutes)&&[row.p_over,row.p_under,row.p_push].every(probability)&&Math.abs(row.p_over+row.p_under+row.p_push-1)<1e-6);
+  const evaluation=report.evaluation||{};
+  const reach=(report.round_reach||[]).filter(row=>Number.isInteger(row.round)&&row.round>=1&&row.round<=request.scheduled_rounds&&probability(row.probability));
+  return `<section class="panel rounds-panel" aria-label="Rounds and duration probabilities"><div class="winner-heading"><div><p class="eyebrow">FIGHT TIME MODEL</p><h3>Rounds & duration</h3></div><span class="winner-scenario">${escapeHtml(request.scheduled_rounds)} scheduled rounds</span></div><div class="duration-highlights"><div><span>Completes scheduled time</span><strong>${percent(report.p_complete_scheduled_time)}</strong><small>Full ${request.scheduled_rounds*5} minutes</small></div><div><span>Finishes early</span><strong>${percent(report.p_finish_early)}</strong><small>Before scheduled time</small></div><div><span>Estimated duration</span><strong>${number(report.expected_duration_minutes,1)}<small> min</small></strong><small>Approximate model mean</small></div></div><div class="round-reach">${reach.map(row=>`<div><span>Starts round ${row.round}</span><div class="reach-track"><i style="width:${row.probability*100}%"></i></div><strong>${percent(row.probability)}</strong></div>`).join('')}</div><div class="table-scroll"><table class="round-threshold-table"><caption>Elapsed round thresholds</caption><thead><tr><th>Round line</th><th>Time</th><th>Over</th><th>Under</th><th>Exact boundary</th></tr></thead><tbody>${thresholds.map(row=>`<tr><th>${number(row.line,1)}</th><td>${Math.floor(row.minutes)}:${String(Math.round((row.minutes%1)*60)).padStart(2,'0')}</td><td>${percent(row.p_over)}</td><td>${percent(row.p_under)}</td><td>${percent(row.p_push)}</td></tr>`).join('')}</tbody></table></div><p class="panel-description">Elapsed fight time. Over 1.5 means lasting longer than 7:30; exact boundaries are listed separately. These are not market settlement rules. Completing scheduled time does not necessarily mean a decision.</p><details class="winner-details"><summary>Time model details & provenance</summary><p class="panel-description">A separate duration model estimates these probabilities independently of strike totals and the winner model. ${escapeHtml(report.mean_approximation||'Expected minutes are an approximation.')}</p><p class="panel-description">Evaluation ${escapeHtml(Array.isArray(evaluation.period)?evaluation.period.join(' → '):evaluation.period||'See time model report')} · ${escapeHtml(factText(evaluation.kind||'Historical evaluation'))}. ${number(evaluation.n_bouts,0)} bouts · Category log loss ${number(evaluation.category_log_loss,4)} · Survival Brier ${number(evaluation.survival_brier,4)} · Completion Brier ${number(evaluation.completion_brier,4)}.</p>${report.warnings?.length?`<ul class="limitation-list">${report.warnings.map(w=>`<li>${escapeHtml(w)}</li>`).join('')}</ul>`:''}<dl class="metadata-list">${metadataRow('Prediction ID',report.prediction_id)}${metadataRow('Model version',report.model_version)}${metadataRow('Feature cutoff',date(report.feature_cutoff))}${metadataRow('Data cutoff',date(report.data_cutoff))}${metadataRow('Artifact SHA256',report.artifact_sha256)}${metadataRow('Source snapshot SHA256',report.source_snapshot_sha256)}${metadataRow('Duration labels SHA256',report.duration_labels_sha256)}</dl><a class="text-link" href="/api/v1/rounds-model">Inspect time model report ↗</a></details></section>`;
+}
+function renderComparison(predictions, context, request, winner=null, winnerError=null, failures=[], rounds=null, roundsError=null) {
   const athletes=[request.fighter_id,request.opponent_id].map(id=>state.fighters.find(f=>String(f.fighter_id)===String(id))||{fighter_id:id,name:'Athlete'});
-const card=(athlete,p,i)=>`<article class="comparison-athlete ${i?'blue-side':'red-side'}">${athletePortrait({...athlete,id:athlete.fighter_id})}<p class="eyebrow">${i?'BLUE':'RED'} SIDE</p><h2>${fighterProfileLink(athlete.fighter_id,athlete.name)}</h2>${p?`<div class="comparison-estimate"><strong>${number(p.mean)}</strong><span>Expected significant strikes</span></div><div class="comparison-range"><span>Median <b>${number(p.median,0)}</b></span><span>${percent(p.interval_level??.8)} range <b>${number(p.interval_low,0)}–${number(p.interval_high,0)}</b></span></div><details class="comparison-probabilities"><summary>Probabilities at ${number(p.line)} strikes</summary><p>Over ${percent(p.p_over)} · Under ${percent(p.p_under)} · Push ${percent(p.p_push)}</p><small>Same hypothetical threshold for each athlete; not a market line.</small></details>`:'<p class="error-message">Forecast unavailable. Submit again to retry.</p>'}</article>`;
+const card=(athlete,p,i)=>`<article class="comparison-athlete ${i?'blue-side':'red-side'}">${athletePortrait({...athlete,id:athlete.fighter_id},true)}<p class="eyebrow">${i?'BLUE':'RED'} SIDE</p><h2>${fighterProfileLink(athlete.fighter_id,athlete.name)}</h2>${currentRankBadge(athlete.fighter_id)}${p?`<div class="comparison-estimate"><strong>${number(p.mean)}</strong><span>Expected significant strikes</span></div><div class="comparison-range"><span>Median <b>${number(p.median,0)}</b></span><span>${percent(p.interval_level??.8)} range <b>${number(p.interval_low,0)}–${number(p.interval_high,0)}</b></span></div><details class="comparison-probabilities"><summary>Probabilities at ${number(p.line)} strikes</summary><p>Over ${percent(p.p_over)} · Under ${percent(p.p_under)} · Push ${percent(p.p_push)}</p><small>Same hypothetical threshold for each athlete; not a market line.</small></details>`:'<p class="error-message">Forecast unavailable. Submit again to retry.</p>'}</article>`;
   $('forecast-result').innerHTML=`<div class="panel comparison-projections"><div class="comparison-title"><div><p class="eyebrow">MODEL PROJECTIONS</p><h3>${escapeHtml(request.scheduled_rounds)}-round matchup</h3></div><span class="pill">HYPOTHETICAL SCENARIO</span></div><div class="comparison-hero">${card(athletes[0],predictions[0],0)}<span class="comparison-versus">VS</span>${card(athletes[1],predictions[1],1)}</div><div class="comparison-chart"><h3>How the count outcomes compare</h3><p class="panel-description">Solid curves show count probabilities; dashed lines mark expected counts. Overlap reflects uncertainty, not a win probability.</p><div class="comparison-legend"><span class="red-side">● ${escapeHtml(athletes[0].name)}</span><span class="blue-side">● ${escapeHtml(athletes[1].name)}</span></div>${comparisonDistribution(predictions)}<p class="panel-description">Displayed PMFs are finite excerpts. Remaining probability beyond the chart: ${predictions.map((p,i)=>`${escapeHtml(athletes[i].name)} ${p?percent(p.tail_probability??p.distribution_tail_probability):'—'}`).join(' · ')}.</p></div><details class="forecast-notes"><summary>Forecast warnings and provenance</summary>${predictions.map((p,i)=>p?`<h4>${escapeHtml(athletes[i].name)}</h4><ul class="warnings">${(p.warnings||[]).map(w=>`<li>${escapeHtml(w)}</li>`).join('')}</ul><p class="provenance">Model ${escapeHtml(p.model_version)} · ID ${escapeHtml(p.prediction_id)}<br>Features through ${escapeHtml(date(p.feature_cutoff))} · Data through ${escapeHtml(date(p.data_cutoff))}</p>`:'').join('')}</details></div><div id="comparison-observed" class="panel data-panel"></div>`;
   bindPortraits($('forecast-result'));
+  $('forecast-result').insertAdjacentHTML('afterbegin',fundamentalsPanel(winner,athletes));
+  $('forecast-result').insertAdjacentHTML('afterbegin',roundsPanel(rounds,athletes,request,roundsError));
+  $('forecast-result').insertAdjacentHTML('afterbegin',winnerPanel(winner,athletes,winnerError));
+  $('forecast-result').insertAdjacentHTML('afterbegin','<aside class="forecast-use-notice" role="note"><strong>Research only · Not betting advice</strong><p>Model estimates can be wrong. Do not use OctogonML to place bets or risk money. You are responsible for how you use these estimates.</p></aside>');
   const hero=$('forecast-result').querySelector('.comparison-hero');
   hero.classList.add('comparison-stage');
   hero.insertBefore($('comparison-observed'),hero.lastElementChild);
@@ -350,23 +431,44 @@ const card=(athlete,p,i)=>`<article class="comparison-athlete ${i?'blue-side':'r
     if(!rows.length)return;
     card.insertAdjacentHTML('beforeend',`<div class="comparison-recent"><h4>Last ${rows.length} observed counts</h4><svg viewBox="0 0 220 100" role="img" aria-label="Recent observed significant strikes, newest first, shared scale across athletes">${rows.map((row,i)=>`<rect x="${i*44+8}" y="${68-Number(row.sig_landed)/recentMax*52}" width="28" height="${Number(row.sig_landed)/recentMax*52}" fill="currentColor" fill-opacity=".7"><title>${escapeHtml(row.event_date)} vs ${escapeHtml(row.opponent_name)}: ${number(row.sig_landed,0)} landed</title></rect><text x="${i*44+22}" y="${Math.max(10,63-Number(row.sig_landed)/recentMax*52)}" fill="currentColor" text-anchor="middle" font-size="10">${number(row.sig_landed,0)}</text><text x="${i*44+22}" y="85" fill="#a7a9af" text-anchor="middle" font-size="8">${escapeHtml(String(row.event_date).slice(2,7))}</text>`).join('')}</svg><p>Actual landed · newest first</p></div>`);
   });
-  const historyPanel=document.createElement('div');historyPanel.className='panel data-panel comparison-history-panel';
-  $('forecast-result').append(historyPanel);
   const dashboard=context?.comparison_dashboard;
   if(dashboard){
     const renderWindow=window=>{
       $('comparison-observed').innerHTML=renderObservedComparison(dashboard,window,athletes);
-      const history=$('comparison-observed').querySelector('.comparison-history');
-      if(history)historyPanel.replaceChildren(history);
       $('comparison-observed').querySelectorAll('[data-history-window]').forEach(button=>button.addEventListener('click',()=>renderWindow(button.dataset.historyWindow)));
     };
     renderWindow('last5');
-  }else {historyPanel.hidden=true;$('comparison-observed').innerHTML='<h3>Observed history unavailable</h3><p class="panel-description">Forecasts remain available. Submit again to retry loading historical comparison data.</p>';}
-  if(context){
-    const details=document.createElement('details');details.className='panel matchup-disclosure';
-    details.innerHTML=`<summary>Why this projection? <span class="text-link">Model sensitivity</span></summary><div class="matchup-context"><h3>Model sensitivity for ${escapeHtml(athletes[0].name)}</h3><p class="panel-description">${escapeHtml(context.explanation_note||'Controlled feature substitutions are model responses, not causal effects or additive attributions. Groups can overlap and must not be summed.')}</p>${(context.explanation||[]).length?`<div class="sensitivity-list">${context.explanation.map(e=>`<div><span>${escapeHtml(e.group)}</span><strong>${Number(e.delta_mean)>0?'+':''}${number(e.delta_mean)} strikes</strong><small>${escapeHtml(e.description)}</small></div>`).join('')}</div>`:'<p class="panel-description">Sensitivity values are unavailable for this artifact.</p>'}</div>`;
-    $('forecast-result').append(details);
-  }
+  }else {$('comparison-observed').innerHTML='<h3>Observed history unavailable</h3><p class="panel-description">Forecasts remain available. Submit again to retry loading historical comparison data.</p>';}
+  appendMatchupAnalysis({winner_prediction_id:winner?.prediction_id,rounds_prediction_id:rounds?.prediction_id,fighter_prediction_id:predictions[0]?.prediction_id,opponent_prediction_id:predictions[1]?.prediction_id},athletes,winner);
+
+}
+function aiGuidancePanel(guidance,athletes,winner) {
+  if(!guidance)return '';
+  const base=[guidance.baseline_p_fighter_win,guidance.baseline_p_opponent_win],adjusted=[guidance.p_fighter_win,guidance.p_opponent_win];
+  const valid=guidance.status==='experimental'&&guidance.validated===false&&[...base,...adjusted].every(value=>Number.isFinite(value)&&value>=0&&value<=1)&&Math.abs(base[0]+base[1]-1)<1e-6&&Math.abs(adjusted[0]+adjusted[1]-1)<1e-6&&Math.abs(base[0]-winner?.p_fighter_win)<1e-6&&Math.abs(base[1]-winner?.p_opponent_win)<1e-6&&adjusted.every((value,index)=>Math.abs(value-base[index])<=.05000001)&&Number.isFinite(guidance.max_shift_percentage_points)&&guidance.max_shift_percentage_points<=5;
+  if(!valid)return '<div class="ai-guidance"><h4>AI-guided estimate</h4><p class="panel-description">The experimental estimate is unavailable because its probability checks did not pass. The ML baseline remains above.</p></div>';
+  const shift=(value,baseline)=>{const delta=(value-baseline)*100;return Math.abs(delta)<.00001?'No change':`${delta>0?'+':''}${number(delta,1)} percentage points`;};
+  const explanation=typeof guidance.explanation==='string'?guidance.explanation:guidance.explanation?.text||'';
+  return `<div class="ai-guidance" aria-label="Experimental AI-guided win estimate"><div class="winner-heading"><h4>AI-guided estimate</h4><span class="pill">EXPERIMENTAL · UNVALIDATED</span></div><div class="ai-guidance-sides">${athletes.map((athlete,index)=>`<div class="${index?'blue':'red'}-side"><strong>${escapeHtml(athlete.name)}</strong><div><span>${percent(base[index])}</span><span aria-hidden="true">→</span><b>${percent(adjusted[index])}</b></div><small>ML baseline → AI-guided · ${shift(adjusted[index],base[index])}</small></div>`).join('')}</div><p>${escapeHtml(explanation)}</p><p class="ai-guidance-warning">Experimental adjustment; backtest performance is not established. The language model can propose a bounded shift of up to ${number(guidance.max_shift_percentage_points,0)} percentage points. ML evaluation scores apply only to the unchanged baseline.</p><details class="winner-details"><summary>Adjustment policy</summary><p class="panel-description">Policy ${escapeHtml(guidance.policy_version)}. Among decisive outcomes. This adjustment is not a trained or calibrated probability model.</p></details></div>`;
+}
+function appendMatchupAnalysis(ids,athletes,winner) {
+  const panel=document.createElement('section');panel.className='panel matchup-analysis';panel.setAttribute('aria-label','Matchup breakdown');panel.setAttribute('aria-live','polite');$('forecast-result').append(panel);
+  const selection=matchupSelectionVersion;
+  const heading='<p class="eyebrow">MATCHUP BREAKDOWN</p><h3>How this fight could unfold</h3>';
+  const load=async()=>{
+    panel.innerHTML=heading+'<div class="analysis-loading"><span class="loading-pulse"></span><p>Building a local breakdown from saved estimates and observed history. This can take up to 90 seconds; your forecasts remain available above.</p></div>';panel.setAttribute('aria-busy','true');
+    if(!ids.winner_prediction_id){panel.innerHTML=heading+'<p class="panel-description">A saved winner forecast is required to build this breakdown. Compare the fighters again when that model is available.</p>';panel.setAttribute('aria-busy','false');return;}
+    try{
+      const report=await api('/api/v1/matchup-analysis',{method:'POST',body:JSON.stringify(Object.fromEntries(Object.entries(ids).filter(([,value])=>Boolean(value))))});
+      if(!panel.isConnected||selection!==matchupSelectionVersion)return;
+      if(report.status!=='ready')throw new Error('The matchup breakdown is not ready.');
+      const claimText=claim=>typeof claim==='string'?claim:claim?.text||'';
+      if(String(report.fighter_case?.fighter_id)!==String(athletes[0].fighter_id)||String(report.opponent_case?.fighter_id)!==String(athletes[1].fighter_id))throw new Error('The breakdown did not match the selected athletes.');
+      const side=(item,athlete,color)=>`<article class="analysis-case ${color}"><h4>${escapeHtml(athlete.name)}</h4>${item?.advantages?.length?`<ul>${item.advantages.map(advantage=>`<li>${escapeHtml(advantage.text)}</li>`).join('')}</ul>`:''}<p>${escapeHtml(claimText(item?.path_to_victory)||'No supported path was returned.')}</p></article>`;
+      panel.innerHTML=heading+`<p class="analysis-summary">${escapeHtml(claimText(report.summary))}</p>${aiGuidancePanel(report.ai_guidance,athletes,winner)}<div class="analysis-cases">${side(report.fighter_case,athletes[0],'red-side')}${side(report.opponent_case,athletes[1],'blue-side')}</div><div class="analysis-key"><span>Key stylistic question</span><p>${escapeHtml(claimText(report.key_matchup)||'No supported factor was returned.')}</p></div>${report.uncertainties?.length?`<div class="analysis-caveats"><h4>What could change the picture</h4><ul>${report.uncertainties.map(note=>`<li>${escapeHtml(note)}</li>`).join('')}</ul></div>`:''}<details class="winner-details"><summary>Sources & analysis details</summary><p class="panel-description">Generated by ${escapeHtml(report.provider)} / ${escapeHtml(report.model)} from saved model outputs. This is a model-based explanation, not certainty or betting advice.</p><dl class="metadata-list">${metadataRow('Analysis ID',report.analysis_id)}${metadataRow('Prompt version',report.prompt_version)}${metadataRow('Evidence SHA256',report.evidence_sha256)}${metadataRow('As of',report.as_of)}${metadataRow('Winner prediction',ids.winner_prediction_id)}${metadataRow('Rounds prediction',ids.rounds_prediction_id)}</dl>${report.evidence?.length?`<ul class="analysis-evidence">${report.evidence.map(row=>`<li><strong>${escapeHtml(row.label||row.id)}</strong> ${escapeHtml(row.text|| (typeof row.value==='object'?JSON.stringify(row.value):row.value))}</li>`).join('')}</ul>`:''}</details>`;
+    }catch(error){if(!panel.isConnected||selection!==matchupSelectionVersion)return;panel.innerHTML=heading+`<p class="panel-description">The written breakdown is unavailable. Your forecasts remain available above.</p><button type="button" class="secondary-button analysis-retry">Retry breakdown ↗</button><details class="winner-details"><summary>Service details</summary><p class="panel-description">${escapeHtml(error.message)}</p></details>`;panel.querySelector('.analysis-retry').addEventListener('click',load);}
+    finally{if(panel.isConnected)panel.setAttribute('aria-busy','false');}
+  };load();
 }
 function renderObservedComparison(dashboard, window, athletes) {
   const pair=dashboard.windows?.[window]||{},a=pair.fighter||{},b=pair.opponent||{};
@@ -396,7 +498,7 @@ function renderObservedComparison(dashboard, window, athletes) {
     const rows=(window==='last5'?items.slice(0,5):items);
     return `<div class="history-column ${side}"><h4>${escapeHtml(name)}</h4>${rows.length?`<div class="table-scroll"><table><thead><tr><th>DATE / OPPONENT</th><th>LANDED</th><th>ABS.</th><th>MIN.</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${escapeHtml(date(row.event_date))}<small>${escapeHtml(row.opponent_name)}</small><small>${escapeHtml(row.method||'')} · ${escapeHtml(row.scheduled_rounds)} rounds</small></td><td>${number(row.sig_landed,0)}</td><td>${number(row.sig_absorbed,0)}</td><td>${number(row.duration_minutes,1)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="panel-description">No covered prior bouts. Rates are unavailable.</p>'}</div>`;
   };
-  return `<div class="observed-heading"><div><p class="eyebrow">OBSERVED HISTORY · NOT A PROJECTION</p><h3>Striking, side by side</h3></div><div class="history-window" role="group" aria-label="Historical sample"><button type="button" data-history-window="last5" aria-pressed="${window==='last5'}">Last 5</button><button type="button" data-history-window="career" aria-pressed="${window==='career'}">All covered</button></div></div><p class="panel-description">${escapeHtml(dashboard.coverage_label||'Covered UFC bouts since 2013')} · History before ${escapeHtml(date(dashboard.as_of))}. Rates aggregate observed counts and time; these are not full MMA career records.</p><div class="sample-comparison"><span class="red-side"><b>${number(a.covered_bouts,0)}</b> bouts · ${number(a.observed_minutes,1)} observed min</span><span class="blue-side"><b>${number(b.covered_bouts,0)}</b> bouts · ${number(b.observed_minutes,1)} observed min</span></div>${rows}<p class="panel-description comparison-scale-note">Each row uses the same scale for both athletes. Net bars share a zero center; left of zero means more absorbed than landed. No bar alone determines matchup advantage.</p><details class="comparison-history"><summary>Fight-by-fight observed history</summary><div class="comparison-history-grid">${history(dashboard.history?.fighter||[],athletes[0].name,'red-side')}${history(dashboard.history?.opponent||[],athletes[1].name,'blue-side')}</div></details><p class="panel-description">${escapeHtml(dashboard.note||'Historical opponent quality, styles, and sample sizes can differ. These summaries are descriptive.')}</p>`;
+  return `<div class="observed-heading"><div><p class="eyebrow">OBSERVED HISTORY · NOT A PROJECTION</p><h3>Striking, side by side</h3></div><div class="history-window" role="group" aria-label="Historical sample"><button type="button" data-history-window="last5" aria-pressed="${window==='last5'}">Last 5</button><button type="button" data-history-window="career" aria-pressed="${window==='career'}">All covered</button></div></div><p class="panel-description">${escapeHtml(dashboard.coverage_label||'Covered UFC bouts since 2013')} · History before ${escapeHtml(date(dashboard.as_of))}. Rates aggregate observed counts and time; these are not full MMA career records.</p><div class="sample-comparison"><span class="red-side"><b>${number(a.covered_bouts,0)}</b> bouts · ${number(a.observed_minutes,1)} observed min</span><span class="blue-side"><b>${number(b.covered_bouts,0)}</b> bouts · ${number(b.observed_minutes,1)} observed min</span></div>${rows}<p class="panel-description comparison-scale-note">Each row uses the same scale for both athletes. Net bars share a zero center; left of zero means more absorbed than landed. No bar alone determines matchup advantage.</p><p class="panel-description">${escapeHtml(dashboard.note||'Historical opponent quality, styles, and sample sizes can differ. These summaries are descriptive.')}</p>`;
 }
 function distributionChart(prediction) {
   let points = (prediction.distribution || [])
@@ -586,7 +688,7 @@ for (const id of ["fighter", "opponent"]) {
   });
 }
 function safeUrl(value) {
-  if (typeof value !== "string") return null;
+  if (typeof value !== "string" || !value.trim()) return null;
   try {
     const parsed = new URL(value, location.origin);
     return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : null;
@@ -716,10 +818,17 @@ const evidenceObserver=new MutationObserver(()=>{
   if(!$('experiments-content'))loadExperiments();
 });
 evidenceObserver.observe($('evidence-content'),{childList:true});
+function ingestFighterPhotos(photos) {
+  const entries=Array.isArray(photos)?photos.map(fighter=>[fighter.fighter_id||fighter.id,fighter]):Object.entries(photos||{});
+  entries.forEach(([id,fighter])=>rememberPhoto({...fighter,fighter_id:fighter.fighter_id||fighter.id||id}));
+}
 function rememberPhoto(fighter) {
   const id = fighter?.fighter_id || fighter?.id;
   const url = fighter?.photo_url || fighter?.image_url || fighter?.photo?.url;
-  if (id && url) state.photos.set(String(id), {url, source: fighter.photo_source_url || fighter.profile_url || fighter.photo?.source_url});
+  const observedAt=fighter?.photo_observed_at||fighter?.observed_at||fighter?.photo?.observed_at;
+  const existing=state.photos.get(String(id));
+  if(existing?.observedAt&&(!observedAt||String(observedAt)<String(existing.observedAt)))return;
+  if (id && url) state.photos.set(String(id), {url, source: fighter.photo_source_url || fighter.profile_url || fighter.photo?.source_url,observedAt,provider:fighter.photo_provider||fighter.provider,alternates:fighter.alternate_photo_urls||fighter.photo?.alternate_photo_urls||[]});
 }
 function addExplorerPhotos(prediction) {
   const panel=$('forecast-result').querySelector('.result-panel');
@@ -738,14 +847,27 @@ function athletePortrait(fighter, compact=false) {
   const identity = String(fighter.id || fighter.fighter_id || '');
   const photo = state.photos.get(identity) || {url:fighter.photo_url||fighter.image_url,source:fighter.photo_source_url};
   const url = photo?.url && safeUrl(photo.url);
+  const candidates=photo?.alternates||fighter.alternate_photo_urls||[];
+  const observed=Array.from(new Set([url,...(Array.isArray(candidates)?candidates:[]).map(safeUrl)].filter(Boolean)));
+  const preferred=url;
+  const alternates=observed.filter(candidate=>candidate!==preferred);
   const initials = (fighter.name || fighter.fighter_name || 'Athlete').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('');
-  return `<div class="athlete-portrait ${compact?'compact':''}"><span class="portrait-initials" aria-hidden="true">${escapeHtml(initials)}</span>${url?`<img src="${escapeHtml(url)}" alt="${escapeHtml(fighter.name||fighter.fighter_name)}" loading="lazy" decoding="async">`:''}</div>`;
+  const provider=String(photo?.provider||fighter.photo_provider||fighter.provider||'').toLowerCase();
+  const headshot=preferred&&/headshots?\b/i.test(new URL(preferred).pathname);
+  return `<div class="athlete-portrait ${compact?'compact':''} ${provider==='ufc'?'official-ufc-portrait':''} ${headshot?'verified-headshot':''}"><span class="portrait-initials" aria-hidden="true">${escapeHtml(initials)}</span>${preferred?`<img src="${escapeHtml(preferred)}" data-photo-fallbacks="${escapeHtml(JSON.stringify(alternates))}" alt="${escapeHtml(fighter.name||fighter.fighter_name)}" loading="lazy" decoding="async">`:''}</div>`;
 }
 function bindPortraits(container) {
   container.querySelectorAll('.athlete-portrait img').forEach(img=>{
-    const failed=()=>{img.remove();};
-    img.addEventListener('error',failed,{once:true});
-    if(img.complete && img.naturalWidth===0)failed();
+    let alternates=[];
+    try{alternates=JSON.parse(img.dataset.photoFallbacks||'[]').filter(value=>safeUrl(value));}catch{alternates=[];}
+    const failed=()=>{
+      const next=alternates.shift();
+      if(next){img.closest('.athlete-portrait')?.classList?.remove('verified-headshot');img.style.objectFit='contain';img.src=next;return;}
+      const caption=img.closest('.profile-portrait')?.querySelector('.profile-photo-caption');
+      if(caption)caption.textContent='Photo unavailable';
+      img.remove();
+    };
+    img.addEventListener('error',failed);
   });
 }
 function fixtureAthlete(fixture, side) {
@@ -777,7 +899,7 @@ function upcomingFightCard(fixture) {
   const confidence=fixture.time_confidence||fixture.schedule_confidence||fixture.schedule_kind;
   const exactTime=fixture.scheduled_at && !['date_only','unknown','tba'].includes(String(confidence).toLowerCase());
   const time=exactTime?new Date(fixture.scheduled_at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'Time TBA';
-return `<article class="fight-card"><div class="fight-card-top"><span>${escapeHtml(fixture.division||fixture.weight_class||'UFC MATCHUP')}</span><span>${rounds?`${escapeHtml(rounds)} ROUNDS`:'ROUNDS TBA'}</span></div><div class="fight-athletes"><div class="fight-athlete">${athletePortrait(fighter)}<h3>${fighterProfileLink(fighter.id,fighter.name)}</h3>${fighterForecast(fixture,fighter,0)}</div><span class="card-versus">VS</span><div class="fight-athlete">${athletePortrait(opponent)}<h3>${fighterProfileLink(opponent.id,opponent.name)}</h3>${fighterForecast(fixture,opponent,1)}</div></div>${fixture.projection_status==='unsupported'?`<p class="card-omission">${escapeHtml(fixture.omission_reason||'This announced matchup does not yet have enough verified information for a forecast.')}</p>`:''}<div class="fight-card-footer"><span title="${escapeHtml(confidence||'Published card or segment time')}">Card start · ${escapeHtml(time)}</span>${source?`<a href="${escapeHtml(source)}" target="_blank" rel="noopener">Fight source ↗</a>`:'<span>Source unavailable</span>'}</div></article>`;
+return `<article class="fight-card"><div class="fight-card-top"><span>${escapeHtml(fixture.division||fixture.weight_class||'UFC MATCHUP')}</span><span>${rounds?`${escapeHtml(rounds)} ROUNDS`:'ROUNDS TBA'}</span></div><div class="fight-athletes"><div class="fight-athlete">${athletePortrait(fighter,true)}<h3>${fighterProfileLink(fighter.id,fighter.name)}</h3>${fighterForecast(fixture,fighter,0)}</div><span class="card-versus">VS</span><div class="fight-athlete">${athletePortrait(opponent,true)}<h3>${fighterProfileLink(opponent.id,opponent.name)}</h3>${fighterForecast(fixture,opponent,1)}</div></div>${fixture.projection_status==='unsupported'?`<p class="card-omission">${escapeHtml(fixture.omission_reason||'This announced matchup does not yet have enough verified information for a forecast.')}</p>`:''}<div class="fight-card-footer"><span title="${escapeHtml(confidence||'Published card or segment time')}">Card start · ${escapeHtml(time)}</span>${source?`<a href="${escapeHtml(source)}" target="_blank" rel="noopener">Fight source ↗</a>`:'<span>Source unavailable</span>'}</div></article>`;
 }
 function renderUpcoming(report) {
   let fixtures=report.fixtures||[];
@@ -795,7 +917,7 @@ function renderUpcoming(report) {
     const when=new Date(`${date(first.event_date||first.scheduled_at)}T12:00:00`);
     return `<section class="event-group" data-calendar-event="${index}" ${index>0?'hidden':''}><div class="event-heading"><div class="event-date"><strong>${escapeHtml(when.toLocaleDateString(undefined,{month:'short'}))}</strong><span>${escapeHtml(when.getDate()||'—')}</span></div><div><p class="eyebrow">${escapeHtml(calendarDate(first.event_date||first.scheduled_at,{weekday:'long',year:'numeric'}))}</p><h3>${escapeHtml(first.event_name||first.name||'UFC event')}</h3>${first.location||first.venue?`<p>${escapeHtml(first.location||first.venue)}</p>`:''}</div>${source?`<a class="event-source" href="${escapeHtml(source)}" target="_blank" rel="noopener">Announcement ↗</a>`:''}</div><div class="fight-card-grid">${group.map(upcomingFightCard).join('')}</div></section>`;
   }).join('');
-  $('upcoming-content').innerHTML=`<div class="calendar-summary"><span>${grouped.size} announced ${grouped.size===1?'event':'events'} · ${fixtures.length} matchups</span><span>Snapshot ${escapeHtml(date(issued))}</span></div><div class="event-filters" aria-label="Choose an announced event">${filters}<button class="event-filter" data-event-index="all" aria-pressed="false"><strong>All cards</strong><span>Through Dec 31</span></button></div>${sections}<div class="calendar-disclosure"><p>Expected significant strikes landed per athlete, not a winner prediction. The 80% range describes possible full-fight outcomes. No market line or betting recommendation is shown.</p><details><summary>Schedule, photos & forecast details</summary><p>${escapeHtml(scheduleNote)}</p><p>Schedule snapshot ${escapeHtml(date(issued))}. Model history through ${escapeHtml(date(report.data_cutoff||report.history_cutoff))}. ${escapeHtml(report.model_version||'')}.</p><p>Fighter photos are sourced from ESPN athlete profiles where available. Missing or unavailable photos use initials. Images identify athletes; this independent project is not affiliated with UFC or ESPN. Published times refer to a card or segment, not individual bout walkouts.</p></details></div>`;
+  $('upcoming-content').innerHTML=`<div class="calendar-summary"><span>${grouped.size} announced ${grouped.size===1?'event':'events'} · ${fixtures.length} matchups</span><span>Snapshot ${escapeHtml(date(issued))}</span></div><div class="event-filters" aria-label="Choose an announced event">${filters}<button class="event-filter" data-event-index="all" aria-pressed="false"><strong>All cards</strong><span>Through Dec 31</span></button></div>${sections}<div class="calendar-disclosure"><p>Research only · Not betting advice. Model estimates can be wrong. Do not use OctogonML to place bets or risk money. You are responsible for how you use these estimates. Counts and 80% ranges describe possible full-bout strike outcomes, not winner predictions.</p><details><summary>Schedule, photos & forecast details</summary><p>${escapeHtml(scheduleNote)}</p><p>Schedule snapshot ${escapeHtml(date(issued))}. Model history through ${escapeHtml(date(report.data_cutoff||report.history_cutoff))}. ${escapeHtml(report.model_version||'')}.</p><p>Fighter photos are sourced from official UFC and ESPN athlete profiles where available. Missing or unavailable photos use initials. Images identify athletes; this independent project is not affiliated with UFC or ESPN. Published times refer to a card or segment, not individual bout walkouts.</p></details></div>`;
   bindPortraits($('upcoming-content'));
   $('upcoming-content').querySelectorAll('[data-event-index]').forEach(button=>button.addEventListener('click',()=>{
     const selected=button.dataset.eventIndex;

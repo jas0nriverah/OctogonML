@@ -15,6 +15,8 @@ from cagemetrics.db import Repository
 from cagemetrics.features import FEATURE_COLUMNS, matchup_features
 from cagemetrics.modeling import ForecastEngine
 from cagemetrics.forward import ForecastBatch, ForecastEntry, create_batch, settle_batch
+from cagemetrics.winner import WinnerEngine
+from cagemetrics.rounds import RoundsEngine
 
 
 @pytest.mark.skipif(
@@ -52,6 +54,53 @@ def test_postgres_migration_ingestion_cutoff_and_prediction_lineage(monkeypatch)
         {k: float(features.iloc[0][k]) for k in FEATURE_COLUMNS}, response, "2026-10-22"
     )
     assert repository.get_prediction(saved["prediction_id"]) == saved
+    winner = WinnerEngine(project / "artifacts" / "winner")
+    winner_result = winner.predict_matchup(repository.dataset(), ids[0], ids[1], 3, "2026-10-22")
+    repository.register_model(winner.metadata, winner.sha256)
+    winner_response = {
+        "fighter": {"id": ids[0]}, "opponent": {"id": ids[1]},
+        "model_version": winner.metadata["model_version"],
+        "p_fighter_win": winner_result["p_fighter_win"],
+        "p_opponent_win": winner_result["p_opponent_win"],
+        "outcome_labels_sha256": winner.outcome_labels_sha256,
+    }
+    saved_winner = repository.record_prediction(
+        winner_result["features"], winner_response, "2026-10-22",
+        kind="winner_hypothetical",
+    )
+    assert repository.get_prediction(
+        saved_winner["prediction_id"], kind="winner_hypothetical"
+    ) == saved_winner
+    assert repository.get_prediction(saved_winner["prediction_id"], kind="hypothetical") is None
+    assert saved_winner["p_fighter_win"] + saved_winner["p_opponent_win"] == pytest.approx(1)
+    duration = RoundsEngine(project / "artifacts" / "rounds")
+    duration_result = duration.predict_matchup(repository.dataset(), ids[0], ids[1], 3, "2026-10-22")
+    repository.register_model(duration.metadata, duration.sha256)
+    duration_response = {
+        "fighter": {"id": ids[0]}, "opponent": {"id": ids[1]},
+        "model_version": duration.metadata["model_version"],
+        "completion_probability": duration_result["completion_probability"],
+        "survival": duration_result["survival"],
+        "duration_labels_sha256": duration.duration_labels_sha256,
+    }
+    saved_duration = repository.record_prediction(
+        duration_result["features"], duration_response, "2026-10-22", kind="rounds_hypothetical"
+    )
+    assert repository.get_prediction(
+        saved_duration["prediction_id"], kind="rounds_hypothetical"
+    ) == saved_duration
+    assert repository.get_prediction(saved_duration["prediction_id"], kind="hypothetical") is None
+    evidence = {"prediction_ids": {"winner": saved_winner["prediction_id"]}, "facts": []}
+    analysis_sha = uuid4().hex * 2
+    analysis = repository.record_analysis(
+        evidence, {"status": "fixture", "guidance": "No model call in storage test"},
+        analysis_sha, repository.latest_snapshot_id(),
+    )
+    assert repository.get_analysis(analysis_id=analysis["analysis_id"]) == analysis
+    assert repository.record_analysis(
+        evidence, {"status": "must not replace original"}, analysis_sha, repository.latest_snapshot_id()
+    ) == analysis
+    assert "matchup_analyses" in inspect(repository.engine).get_table_names()
     # Exercise timezone-aware forward issuance against the actual PostgreSQL types
     # and unique indexes. Test-only fixtures are removed from the designated DB.
     future = datetime.now(timezone.utc) + timedelta(days=2)

@@ -1,0 +1,712 @@
+{
+  "model_version": "winner-63014a4ff111cf48",
+  "label_audit": {
+    "overlap_agreements": 6626,
+    "overlap_conflicts": 0,
+    "identical_duplicate_greco_rows": 25,
+    "bout_scoped_complement_resolutions": [
+      {
+        "bout_id": "781a2ea50f5ae68f",
+        "source_name": "Rafael Cerquiera",
+        "canonical_id": "09a4447655fd4b7b",
+        "exact_opponent_anchor": "6e8f1bcdda94ff45",
+        "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+      },
+      {
+        "bout_id": "b6475543ab6d20c9",
+        "source_name": "Rafael Cerquiera",
+        "canonical_id": "09a4447655fd4b7b",
+        "exact_opponent_anchor": "476fe566d2df676e",
+        "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+      },
+      {
+        "bout_id": "3d6571790c21527c",
+        "source_name": "Rafael Cerquiera",
+        "canonical_id": "09a4447655fd4b7b",
+        "exact_opponent_anchor": "6add18754930182b",
+        "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+      }
+    ],
+    "canonical_bouts": 6639,
+    "decisive_bouts": 6590,
+    "excluded_draws": 49,
+    "excluded_no_contests": 0,
+    "missing_labels": 0,
+    "policy": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+  },
+  "development": [
+    {
+      "year": 2021,
+      "candidate": "elo",
+      "n_bouts": 495,
+      "log_loss": 0.679395853409905,
+      "brier_score": 0.24302434546632812,
+      "accuracy": 0.5717171717171717,
+      "calibration": [
+        {
+          "predicted": 0.23905863545328557,
+          "observed": 1.0,
+          "n": 3
+        },
+        {
+          "predicted": 0.357844474118189,
+          "observed": 0.3333333333333333,
+          "n": 36
+        },
+        {
+          "predicted": 0.4545222069739149,
+          "observed": 0.5298507462686567,
+          "n": 134
+        },
+        {
+          "predicted": 0.5460687391864252,
+          "observed": 0.5892857142857143,
+          "n": 224
+        },
+        {
+          "predicted": 0.6407429563954938,
+          "observed": 0.6071428571428571,
+          "n": 84
+        },
+        {
+          "predicted": 0.7271227158366598,
+          "observed": 0.9,
+          "n": 10
+        },
+        {
+          "predicted": 0.82101379128674,
+          "observed": 0.75,
+          "n": 4
+        }
+      ],
+      "ece": 0.05611128928006659
+    },
+    {
+      "year": 2021,
+      "candidate": "logistic",
+      "n_bouts": 495,
+      "log_loss": 0.6828818871642934,
+      "brier_score": 0.24416816619499473,
+      "accuracy": 0.5969696969696969,
+      "calibration": [
+        {
+          "predicted": 0.261480573591155,
+          "observed": 0.7142857142857143,
+          "n": 7
+        },
+        {
+          "predicted": 0.3703904051426835,
+          "observed": 0.48148148148148145,
+          "n": 27
+        },
+        {
+          "predicted": 0.46277948352942144,
+          "observed": 0.44966442953020136,
+          "n": 149
+        },
+        {
+          "predicted": 0.5414028458029422,
+          "observed": 0.6137339055793991,
+          "n": 233
+        },
+        {
+          "predicted": 0.6334879693420247,
+          "observed": 0.65625,
+          "n": 64
+        },
+        {
+          "predicted": 0.7261949323358515,
+          "observed": 0.8333333333333334,
+          "n": 12
+        },
+        {
+          "predicted": 0.8116119569625402,
+          "observed": 0.5,
+          "n": 2
+        },
+        {
+          "predicted": 0.9057442058491477,
+          "observed": 0.0,
+          "n": 1
+        }
+      ],
+      "ece": 0.059086411946792226
+    },
+    {
+      "year": 2021,
+      "candidate": "hgb",
+      "n_bouts": 495,
+      "log_loss": 0.6748015628970183,
+      "brier_score": 0.2408817848323832,
+      "accuracy": 0.5787878787878787,
+      "calibration": [
+        {
+          "predicted": 0.2826564116411176,
+          "observed": 0.3333333333333333,
+          "n": 3
+        },
+        {
+          "predicted": 0.3660696274701015,
+          "observed": 0.5217391304347826,
+          "n": 46
+        },
+        {
+          "predicted": 0.4535875680109614,
+          "observed": 0.48226950354609927,
+          "n": 141
+        },
+        {
+          "predicted": 0.5520372273973578,
+          "observed": 0.5829145728643216,
+          "n": 199
+        },
+        {
+          "predicted": 0.6383487970246378,
+          "observed": 0.6907216494845361,
+          "n": 97
+        },
+        {
+          "predicted": 0.7159483485541652,
+          "observed": 0.5555555555555556,
+          "n": 9
+        }
+      ],
+      "ece": 0.04853590784935318
+    },
+    {
+      "year": 2022,
+      "candidate": "elo",
+      "n_bouts": 504,
+      "log_loss": 0.6777610774217672,
+      "brier_score": 0.24182083471282922,
+      "accuracy": 0.5793650793650794,
+      "calibration": [
+        {
+          "predicted": 0.14010994297189766,
+          "observed": 1.0,
+          "n": 1
+        },
+        {
+          "predicted": 0.2550712054942785,
+          "observed": 0.4117647058823529,
+          "n": 17
+        },
+        {
+          "predicted": 0.36388802727595304,
+          "observed": 0.4473684210526316,
+          "n": 38
+        },
+        {
+          "predicted": 0.4595566058137028,
+          "observed": 0.5454545454545454,
+          "n": 121
+        },
+        {
+          "predicted": 0.5423124612105934,
+          "observed": 0.6063829787234043,
+          "n": 188
+        },
+        {
+          "predicted": 0.6378904106332711,
+          "observed": 0.6886792452830188,
+          "n": 106
+        },
+        {
+          "predicted": 0.7396491491150655,
+          "observed": 0.625,
+          "n": 24
+        },
+        {
+          "predicted": 0.8388666247914159,
+          "observed": 0.7777777777777778,
+          "n": 9
+        }
+      ],
+      "ece": 0.07503936148977607
+    },
+    {
+      "year": 2022,
+      "candidate": "logistic",
+      "n_bouts": 504,
+      "log_loss": 0.6698595534154048,
+      "brier_score": 0.23876524184600217,
+      "accuracy": 0.5942460317460317,
+      "calibration": [
+        {
+          "predicted": 0.15553664170603598,
+          "observed": 1.0,
+          "n": 1
+        },
+        {
+          "predicted": 0.2590001800931818,
+          "observed": 0.45454545454545453,
+          "n": 11
+        },
+        {
+          "predicted": 0.36501899212450883,
+          "observed": 0.4634146341463415,
+          "n": 41
+        },
+        {
+          "predicted": 0.4591011080795162,
+          "observed": 0.5037037037037037,
+          "n": 135
+        },
+        {
+          "predicted": 0.5416887433416556,
+          "observed": 0.6363636363636364,
+          "n": 220
+        },
+        {
+          "predicted": 0.6425505377330608,
+          "observed": 0.64,
+          "n": 75
+        },
+        {
+          "predicted": 0.7473202188604793,
+          "observed": 0.8571428571428571,
+          "n": 14
+        },
+        {
+          "predicted": 0.8376143261587362,
+          "observed": 1.0,
+          "n": 7
+        }
+      ],
+      "ece": 0.07290677888310886
+    },
+    {
+      "year": 2022,
+      "candidate": "hgb",
+      "n_bouts": 504,
+      "log_loss": 0.6743303325235904,
+      "brier_score": 0.24071398048858839,
+      "accuracy": 0.5843253968253969,
+      "calibration": [
+        {
+          "predicted": 0.27973915042977204,
+          "observed": 1.0,
+          "n": 1
+        },
+        {
+          "predicted": 0.36374112428720995,
+          "observed": 0.390625,
+          "n": 64
+        },
+        {
+          "predicted": 0.4507269223549165,
+          "observed": 0.5615384615384615,
+          "n": 130
+        },
+        {
+          "predicted": 0.5483400585889519,
+          "observed": 0.6388888888888888,
+          "n": 180
+        },
+        {
+          "predicted": 0.6408061314949327,
+          "observed": 0.6574074074074074,
+          "n": 108
+        },
+        {
+          "predicted": 0.7203305651423236,
+          "observed": 0.7142857142857143,
+          "n": 21
+        }
+      ],
+      "ece": 0.0695734089475682
+    },
+    {
+      "year": 2023,
+      "candidate": "elo",
+      "n_bouts": 498,
+      "log_loss": 0.6848030533073308,
+      "brier_score": 0.2459211035094909,
+      "accuracy": 0.5471887550200804,
+      "calibration": [
+        {
+          "predicted": 0.37171971818528626,
+          "observed": 0.36666666666666664,
+          "n": 30
+        },
+        {
+          "predicted": 0.4605175278370756,
+          "observed": 0.5714285714285714,
+          "n": 147
+        },
+        {
+          "predicted": 0.5444117845356428,
+          "observed": 0.5819672131147541,
+          "n": 244
+        },
+        {
+          "predicted": 0.6332609156458127,
+          "observed": 0.6142857142857143,
+          "n": 70
+        },
+        {
+          "predicted": 0.7249300297527125,
+          "observed": 0.8571428571428571,
+          "n": 7
+        }
+      ],
+      "ece": 0.05596946468624403
+    },
+    {
+      "year": 2023,
+      "candidate": "logistic",
+      "n_bouts": 498,
+      "log_loss": 0.6856427236219446,
+      "brier_score": 0.2451217573215003,
+      "accuracy": 0.5753012048192772,
+      "calibration": [
+        {
+          "predicted": 0.06708654619530509,
+          "observed": 1.0,
+          "n": 1
+        },
+        {
+          "predicted": 0.26871057826201444,
+          "observed": 0.4,
+          "n": 5
+        },
+        {
+          "predicted": 0.3638358475556,
+          "observed": 0.5,
+          "n": 50
+        },
+        {
+          "predicted": 0.4564521993932256,
+          "observed": 0.49640287769784175,
+          "n": 139
+        },
+        {
+          "predicted": 0.5445105543741017,
+          "observed": 0.6019417475728155,
+          "n": 206
+        },
+        {
+          "predicted": 0.6410398202425845,
+          "observed": 0.6708860759493671,
+          "n": 79
+        },
+        {
+          "predicted": 0.7394545043104426,
+          "observed": 0.7333333333333333,
+          "n": 15
+        },
+        {
+          "predicted": 0.8351092867538853,
+          "observed": 0.3333333333333333,
+          "n": 3
+        }
+      ],
+      "ece": 0.059711923481416525
+    },
+    {
+      "year": 2023,
+      "candidate": "hgb",
+      "n_bouts": 498,
+      "log_loss": 0.6755173440709917,
+      "brier_score": 0.2412759801691973,
+      "accuracy": 0.5853413654618473,
+      "calibration": [
+        {
+          "predicted": 0.2829766608308697,
+          "observed": 0.25,
+          "n": 4
+        },
+        {
+          "predicted": 0.36736590229251065,
+          "observed": 0.3968253968253968,
+          "n": 63
+        },
+        {
+          "predicted": 0.4562335831386023,
+          "observed": 0.5343511450381679,
+          "n": 131
+        },
+        {
+          "predicted": 0.5446788529460509,
+          "observed": 0.603448275862069,
+          "n": 174
+        },
+        {
+          "predicted": 0.6404454920629283,
+          "observed": 0.672566371681416,
+          "n": 113
+        },
+        {
+          "predicted": 0.7207966842836991,
+          "observed": 0.6923076923076923,
+          "n": 13
+        }
+      ],
+      "ece": 0.053106729493378996
+    }
+  ],
+  "development_log_loss": {
+    "elo": 0.6806442558487137,
+    "logistic": 0.6794160490523832,
+    "hgb": 0.6748810277710537
+  },
+  "selected_candidate": "hgb",
+  "test_period": [
+    "2024-01-01",
+    "2024-12-31"
+  ],
+  "test": {
+    "fair_coin": {
+      "n_bouts": 507,
+      "log_loss": 0.6931471805599453,
+      "brier_score": 0.25,
+      "accuracy": 0.5,
+      "calibration": [
+        {
+          "predicted": 0.5,
+          "observed": 0.5443786982248521,
+          "n": 507
+        }
+      ],
+      "ece": 0.044378698224852076
+    },
+    "elo": {
+      "n_bouts": 507,
+      "log_loss": 0.6819649185887111,
+      "brier_score": 0.24475980994646837,
+      "accuracy": 0.5552268244575936,
+      "calibration": [
+        {
+          "predicted": 0.2543041300395702,
+          "observed": 0.5,
+          "n": 4
+        },
+        {
+          "predicted": 0.3583658743822212,
+          "observed": 0.4838709677419355,
+          "n": 31
+        },
+        {
+          "predicted": 0.45450171795035377,
+          "observed": 0.4864864864864865,
+          "n": 148
+        },
+        {
+          "predicted": 0.5467980624365399,
+          "observed": 0.5580357142857143,
+          "n": 224
+        },
+        {
+          "predicted": 0.6460728882533892,
+          "observed": 0.5662650602409639,
+          "n": 83
+        },
+        {
+          "predicted": 0.7327256664408083,
+          "observed": 0.8666666666666667,
+          "n": 15
+        },
+        {
+          "predicted": 0.83723670755773,
+          "observed": 1.0,
+          "n": 2
+        }
+      ],
+      "ece": 0.04158404821471258
+    },
+    "hgb": {
+      "n_bouts": 507,
+      "log_loss": 0.6746318575122134,
+      "brier_score": 0.2409645639444907,
+      "accuracy": 0.5779092702169625,
+      "calibration": [
+        {
+          "predicted": 0.19603464963498887,
+          "observed": 0.0,
+          "n": 1
+        },
+        {
+          "predicted": 0.26419110751642244,
+          "observed": 0.21428571428571427,
+          "n": 14
+        },
+        {
+          "predicted": 0.3563731364409124,
+          "observed": 0.4588235294117647,
+          "n": 85
+        },
+        {
+          "predicted": 0.44982713417771625,
+          "observed": 0.4954954954954955,
+          "n": 111
+        },
+        {
+          "predicted": 0.547945971259346,
+          "observed": 0.5492957746478874,
+          "n": 142
+        },
+        {
+          "predicted": 0.6455038678010087,
+          "observed": 0.6481481481481481,
+          "n": 108
+        },
+        {
+          "predicted": 0.7268917997879866,
+          "observed": 0.6666666666666666,
+          "n": 45
+        },
+        {
+          "predicted": 0.8232858599392565,
+          "observed": 1.0,
+          "n": 1
+        }
+      ],
+      "ece": 0.03557451903914187
+    }
+  },
+  "evaluation": {
+    "n_bouts": 507,
+    "log_loss": 0.6746318575122134,
+    "brier_score": 0.2409645639444907,
+    "accuracy": 0.5779092702169625,
+    "calibration": [
+      {
+        "predicted": 0.19603464963498887,
+        "observed": 0.0,
+        "n": 1
+      },
+      {
+        "predicted": 0.26419110751642244,
+        "observed": 0.21428571428571427,
+        "n": 14
+      },
+      {
+        "predicted": 0.3563731364409124,
+        "observed": 0.4588235294117647,
+        "n": 85
+      },
+      {
+        "predicted": 0.44982713417771625,
+        "observed": 0.4954954954954955,
+        "n": 111
+      },
+      {
+        "predicted": 0.547945971259346,
+        "observed": 0.5492957746478874,
+        "n": 142
+      },
+      {
+        "predicted": 0.6455038678010087,
+        "observed": 0.6481481481481481,
+        "n": 108
+      },
+      {
+        "predicted": 0.7268917997879866,
+        "observed": 0.6666666666666666,
+        "n": 45
+      },
+      {
+        "predicted": 0.8232858599392565,
+        "observed": 1.0,
+        "n": 1
+      }
+    ],
+    "ece": 0.03557451903914187,
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "retrospective winner temporal comparison; weight-feature revision selected on 2021\u20132023 only; 2024 was previously inspected"
+  },
+  "protocol": {
+    "revision": "prior-division-weight-contrasts-v2",
+    "weight_features": "Strictly earlier observed division limits from shared parse_division; signed limit difference/100, antisymmetric missingness, signed gap times symmetric mean log-experience, mean known limit/200 times last5 pace contrast; no upcoming bout division or measured-bodyweight inference.",
+    "candidates": [
+      "elo",
+      "logistic",
+      "hgb"
+    ],
+    "seed": 42,
+    "elo": {
+      "initial_rating": 1500.0,
+      "k": 32.0,
+      "scale": 400.0,
+      "draw_policy": "exclude from rating updates"
+    },
+    "logistic": {
+      "C": 0.1,
+      "fit_intercept": false,
+      "max_iter": 1000,
+      "scaler": "standard deviation only; no centering"
+    },
+    "hgb": {
+      "max_iter": 120,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 60,
+      "l2_regularization": 10.0,
+      "learning_rate": 0.05,
+      "early_stopping": false
+    },
+    "symmetry": "Fit mirrored contrasts and labels; average p(x) with 1-p(-x); zero-intercept temperature calibration preserves complements.",
+    "calibration": "Minimize calibration log loss over log-temperature in [-1.5, 1.5]; mean models never fit calibration rows.",
+    "development_years": [
+      2021,
+      2022,
+      2023
+    ],
+    "selection": "minimum pooled development log loss",
+    "test_year": 2024,
+    "annual_split": "Train before preceding July 1; calibrate July\u2013December; evaluate next calendar year.",
+    "deployment_train_before": "2026-07-01",
+    "deployment_calibration_before": "2026-10-18",
+    "label_scope": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+  },
+  "warnings": [
+    "Win probabilities are conditional on a decisive result; draw/no-contest probability is not modeled.",
+    "Only covered UFC history is available; missing earlier history and sparse histories limit reliability.",
+    "2024 winner outcomes were inspected in the initial 38-feature study; this weight-feature revision is a retrospective temporal comparison, not a fresh holdout.",
+    "Weight inputs are prior observed division limits, not measured current body weights; cross-division winner evidence is limited.",
+    "Future winner accuracy and calibration require prospective evaluation; this is not a market probability or betting recommendation."
+  ],
+  "accuracy_tie_policy": "Exact 0.5 probabilities receive expected tie accuracy 0.5; no source-first advantage.",
+  "test_paired_event_bootstrap": {
+    "elo": {
+      "events": 42,
+      "resamples": 2000,
+      "direction": "Negative favors selected classifier",
+      "log_loss": {
+        "difference": -0.007333061076497846,
+        "ci_95": [
+          -0.022606384082505974,
+          0.0069635765479428135
+        ]
+      },
+      "brier_score": {
+        "difference": -0.003795246001977672,
+        "ci_95": [
+          -0.010914120313983242,
+          0.0028089303002746236
+        ]
+      }
+    },
+    "fair_coin": {
+      "events": 42,
+      "resamples": 2000,
+      "direction": "Negative favors selected classifier",
+      "log_loss": {
+        "difference": -0.01851532304773194,
+        "ci_95": [
+          -0.038463106872113254,
+          -0.0004006651694236248
+        ]
+      },
+      "brier_score": {
+        "difference": -0.009035436055509308,
+        "ci_95": [
+          -0.018539635486025347,
+          -0.000444442878267553
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "overlap_agreements": 6626,
+  "overlap_conflicts": 0,
+  "identical_duplicate_greco_rows": 25,
+  "bout_scoped_complement_resolutions": [
+    {
+      "bout_id": "781a2ea50f5ae68f",
+      "source_name": "Rafael Cerquiera",
+      "canonical_id": "09a4447655fd4b7b",
+      "exact_opponent_anchor": "6e8f1bcdda94ff45",
+      "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+    },
+    {
+      "bout_id": "b6475543ab6d20c9",
+      "source_name": "Rafael Cerquiera",
+      "canonical_id": "09a4447655fd4b7b",
+      "exact_opponent_anchor": "476fe566d2df676e",
+      "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+    },
+    {
+      "bout_id": "3d6571790c21527c",
+      "source_name": "Rafael Cerquiera",
+      "canonical_id": "09a4447655fd4b7b",
+      "exact_opponent_anchor": "6add18754930182b",
+      "rule": "Exact two-athlete bout ID plus one exact source-profile identity uniquely determines the other side; no fuzzy matching."
+    }
+  ],
+  "canonical_bouts": 6639,
+  "decisive_bouts": 6590,
+  "excluded_draws": 49,
+  "excluded_no_contests": 0,
+  "missing_labels": 0,
+  "policy": "W/L decisive canonical bouts only; exclude draws,NCs,overturned and canonical-pipeline exclusions."
+}

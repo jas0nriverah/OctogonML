@@ -12,6 +12,7 @@ COPY migrations ./migrations
 COPY artifacts ./artifacts
 COPY data/processed ./data/processed
 COPY data/schedules ./data/schedules
+COPY data/rankings ./data/rankings
 COPY data/fighter_photos.json ./data/fighter_photos.json
 COPY data/licenses ./data/licenses
 COPY data/ATTRIBUTION.md ./data/ATTRIBUTION.md

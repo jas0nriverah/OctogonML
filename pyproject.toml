@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cagemetrics"
-version = "0.3.0"
-description = "Point-in-time UFC significant-strike forecasting, SQL pipelines, and a FastAPI inference service."
+version = "0.4.0"
+description = "UFC strike forecasts, calibrated win probabilities, SQL pipelines, and FastAPI inference."
 requires-python = ">=3.11,<3.15"
 dependencies = [
   "fastapi>=0.115,<1", "uvicorn>=0.30,<1", "sqlalchemy>=2.0,<3",

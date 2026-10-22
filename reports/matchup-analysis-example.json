@@ -1,0 +1,418 @@
+{
+  "summary": {
+    "text": "The saved ML model estimates Ilia Topuria at 78.1% and Viacheslav Borshchev at 21.9% to win, conditional on a decisive result.",
+    "evidence_ids": [
+      "model.outcome"
+    ]
+  },
+  "fighter_case": {
+    "fighter_id": "54f64b5e283b0ce7",
+    "advantages": [
+      {
+        "text": "Ilia Topuria has the higher observed takedown rate per 15 minutes: Ilia Topuria 1.33 versus Viacheslav Borshchev 0.00. This supports a conditional tactical possibility, not a guaranteed way to win.",
+        "evidence_ids": [
+          "comparison.last5_td_landed_per_minute"
+        ]
+      }
+    ],
+    "path_to_victory": {
+      "text": "If Ilia Topuria creates takedown opportunities and sustains control, grappling could improve the chance of winning.",
+      "evidence_ids": [
+        "fighter.last5_td_landed_per_minute",
+        "fighter.last5_control_seconds_per_minute"
+      ]
+    }
+  },
+  "opponent_case": {
+    "fighter_id": "19c591115a58982c",
+    "advantages": [],
+    "path_to_victory": {
+      "text": "If Viacheslav Borshchev extends control while limiting opposing offense, controlled exchanges could improve the chance of winning.",
+      "evidence_ids": [
+        "opponent.last5_control_seconds_per_minute"
+      ]
+    }
+  },
+  "key_matchup": {
+    "text": "Ilia Topuria has the higher observed control minutes per 15 minutes: Ilia Topuria 1.76 versus Viacheslav Borshchev 1.02. This supports a conditional tactical possibility, not a guaranteed way to win.",
+    "evidence_ids": [
+      "comparison.last5_control_seconds_per_minute"
+    ]
+  },
+  "uncertainties": [
+    "Frozen data may omit recent fights and changes in style.",
+    "Ranking snapshots and model inputs may have different observation dates."
+  ],
+  "probability_adjustment": {
+    "favor_fighter_id": "54f64b5e283b0ce7",
+    "delta_percentage_points": 0.0,
+    "rationale": {
+      "text": "The supplied observations do not establish an additional validated signal beyond the saved model.",
+      "evidence_ids": [
+        "model.outcome"
+      ]
+    }
+  },
+  "provider": "ollama",
+  "model": "qwen3:4b",
+  "served_model": "qwen3:4b",
+  "prompt_version": "grounded-matchup-v3-ai5pp-catalogue-2bbad14bab04",
+  "evidence_sha256": "232584544f8fafe55e1c5d45569426533dde1bc5c7a22541b90ee4a5cb518094",
+  "evidence_used_ids": [
+    "model.outcome",
+    "model.scope",
+    "fighter.sig_landed_per_min",
+    "fighter.sig_absorbed_per_min",
+    "fighter.last5_td_landed_per_minute",
+    "fighter.last5_knockdowns_per_minute",
+    "fighter.last5_control_seconds_per_minute",
+    "opponent.sig_landed_per_min",
+    "opponent.sig_absorbed_per_min",
+    "opponent.last5_sub_attempted_per_minute",
+    "opponent.last5_control_seconds_per_minute",
+    "comparison.sig_landed_per_min",
+    "comparison.sig_absorbed_per_min",
+    "comparison.last5_td_landed_per_minute",
+    "comparison.last5_knockdowns_per_minute",
+    "comparison.last5_control_seconds_per_minute",
+    "ranking.observation4",
+    "ranking.observation64",
+    "fighter.model_rank",
+    "fighter.recent2",
+    "opponent.model_rank",
+    "opponent.recent2",
+    "fighter.sample",
+    "opponent.sample"
+  ],
+  "output_sha256": "7a7c02b166d5ccf1c8322d94ec632afb2b76d903175782a8d1412f8732a23844",
+  "generated_at": "2026-10-22T20:54:04.214097+00:00",
+  "provider_response_id": null,
+  "cached": false,
+  "validation": [
+    "schema",
+    "fighter_identity",
+    "evidence_references",
+    "cited_numbers",
+    "conditional_paths"
+  ],
+  "guidance_policy": "bounded-ai-guidance-v1-max5pp-untested",
+  "tactical_route_policy": "observed-style-route-selection-v1",
+  "narrative_mode": "llm_selected_evidence_and_conditional_routes",
+  "status": "ready",
+  "ai_guidance": {
+    "status": "experimental",
+    "validated": false,
+    "baseline_p_fighter_win": 0.7807959850445853,
+    "baseline_p_opponent_win": 0.21920401495541475,
+    "p_fighter_win": 0.7807959850445853,
+    "p_opponent_win": 0.21920401495541475,
+    "applied_shift_percentage_points": 0.0,
+    "max_shift_percentage_points": 5,
+    "policy_version": "bounded-ai-guidance-v1-max5pp-untested",
+    "explanation": {
+      "text": "The supplied observations do not establish an additional validated signal beyond the saved model.",
+      "evidence_ids": [
+        "model.outcome"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "model.outcome",
+      "text": "The saved ML model estimates Ilia Topuria at 78.1% and Viacheslav Borshchev at 21.9% to win, conditional on a decisive result.",
+      "fighter_id": null,
+      "source_url": null
+    },
+    {
+      "id": "model.scope",
+      "text": "This is a hypothetical 3-round matchup. Completed UFC history ends 2026-10-17; features are frozen before 2026-10-22. Draws and no contests are outside the winner model's scope. These are research estimates, not betting advice.",
+      "fighter_id": null,
+      "source_url": null
+    },
+    {
+      "id": "model.evaluation",
+      "text": "The ML model's retrospective evaluation accuracy is 63.9%; this does not validate an AI adjustment or guarantee this fight.",
+      "fighter_id": null,
+      "source_url": null
+    },
+    {
+      "id": "fighter.sample",
+      "text": "Ilia Topuria's observed sample is 5 prior UFC bouts and 67.5 minutes, using at most the last five covered bouts.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.sig_landed_per_min",
+      "text": "Ilia Topuria: 5.63 significant strikes landed per minute in that observed sample.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.sig_absorbed_per_min",
+      "text": "Ilia Topuria: 4.63 significant strikes absorbed per minute in that observed sample.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.accuracy",
+      "text": "Ilia Topuria: 50.26% significant-strike accuracy in that observed sample.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.defense",
+      "text": "Ilia Topuria: 62.01% share of opposing significant-strike attempts avoided in that observed sample.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.age",
+      "text": "Ilia Topuria: 29.75 years old at the scenario date. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.height_cm",
+      "text": "Ilia Topuria: 170.18 cm in retained height observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.reach_cm",
+      "text": "Ilia Topuria: 175.26 cm in retained reach observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.last5_td_landed_per_minute",
+      "text": "Ilia Topuria: 1.33 takedowns landed per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.last5_sub_attempted_per_minute",
+      "text": "Ilia Topuria: 0.00 submission attempts per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.last5_knockdowns_per_minute",
+      "text": "Ilia Topuria: 1.11 knockdowns per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.last5_control_seconds_per_minute",
+      "text": "Ilia Topuria: 1.76 minutes of control per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.model_rank",
+      "text": "Ilia Topuria's dated ranking input is unavailable or stale in this frozen model. Missing ranking evidence does not mean the fighter is unranked.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.recent0",
+      "text": "On 2024-10-26, Ilia Topuria won against Max Holloway in the retained completed UFC results.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.recent1",
+      "text": "On 2025-06-28, Ilia Topuria won against Charles Oliveira in the retained completed UFC results.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "fighter.recent2",
+      "text": "On 2026-06-14, Ilia Topuria lost against Justin Gaethje in the retained completed UFC results.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "opponent.sample",
+      "text": "Viacheslav Borshchev's observed sample is 5 prior UFC bouts and 53.9 minutes, using at most the last five covered bouts.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.sig_landed_per_min",
+      "text": "Viacheslav Borshchev: 4.28 significant strikes landed per minute in that observed sample.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.sig_absorbed_per_min",
+      "text": "Viacheslav Borshchev: 4.90 significant strikes absorbed per minute in that observed sample.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.accuracy",
+      "text": "Viacheslav Borshchev: 42.54% significant-strike accuracy in that observed sample.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.defense",
+      "text": "Viacheslav Borshchev: 57.96% share of opposing significant-strike attempts avoided in that observed sample.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.age",
+      "text": "Viacheslav Borshchev: 34.79 years old at the scenario date. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.height_cm",
+      "text": "Viacheslav Borshchev: 180.34 cm in retained height observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.reach_cm",
+      "text": "Viacheslav Borshchev: 175.26 cm in retained reach observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.last5_td_landed_per_minute",
+      "text": "Viacheslav Borshchev: 0.00 takedowns landed per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.last5_sub_attempted_per_minute",
+      "text": "Viacheslav Borshchev: 0.28 submission attempts per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.last5_knockdowns_per_minute",
+      "text": "Viacheslav Borshchev: 0.00 knockdowns per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.last5_control_seconds_per_minute",
+      "text": "Viacheslav Borshchev: 1.02 minutes of control per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.model_rank",
+      "text": "Viacheslav Borshchev's dated ranking input is unavailable or stale in this frozen model. Missing ranking evidence does not mean the fighter is unranked.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.recent0",
+      "text": "On 2025-02-08, Viacheslav Borshchev lost against Tom Nolan in the retained completed UFC results.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.recent1",
+      "text": "On 2025-06-28, Viacheslav Borshchev lost against Terrance McKinney in the retained completed UFC results.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "opponent.recent2",
+      "text": "On 2025-11-15, Viacheslav Borshchev lost against Matheus Camilo in the retained completed UFC results.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "comparison.sig_landed_per_min",
+      "text": "Ilia Topuria has the higher observed striking output: Ilia Topuria 5.63 versus Viacheslav Borshchev 4.28. The samples involve different opponents and do not prove a causal matchup advantage.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "comparison.sig_absorbed_per_min",
+      "text": "Ilia Topuria has the lower observed strikes absorbed per minute: Ilia Topuria 4.63 versus Viacheslav Borshchev 4.90. The samples involve different opponents and do not prove a causal matchup advantage.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "comparison.last5_td_landed_per_minute",
+      "text": "Ilia Topuria has the higher observed takedown rate per 15 minutes: Ilia Topuria 1.33 versus Viacheslav Borshchev 0.00. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "comparison.last5_knockdowns_per_minute",
+      "text": "Ilia Topuria has the higher observed knockdown rate per 15 minutes: Ilia Topuria 1.11 versus Viacheslav Borshchev 0.00. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "comparison.last5_control_seconds_per_minute",
+      "text": "Ilia Topuria has the higher observed control minutes per 15 minutes: Ilia Topuria 1.76 versus Viacheslav Borshchev 1.02. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "model.duration",
+      "text": "The separate duration model estimates 36.3% probability of completing scheduled time. Completion includes a stoppage recorded at the final bell; it does not establish a decision or a winner.",
+      "fighter_id": null,
+      "source_url": null
+    },
+    {
+      "id": "model.fighter_strikes",
+      "text": "The separate strike model estimates 59.1 significant strikes for Ilia Topuria. More projected strikes do not establish a higher win probability.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": null
+    },
+    {
+      "id": "model.opponent_strikes",
+      "text": "The separate strike model estimates 55.3 significant strikes for Viacheslav Borshchev. More projected strikes do not establish a higher win probability.",
+      "fighter_id": "19c591115a58982c",
+      "source_url": null
+    },
+    {
+      "id": "ranking.observation4",
+      "text": "Official UFC page observation 2026-10-22T20:17:16.420435+00:00: Ilia Topuria listed as rank 5 in Men's Pound-for-Pound. The page publishes no explicit board date; this display observation is separate from frozen model inputs.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": "https://www.ufc.com/rankings"
+    },
+    {
+      "id": "ranking.observation64",
+      "text": "Official UFC page observation 2026-10-22T20:17:16.420435+00:00: Ilia Topuria listed as rank 1 in Lightweight. The page publishes no explicit board date; this display observation is separate from frozen model inputs.",
+      "fighter_id": "54f64b5e283b0ce7",
+      "source_url": "https://www.ufc.com/rankings"
+    }
+  ],
+  "prediction_ids": {
+    "winner": "4b9e86fd-2453-4f2d-b874-b311a18e2829",
+    "rounds": "8e2cf0db-98ab-455a-9c02-6e4040372d31",
+    "fighter_strikes": "f8eb4df3-c9e1-4b08-8e76-6017c899745d",
+    "opponent_strikes": "bea9ba0b-bfdb-4b5d-864c-43ae4c87da45"
+  },
+  "model_versions": {
+    "winner": "winner-v2-d04e8f09a8abcbb4",
+    "rounds": "rounds-8f9fc4ebaff2963e",
+    "fighter_strikes": "v3-5108e9766d66f10b",
+    "opponent_strikes": "v3-5108e9766d66f10b",
+    "narrator": "qwen3:4b@359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+  },
+  "as_of": "2026-10-22",
+  "ranking_snapshot": {
+    "source_url": "https://www.ufc.com/rankings",
+    "observed_at": "2026-10-22T20:17:16.420435+00:00",
+    "published_board_date": null,
+    "sha256": "2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0",
+    "source_cache": "rankings/raw/2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0.html.gz"
+  },
+  "warnings": [
+    "Research only, not betting advice. Model estimates can be wrong; do not use them to place bets or risk money. You are responsible for how you use these estimates.",
+    "AI guidance is experimental; its backtest performance is not established."
+  ],
+  "analysis_id": "c3b4cb64-6401-4c5c-96bd-5b16084e91d1",
+  "created_at": "2026-10-22T20:54:04.296532+00:00"
+}

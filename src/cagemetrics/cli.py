@@ -69,7 +69,11 @@ async def benchmark(settings, url, requests, concurrency, warmup, workload="mixe
         metadata_response = await client.get("/api/v1/models/current")
         metadata_response.raise_for_status()
         metadata = metadata_response.json()
-        fighters = (await client.get("/api/v1/fighters?limit=2")).json()["fighters"]
+        roster = await client.get("/api/v1/fighter-directory?division=Lightweight&per_page=2")
+        roster.raise_for_status()
+        fighters = roster.json()["fighters"]
+        if len(fighters) < 2:
+            raise ValueError("The benchmark requires two fighters with covered lightweight history")
         payload = {
             "fighter_id": fighters[0]["fighter_id"],
             "opponent_id": fighters[1]["fighter_id"],
@@ -164,6 +168,9 @@ def main(argv=None):
             "bootstrap",
             "experiment",
             "research",
+            "train-winner",
+            "train-rounds",
+            "train-winner-v2",
             "forward-issue",
             "forward-settle",
             "forward-export",
@@ -353,7 +360,7 @@ def main(argv=None):
                 import shutil
 
                 source_data = settings.project_dir / "data"
-                for name in ("schedules", "fighter_photos.json"):
+                for name in ("schedules", "rankings", "fighter_photos.json"):
                     source, target = source_data / name, settings.data_dir / name
                     if source.exists() and source.resolve() != target.resolve() and not target.exists():
                         if source.is_dir():
@@ -441,6 +448,53 @@ def main(argv=None):
                     "promotion_passed": report["promotion_passed"],
                     "model_version": report.get("model_version"),
                 }
+            )
+        if args.command == "train-winner":
+            from .winner import WinnerEngine, run_winner_study
+
+            bundle = repository.dataset()
+            target = settings.artifact_dir / "winner"
+            reused = (target / "metadata.json").exists()
+            report = WinnerEngine(target).prepare(bundle).metadata if reused else run_winner_study(
+                bundle, settings.data_dir, target, settings.report_dir
+            )
+            _output(
+                {
+                    "stage": "train-winner",
+                    "selected_candidate": report.get("selected_candidate", report.get("candidate")),
+                    "model_version": report["model_version"],
+                    "evaluation": report.get("evaluation", {}),
+                    "reused_verified_artifact": reused,
+                }
+            )
+        if args.command == "train-rounds":
+            from .rounds import RoundsEngine, run_rounds_study
+
+            bundle = repository.dataset()
+            target = settings.artifact_dir / "rounds"
+            reused = (target / "metadata.json").exists()
+            report = RoundsEngine(target).prepare(bundle).metadata if reused else run_rounds_study(
+                bundle, target, settings.report_dir
+            )
+            _output(
+                {
+                    "stage": "train-rounds",
+                    "selected_candidate": report.get("selected_candidate", report.get("candidate")),
+                    "model_version": report["model_version"],
+                    "evaluation": report.get("evaluation", {}),
+                    "reused_verified_artifact": reused,
+                }
+            )
+        if args.command == "train-winner-v2":
+            from .winner_v2 import run_winner_v2_study
+
+            report = run_winner_v2_study(
+                repository.dataset(), settings.data_dir, settings.artifact_dir / "winner_v2",
+                settings.report_dir, settings.artifact_dir / "winner",
+            )
+            _output(
+                {"stage": "train-winner-v2", "model_version": report["model_version"],
+                 "promotion_passed": report["promotion_passed"], "evaluation": report.get("evaluation", {})}
             )
         if args.command == "features":
             from .features import build_features

@@ -1,0 +1,13 @@
+{
+  "selected": "hgb",
+  "development_log_loss": {
+    "elo": 0.6806442558487137,
+    "logistic": 0.6794160490523832,
+    "hgb": 0.6748810277710537
+  },
+  "selection_years": [
+    2021,
+    2022,
+    2023
+  ]
+}

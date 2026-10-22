@@ -17,7 +17,7 @@ services:
     ports: ["127.0.0.1:8000:8000"]
     environment:
       DATABASE_URL: postgresql+psycopg://cagemetrics:${POSTGRES_PASSWORD:-cagemetrics_dev}@database:5432/cagemetrics
-      CAGEMETRICS_MODEL_CHANNEL: v2
+      CAGEMETRICS_MODEL_CHANNEL: auto
     volumes:
       - app-data:/var/lib/cagemetrics
     depends_on:
