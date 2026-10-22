@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: cagemetrics
+    runtime: python
+    buildCommand: pip install -c requirements-lock.txt -e '.[postgres]' && cagemetrics demo
+    startCommand: cagemetrics serve --host 0.0.0.0
+    healthCheckPath: /health/ready
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"

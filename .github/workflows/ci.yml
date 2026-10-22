@@ -1,0 +1,30 @@
+name: Validate pipeline and API
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cagemetrics
+          POSTGRES_PASSWORD: cagemetrics
+          POSTGRES_DB: cagemetrics_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      CAGEMETRICS_TEST_DATABASE_URL: postgresql+psycopg://cagemetrics:cagemetrics@localhost:5432/cagemetrics_test
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -c requirements-lock.txt -e '.[dev,postgres]'
+      - run: ruff check src tests migrations
+      - run: pytest --cov=cagemetrics --cov-report=term-missing
+      - run: node --check src/cagemetrics/web/app.js

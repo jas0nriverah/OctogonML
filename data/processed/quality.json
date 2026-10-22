@@ -1,0 +1,16 @@
+{
+  "fights": 6639,
+  "fighters": 2074,
+  "athlete_outcomes": 13278,
+  "min_event_date": "2013-02-16",
+  "max_event_date": "2026-10-17",
+  "recent_bouts": 25,
+  "recent_athlete_outcomes": 50,
+  "quarantine": [],
+  "identity_aliases": {
+    "Nick Galanti": "Nicholas Galanti"
+  },
+  "excluded_base_bouts": 117,
+  "overlap_labels_compared": 13474,
+  "overlap_label_disagreements": 0
+}

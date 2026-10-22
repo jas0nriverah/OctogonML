@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#111c25" />
+    <title>CageMetrics · Significant strike intelligence</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="brand" href="/" aria-label="CageMetrics home"
+        ><span class="brand-icon">C<span>M</span></span
+        ><span
+          >CAGE<span class="brand-light">METRICS</span
+          ><small>MIXED MARTIAL ARTS / ANALYTICS LAB</small></span
+        ></a
+      >
+      <div class="header-status">
+        <span class="status-dot"></span
+        ><span id="service-status">CONNECTING TO MODEL</span>
+      </div>
+      <a class="api-link" href="/docs"
+        >API DOCS <span aria-hidden="true">↗</span></a
+      >
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">THE NUMBERS BEHIND THE MATCHUP</p>
+          <h1>Every strike has<br />a distribution.</h1>
+          <p class="intro-copy">
+            Explore significant strike forecasts, test them against recent
+            fights, and inspect the evidence behind the model.
+          </p>
+        </div>
+        <aside class="intro-note">
+          <span class="note-number">01 / 03</span>
+          <p>Estimate the range.<br />Understand the uncertainty.</p>
+          <span class="mini-rule"></span
+          ><small
+            >PUBLIC DATA. REPRODUCIBLE MODELS.<br />NO LIVE BETTING FEED.</small
+          >
+        </aside>
+      </section>
+      <section class="summary-strip" id="summary" aria-label="Dataset summary">
+        <div>
+          <span>HISTORICAL BOUTS</span><strong id="summary-bouts">—</strong>
+        </div>
+        <div><span>ATHLETES</span><strong id="summary-fighters">—</strong></div>
+        <div><span>LATEST DATA</span><strong id="summary-date">—</strong></div>
+        <div>
+          <span>MODEL VERSION</span><strong id="summary-model">—</strong>
+        </div>
+      </section>
+      <nav class="tabs" aria-label="Analysis views">
+        <button class="tab active" data-view="explorer" aria-selected="true">
+          01 <span>Forecast Explorer</span></button
+        ><button class="tab" data-view="recent" aria-selected="false">
+          02 <span>Recent Cards</span></button
+        ><button class="tab" data-view="evidence" aria-selected="false">
+          03 <span>Model Evidence</span>
+        </button>
+      </nav>
+      <section id="view-explorer" class="view">
+        <div class="explorer-layout">
+          <form id="forecast-form" class="panel matchup-panel">
+            <div class="panel-heading">
+              <span class="eyebrow">BUILD A SCENARIO</span
+              ><span class="small-label">PRE-FIGHT / FULL BOUT</span>
+            </div>
+            <h2>The matchup</h2>
+            <label for="fighter">Forecast athlete</label
+            ><input
+              class="fighter-search"
+              id="fighter-search"
+              type="search"
+              placeholder="Find an athlete…"
+              aria-label="Search forecast athletes"
+              autocomplete="off"
+            /><select id="fighter" name="fighter_id" required disabled>
+              <option>Loading athletes…</option>
+            </select>
+            <div class="versus"><span></span>VS<span></span></div>
+            <label for="opponent">Opponent</label
+            ><input
+              class="fighter-search"
+              id="opponent-search"
+              type="search"
+              placeholder="Find an opponent…"
+              aria-label="Search opponents"
+              autocomplete="off"
+            /><select id="opponent" name="opponent_id" required disabled>
+              <option>Loading athletes…</option>
+            </select>
+            <div class="form-row">
+              <fieldset>
+                <legend>Scheduled rounds</legend>
+                <div class="round-toggle">
+                  <label
+                    ><input
+                      type="radio"
+                      name="scheduled_rounds"
+                      value="3"
+                      checked
+                    /><span>3 RDS</span></label
+                  ><label
+                    ><input
+                      type="radio"
+                      name="scheduled_rounds"
+                      value="5"
+                    /><span>5 RDS</span></label
+                  >
+                </div>
+              </fieldset>
+              <div>
+                <label for="line">Strike line</label
+                ><input
+                  id="line"
+                  name="line"
+                  type="number"
+                  min="0"
+                  max="1000"
+                  step="0.5"
+                  value="50.5"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              id="forecast-button"
+              class="primary-button"
+              type="submit"
+              disabled
+            >
+              Generate forecast <span>↗</span>
+            </button>
+            <p class="form-note">
+              The line is your scenario input. Probabilities describe the
+              model’s count distribution, not a betting recommendation.
+            </p>
+            <p id="form-error" class="error-message" role="alert" hidden></p>
+          </form>
+          <div id="forecast-result" class="forecast-result" aria-live="polite">
+            <div class="panel empty-state">
+              <span class="empty-symbol">∿</span>
+              <p class="eyebrow">YOUR MATCHUP, IN CONTEXT</p>
+              <h2>A forecast is more<br />than a single number.</h2>
+              <p>
+                Select two athletes and a strike line to explore the expected
+                count, prediction interval, and probability on either side of
+                the line.
+              </p>
+              <div class="empty-axis">
+                <span>0</span><span>SIGNIFICANT STRIKES</span><span>200+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="method-note">
+          <span class="outlined-label">WHAT COUNTS?</span>
+          <p>
+            Significant strikes landed by the selected athlete across the entire
+            fight. Early finishes and opponent style both affect the outcome. A
+            prediction interval describes possible outcomes, not certainty about
+            the mean.
+          </p>
+        </div>
+      </section>
+      <section id="view-recent" class="view" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">OUT-OF-TIME REALITY CHECK</p>
+            <h2>Recent fight replay</h2>
+          </div>
+          <span id="recent-period" class="date-badge">Loading period…</span>
+        </div>
+        <p class="section-copy">
+          Reconstructed historical inference with a model frozen before the
+          evaluation window. These forecasts were generated retrospectively;
+          displayed strike lines are synthetic evaluation thresholds.
+        </p>
+        <div id="recent-content" aria-live="polite">
+          <div class="panel loading-state">Loading recent results…</div>
+        </div>
+      </section>
+      <section id="view-evidence" class="view" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">OPEN THE MODEL CARD</p>
+            <h2>Evidence before confidence.</h2>
+          </div>
+          <a href="/docs" class="text-link">Explore the REST API ↗</a>
+        </div>
+        <p class="section-copy">
+          Chronological evaluation, explicit baselines, and traceable artifacts.
+          Reported performance belongs to its stated sample and time window.
+        </p>
+        <div id="evidence-content" aria-live="polite">
+          <div class="panel loading-state">Loading model evidence…</div>
+        </div>
+      </section>
+      <footer>
+        <div>
+          <strong>CAGEMETRICS</strong
+          ><span>An independent MMA forecasting portfolio.</span>
+        </div>
+        <p id="source-note">
+          Public historical fight data · Counts are forecasts, not guarantees.
+        </p>
+        <a href="/docs">OpenAPI ↗</a>
+      </footer>
+    </main>
+  </body>
+</html>

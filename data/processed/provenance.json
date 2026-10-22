@@ -1,0 +1,100 @@
+{
+  "nlbair/ufc-data/data/ufc_all_fights_wide.csv": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+    "bytes": 11337448,
+    "observed_at": "2026-10-22T15:57:32.386326+00:00"
+  },
+  "nlbair/ufc-data/data/id_crosswalk_all.csv": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/id_crosswalk_all.csv",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "449523ce63c7cb17d8b1915cc39c2c031115cf00c4e72f56647433e8a29f571b",
+    "bytes": 1585852,
+    "observed_at": "2026-10-22T15:57:32.815773+00:00"
+  },
+  "nlbair/ufc-data/codebook/codebook_fights_wide.csv": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/codebook/codebook_fights_wide.csv",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "b259c136363aa348d20aaab204bf4166344911edc9e3e5098f74d0cd8721dca3",
+    "bytes": 70808,
+    "observed_at": "2026-10-22T15:57:32.966090+00:00"
+  },
+  "nlbair/ufc-data/LICENSE": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/LICENSE",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "5ed51b0df12f057ea2a3770ad75046686c89c65a3365ee81d09859c357054cb3",
+    "bytes": 663,
+    "observed_at": "2026-10-22T15:57:33.088437+00:00"
+  },
+  "nlbair/ufc-data/SOURCES.md": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/SOURCES.md",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "3399f91f5bf2eb176f0c97ab766167895690932f4a8c5af494e704b742ce47a5",
+    "bytes": 805,
+    "observed_at": "2026-10-22T15:57:33.184809+00:00"
+  },
+  "nlbair/ufc-data/CITATION.cff": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/CITATION.cff",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "359638cf12076587cfa6072488057f94fe29ae97484a6b787cfde31083066786",
+    "bytes": 708,
+    "observed_at": "2026-10-22T15:57:33.323904+00:00"
+  },
+  "nlbair/ufc-data/README.md": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/README.md",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "29f0965d241aeffd87e4e07bcc677e5f66e0114ff480bf5cc928d6b1fe50626e",
+    "bytes": 4558,
+    "observed_at": "2026-10-22T15:57:33.462285+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/ufc_fight_results.csv": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_results.csv",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "da1d46420a13419f1afa28653e9b08c7aa1173005138e5f87fe7dea904cd98e2",
+    "bytes": 2107396,
+    "observed_at": "2026-10-22T15:57:33.844436+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/ufc_fight_stats.csv": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_stats.csv",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "bdbb8cd050ccf0a3ee329bf16d361e87997853ab21703682f720fe7aa013767b",
+    "bytes": 7671898,
+    "observed_at": "2026-10-22T15:57:34.617503+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/ufc_event_details.csv": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_event_details.csv",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "beb80dd902d44446399bf1753c650beed2cbc0af2cb791848796a238313a247e",
+    "bytes": 102765,
+    "observed_at": "2026-10-22T15:57:34.751556+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/ufc_fighter_tott.csv": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_tott.csv",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "3296e67941f984cd5484488226e5a5d94de3249c63fe289fbc66d98546311ea1",
+    "bytes": 508399,
+    "observed_at": "2026-10-22T15:57:34.898566+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/ufc_fighter_details.csv": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_details.csv",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "a1f6e4326217fab9734ac42f1958cd07b0b2b98f3caa5da08497ec7648eb6f70",
+    "bytes": 340441,
+    "observed_at": "2026-10-22T15:57:35.033537+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/LICENSE": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/LICENSE",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "bytes": 35149,
+    "observed_at": "2026-10-22T15:57:35.108422+00:00"
+  },
+  "Greco1899/scrape_ufc_stats/README.md": {
+    "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/README.md",
+    "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+    "sha256": "c06ba3cc5d4586ebab9485f08b8f444d8171c364281fc01a97a63302405e979f",
+    "bytes": 2047,
+    "observed_at": "2026-10-22T15:57:35.171927+00:00"
+  }
+}
