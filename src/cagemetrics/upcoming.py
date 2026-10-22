@@ -215,7 +215,7 @@ def generate_upcoming(settings, forecaster, repository, schedule):
         "event_count": len({r.get("event_id") for r in fixtures}),
         "description": "Full-bout significant-strike count forecasts for sourced announced matchups. These are not fight-winner probabilities.",
         "limitations": [
-            "No actual sportsbook or PrizePicks lines were supplied; fixed display thresholds are synthetic.",
+            "No observed market lines were supplied; display thresholds are synthetic.",
             "Dates, opponents, and announced rounds can change after this issuance snapshot.",
             "Deployment intervals have no untouched future coverage validation; evaluate issued forecasts prospectively.",
             "Both athletes are separate marginal count forecasts; do not multiply them as independent joint probabilities.",

@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
+from . import __version__
+
 SCOREBOARD_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates={start}-{end}&limit=1000"
 )
@@ -33,7 +35,7 @@ def _utc(value):
 
 
 def _snapshot(url, folder, label, observed_at):
-    request = urllib.request.Request(url, headers={"User-Agent": "CageMetrics/0.3 research portfolio"})
+    request = urllib.request.Request(url, headers={"User-Agent": f"OctogonML/{__version__}"})
     with urllib.request.urlopen(request, timeout=30) as response:
         content = response.read(5_000_001)
     if len(content) > 5_000_000:

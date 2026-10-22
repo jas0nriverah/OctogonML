@@ -29,7 +29,7 @@ SQLite supplies a zero-account local path with real relational constraints and p
 
 The first serving implementation retrieved fight history and performed pandas merges per forecast. Startup now prepares snapshot/as-of-keyed historical summaries. The V1 path reads two SQL state rows and assembles matchup features. V2 uses its prepared historical-state engine with a bounded 512-entry matchup-frame cache; the API still reads two SQL rows for metadata. Both paths predict and persist the full audit record without rebuilding full history merges per request. Exact-parity tests guard the optimization. Rich historical context is a separate on-demand endpoint, keeping it out of the inference benchmark. Restart after ingestion or artifact changes to refresh loaded state.
 
-An ORM and feature table are useful here because they make lineage and invalidation explicit. A distributed feature store, message queue, model-registry service, and GPU cluster would add operational costs without solving a demonstrated workload requirement. This project does not claim distributed production readiness.
+The ORM and feature table make lineage and invalidation explicit. The service fits within one process and a relational database; model artifacts and source snapshots are versioned alongside the application.
 
 ## Time semantics and model selection
 
@@ -53,4 +53,4 @@ The constrained dependency file, deterministic seeds, source revision/hashes, mo
 
 Measure both serial and concurrent workloads and retain every relevant report. The benchmark includes HTTP, SQL state lookup, feature assembly, inference, distribution generation, and persisted audit history. Loopback measurements exclude external networking and service startup; per-request timing excludes the client semaphore wait. Report throughput and error rate alongside p50/p95, database engine, workload, and hardware. A fast serial request is not a capacity claim.
 
-The [hosted GitHub Actions run for source commit `89000e6`](https://github.com/jas0nriverah/OctogonML/actions/runs/39818568750) passed both jobs: Linux/PostgreSQL ran 136 tests, and Linux Docker built the image and verified V2 readiness. Local measured coverage is 75.5%. The Render manifest defines a deployment path, but no public hosting deployment has been performed. Hosted container verification does not imply a production deployment.
+The [CI workflow](../.github/workflows/ci.yml) runs unit and API tests with PostgreSQL, then builds the Docker image and verifies model readiness in a separate job. Docker Compose provides persistent PostgreSQL and application volumes. The Render manifest supplies an alternative hosting configuration.

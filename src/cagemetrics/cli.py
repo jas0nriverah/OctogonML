@@ -141,10 +141,6 @@ async def benchmark(settings, url, requests, concurrency, warmup, workload="mixe
     settings.report_dir.mkdir(parents=True, exist_ok=True)
     path = settings.report_dir / "benchmark.json"
     path.write_text(json.dumps(report, indent=2))
-    (settings.report_dir / f"benchmark-c{concurrency}.json").write_text(json.dumps(report, indent=2))
-    (settings.report_dir / f"benchmark-{serving.get('database', 'unknown')}-c{concurrency}.json").write_text(
-        json.dumps(report, indent=2)
-    )
     (
         settings.report_dir / f"benchmark-{workload}-{serving.get('database', 'unknown')}-c{concurrency}.json"
     ).write_text(json.dumps(report, indent=2))

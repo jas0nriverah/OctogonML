@@ -4,7 +4,7 @@
 
 Predict one UFC athlete’s **full-bout significant strikes landed**, conditional on the opponent and scheduled three- or five-round duration. Output a count distribution, mean/median, an 80% prediction interval, and probabilities above/below/exactly at a supplied strike line.
 
-The intended use is a reproducible ML engineering demonstration and an exploratory forecast tool. The project has no live PrizePicks integration, timestamped historical market-line dataset, or realized-return evaluation. It is independent of PrizePicks and UFC.
+The model supports exploratory strike-count analysis and prospective forecast evaluation. Historical market lines and realized returns are not part of the dataset.
 
 ## Data and provenance
 
@@ -38,7 +38,7 @@ Gradient boosting reduces MAE by 9.06% against the naive baseline. Its paired ev
 
 Empirical interval coverage is 48.7%, 79.1%, and 94.4% for nominal 50%, 80%, and 95% intervals. Five-round bouts have higher MAE (36.50; n=178) than three-round bouts (24.54; n=1,692). Athletes with fewer than three prior bouts have 77.2% coverage at the nominal 80% level (n=556). [The full report](reports/evaluation.json) includes subgroup metrics, interval widths, probability calibration bins, and bootstrap details.
 
-Over-probability calibration and Brier scores use training-derived synthetic half-point lines. These checks evaluate probabilities at that threshold policy, not accuracy against historical sportsbook or PrizePicks offerings.
+Over-probability calibration and Brier scores use training-derived synthetic half-point lines. These checks evaluate probabilities under that threshold policy; they do not measure performance against historical market lines.
 
 ## Latest two-week replay
 

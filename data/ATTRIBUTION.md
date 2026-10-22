@@ -4,7 +4,7 @@ Historical base: Noah Bair, UFC Data v0.1.1 (2026), https://doi.org/10.5281/zeno
 
 October 17 increment: Greco1899/scrape_ufc_stats, https://github.com/Greco1899/scrape_ufc_stats, repository license GPL-3.0; original license preserved in [licenses/GPL-3.0.txt](licenses/GPL-3.0.txt) and in the raw download cache. The historical source notice is [licenses/CC-BY-4.0-notice.txt](licenses/CC-BY-4.0-notice.txt). No scraper code copied.
 
-Changes: normalized schema, exact identity mappings, round aggregation, standard-format filtering, NC/overturned exclusions, lagged features. Raw snapshots, original license texts, commit IDs, URLs and SHA256 hashes are preserved. Collected after events; recent predictions are reconstructed historical inference. Independent project, not affiliated with UFC or PrizePicks.
+Changes: normalized schema, exact identity mappings, round aggregation, standard-format filtering, NC/overturned exclusions, lagged features. Raw snapshots, original license texts, commit IDs, URLs and SHA256 hashes are preserved. Collected after events; recent predictions are reconstructed historical inference. Independent project, not affiliated with the source providers.
 
 Announced schedules and athlete portraits: ESPN's public UFC scoreboard and athlete-profile APIs, observed October 22, 2026. The requested schedule window is October 22–December 31, 2026. Original JSON responses, retrieval timestamps, URLs and SHA256 digests are preserved under `data/schedules/`; these records describe the published schedule at retrieval, and bookings can change. Card/segment start times are not individual walkout times.
 

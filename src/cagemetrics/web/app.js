@@ -391,18 +391,6 @@ function factText(value) {
   if (typeof value === "object") return value.description || value.message || value.status || JSON.stringify(value);
   return String(value);
 }
-async function loadRelease() {
-  try {
-    const release = await api("/api/v1/release");
-    const freshness = release.freshness || {};
-    const capabilities = release.capabilities || [];
-    const architecture = release.architecture || [];
-    const checks = release.checks || {};
-    $("release-content").innerHTML = `<div class="release-heading"><p>${escapeHtml(release.objective || "A count-forecasting application with point-in-time features, SQL lineage, and evaluated uncertainty.")}</p><span class="pill">${escapeHtml(release.version || "LOCAL RELEASE")}</span></div><div class="release-model-note"><strong>${number(release.model_evidence?.relative_mae_improvement_pct,2)}% lower historical MAE vs naive</strong><span>${escapeHtml(release.model_evidence?.label||"See the chronological report in Model Evidence")} · ${number(release.model_evidence?.n,0)} athlete forecasts</span></div><div class="tour-grid"><div><span class="tour-number">01</span><h3>Ask a matchup question</h3><p>Change the athlete, opponent, rounds, and line. Read the full distribution and its uncertainty.</p></div><div><span class="tour-number">02</span><h3>Inspect the evidence</h3><p>Compare models on the same chronological sample. Inspect calibration, subgroup errors, and artifact hashes.</p></div><div><span class="tour-number">03</span><h3>Preserve the next test</h3><p>Use Forward Tracker to freeze a genuinely pre-event forecast. Score later without rewriting its history.</p></div></div><div class="release-facts"><div><span class="stat-label">DATA FRESHNESS</span><strong>${escapeHtml((freshness.status || "See data cutoff").replaceAll("_"," "))}</strong><small>Data through ${escapeHtml(date(freshness.data_through))}${freshness.age_days !== undefined ? ` · ${escapeHtml(freshness.age_days)} days old` : ""} · as of ${escapeHtml(date(freshness.as_of))}</small></div><div><span class="stat-label">RELEASE CHECKS</span>${Object.entries(checks).map(([key, value]) => `<p><span>${escapeHtml(key.replaceAll("_", " "))}</span> ${escapeHtml(factText(value))}</p>`).join("") || '<p>Inspect the generated release report for verification details.</p>'}</div></div>${architecture.length ? `<div class="architecture-flow" aria-label="System architecture">${architecture.map(step => `<span>${escapeHtml(factText(step))}</span>`).join('<i aria-hidden="true">→</i>')}</div>` : ""}${capabilities.length ? `<div class="feature-tags">${capabilities.map(item => `<span class="feature-tag">${escapeHtml(factText(item))}</span>`).join("")}</div>` : ""}<div class="release-links">${[["recruiter_tour","Two-minute tour"],["architecture","Architecture & tradeoffs"],["model_card","Model card"]].filter(([key])=>safeUrl(release.links?.[key])).map(([key,label])=>`<a class="text-link" href="${escapeHtml(safeUrl(release.links[key]))}" target="_blank" rel="noopener">${label} ↗</a>`).join("")}</div><p class="panel-description release-note">Local research application. Historical replay is reconstructed after events; a forward ledger is meaningful only when recorded before a verified fixture. <a href="/docs">Inspect the API ↗</a></p>`;
-  } catch (error) {
-    $("release-content").innerHTML = `<p class="panel-description">The release report is unavailable: ${escapeHtml(error.message)}. The forecast, replay, and model evidence views remain available independently.</p>`;
-  }
-}
 function addMatchupDisclosure(prediction) {
   const details = document.createElement("details");
   details.className = "matchup-disclosure panel";
@@ -574,4 +562,3 @@ async function loadUpcoming() {
 }
 initialize();
 loadUpcoming();
-loadRelease();

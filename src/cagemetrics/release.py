@@ -1,10 +1,12 @@
-"""Recruiter-facing evidence and portable exports, derived from real artifacts."""
+"""Service metadata and portable forecast exports."""
 
 import csv
 from datetime import datetime
 import io
 import json
 from zoneinfo import ZoneInfo
+
+from . import __version__
 
 
 def _read(path, default=None):
@@ -22,23 +24,7 @@ def release_summary(settings, repository, forecaster):
     naive = metrics.get("naive", {})
     improvement = (1 - selected["mae"] / naive["mae"]) * 100 if naive.get("mae") else None
     return {
-        "version": "0.2.0",
-        "objective": "Forecast UFC significant-strike distributions and preserve "
-        "the complete path from source data to issued predictions.",
-        "architecture": [
-            "Pinned source snapshots and validation",
-            "Normalized SQL and point-in-time feature states",
-            "Chronological model experiments and disjoint calibration",
-            "FastAPI inference and immutable forecast ledger",
-        ],
-        "capabilities": [
-            "Interactive matchup scenarios",
-            "Historical replay with explicit cutoffs",
-            "Development-only challenger selection",
-            "Prospective forecast issuance and exact settlement",
-            "Source, feature, model and prediction lineage",
-            "SQLite and PostgreSQL support",
-        ],
+        "version": __version__,
         "dataset": counts,
         "model_evidence": {
             "period": evaluation.get("report_period"),
@@ -58,10 +44,8 @@ def release_summary(settings, repository, forecaster):
             "status": "pinned_snapshot" if age is not None and age <= 14 else "stale",
             "message": "Source data is a pinned snapshot; refreshing is an explicit, versioned operation.",
         },
-        "checks": _read(settings.report_dir / "verification.json", {"status": "not_recorded"}),
         "links": {
             "api_docs": "/docs",
-            "recruiter_tour": "/project/RECRUITER_TOUR.md",
             "architecture": "/project/ENGINEERING.md",
             "model_card": "/project/MODEL_CARD.md",
             "experiments": "/api/v1/experiments",

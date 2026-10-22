@@ -477,9 +477,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/project/{document}", include_in_schema=False)
     def project_document(document: str):
         allowed = {
-            "RECRUITER_TOUR.md": settings.project_dir / "docs" / "RECRUITER_TOUR.md",
             "ENGINEERING.md": settings.project_dir / "docs" / "ENGINEERING.md",
-            "INTERVIEW.md": settings.project_dir / "docs" / "INTERVIEW.md",
             "MODEL_CARD.md": settings.project_dir / "MODEL_CARD.md",
         }
         path = allowed.get(document)
