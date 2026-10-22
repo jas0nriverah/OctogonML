@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       postgres:
@@ -25,20 +25,20 @@ jobs:
       OMP_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         with:
-          python-version: "3.12"
+          python-version: "3.12.14"
           cache: pip
       - run: pip install -c requirements-lock.txt -e '.[dev,postgres]'
       - run: ruff check src tests migrations
       - run: pytest --cov=cagemetrics --cov-report=term-missing
       - run: node --check src/cagemetrics/web/app.js
   container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - run: docker build -t cagemetrics:ci .
       - run: docker run -d --name cagemetrics-smoke -p 127.0.0.1:8000:8000 cagemetrics:ci
       - name: Wait for offline bootstrap and model readiness
