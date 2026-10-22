@@ -1,0 +1,390 @@
+{
+  "model_version": "v2-fb2f7851859634a0",
+  "selected_candidate": "v1_boosting",
+  "selection_metric": "development-weighted-NLL",
+  "selection_period": [
+    "2021-01-01",
+    "2024-12-31"
+  ],
+  "development": [
+    {
+      "year": 2021,
+      "candidate": "v1_poisson",
+      "n": 1000,
+      "mae": 26.769037349335726,
+      "rmse": 35.78914140462412,
+      "bias": -2.879914584747545,
+      "nll": 4.782358723130061,
+      "coverage_80": 0.827,
+      "interval_coverage": 0.827,
+      "interval_level": 0.8,
+      "interval_width_80": 87.567,
+      "brier_over_synthetic_line": 0.23737467873905438
+    },
+    {
+      "year": 2021,
+      "candidate": "v1_boosting",
+      "n": 1000,
+      "mae": 26.232053401155966,
+      "rmse": 35.183195339003674,
+      "bias": -2.9485323519465734,
+      "nll": 4.768956089536376,
+      "coverage_80": 0.835,
+      "interval_coverage": 0.835,
+      "interval_level": 0.8,
+      "interval_width_80": 87.014,
+      "brier_over_synthetic_line": 0.23397077161727894
+    },
+    {
+      "year": 2021,
+      "candidate": "rich_boosting",
+      "n": 1000,
+      "mae": 26.273052680650185,
+      "rmse": 35.4842766718604,
+      "bias": -2.795166823162129,
+      "nll": 4.769380672288221,
+      "coverage_80": 0.835,
+      "interval_coverage": 0.835,
+      "interval_level": 0.8,
+      "interval_width_80": 87.444,
+      "brier_over_synthetic_line": 0.23313065526440552
+    },
+    {
+      "year": 2022,
+      "candidate": "v1_poisson",
+      "n": 1014,
+      "mae": 25.61321591056909,
+      "rmse": 32.85506579161019,
+      "bias": -0.22108009437720344,
+      "nll": 4.729701956130033,
+      "coverage_80": 0.7978303747534516,
+      "interval_coverage": 0.7978303747534516,
+      "interval_level": 0.8,
+      "interval_width_80": 83.57297830374753,
+      "brier_over_synthetic_line": 0.22640161792536198
+    },
+    {
+      "year": 2022,
+      "candidate": "v1_boosting",
+      "n": 1014,
+      "mae": 25.071764064058353,
+      "rmse": 32.219397970637615,
+      "bias": -0.05091852532431487,
+      "nll": 4.7181984244725195,
+      "coverage_80": 0.7938856015779092,
+      "interval_coverage": 0.7938856015779092,
+      "interval_level": 0.8,
+      "interval_width_80": 82.53254437869822,
+      "brier_over_synthetic_line": 0.22263667864564765
+    },
+    {
+      "year": 2022,
+      "candidate": "rich_boosting",
+      "n": 1014,
+      "mae": 25.653795336942977,
+      "rmse": 32.910466284344096,
+      "bias": 0.16138056716509122,
+      "nll": 4.732042292186389,
+      "coverage_80": 0.7869822485207101,
+      "interval_coverage": 0.7869822485207101,
+      "interval_level": 0.8,
+      "interval_width_80": 82.53944773175543,
+      "brier_over_synthetic_line": 0.22565367834660127
+    },
+    {
+      "year": 2023,
+      "candidate": "v1_poisson",
+      "n": 1008,
+      "mae": 27.72500270595145,
+      "rmse": 35.54190078716261,
+      "bias": -0.21045644825667356,
+      "nll": 4.772974698940776,
+      "coverage_80": 0.7688492063492064,
+      "interval_coverage": 0.7688492063492064,
+      "interval_level": 0.8,
+      "interval_width_80": 83.62400793650794,
+      "brier_over_synthetic_line": 0.23486722850084624
+    },
+    {
+      "year": 2023,
+      "candidate": "v1_boosting",
+      "n": 1008,
+      "mae": 27.63080396309796,
+      "rmse": 35.36511305771587,
+      "bias": 0.23019001821543522,
+      "nll": 4.764687105039474,
+      "coverage_80": 0.7619047619047619,
+      "interval_coverage": 0.7619047619047619,
+      "interval_level": 0.8,
+      "interval_width_80": 83.91468253968254,
+      "brier_over_synthetic_line": 0.23161970294660494
+    },
+    {
+      "year": 2023,
+      "candidate": "rich_boosting",
+      "n": 1008,
+      "mae": 27.415071191777617,
+      "rmse": 35.04131519538913,
+      "bias": 0.02527336208143335,
+      "nll": 4.761528948877175,
+      "coverage_80": 0.7718253968253969,
+      "interval_coverage": 0.7718253968253969,
+      "interval_level": 0.8,
+      "interval_width_80": 84.25992063492063,
+      "brier_over_synthetic_line": 0.23329639882616637
+    },
+    {
+      "year": 2024,
+      "candidate": "v1_poisson",
+      "n": 1014,
+      "mae": 25.734065586501277,
+      "rmse": 32.882381021319844,
+      "bias": -1.7564931952866116,
+      "nll": 4.783942883692126,
+      "coverage_80": 0.8461538461538461,
+      "interval_coverage": 0.8461538461538461,
+      "interval_level": 0.8,
+      "interval_width_80": 92.9516765285996,
+      "brier_over_synthetic_line": 0.2320044041559574
+    },
+    {
+      "year": 2024,
+      "candidate": "v1_boosting",
+      "n": 1014,
+      "mae": 25.44074785519105,
+      "rmse": 32.41165468295264,
+      "bias": -1.3745620336726905,
+      "nll": 4.782204712409621,
+      "coverage_80": 0.8402366863905325,
+      "interval_coverage": 0.8402366863905325,
+      "interval_level": 0.8,
+      "interval_width_80": 93.26923076923077,
+      "brier_over_synthetic_line": 0.2318544207999713
+    },
+    {
+      "year": 2024,
+      "candidate": "rich_boosting",
+      "n": 1014,
+      "mae": 25.421862130726883,
+      "rmse": 32.39920711664061,
+      "bias": -1.3460999176133048,
+      "nll": 4.779652200508555,
+      "coverage_80": 0.8500986193293886,
+      "interval_coverage": 0.8500986193293886,
+      "interval_level": 0.8,
+      "interval_width_80": 93.56508875739645,
+      "brier_over_synthetic_line": 0.2308366774479335
+    }
+  ],
+  "development_nll": {
+    "v1_poisson": 4.767183619237371,
+    "v1_boosting": 4.758466172501154,
+    "rich_boosting": 4.760619442108298
+  },
+  "feature_ablation": "v1_boosting versus rich_boosting: identical estimator settings; rich adds predeclared context/decay/shrinkage/interactions.",
+  "retrospective_comparison_label": "ALREADY-SEEN2025\u20132026 OUTCOMES: retrospective comparison, not a new holdout; never used for selection.",
+  "retrospective": {
+    "v1_poisson": {
+      "n": 1870,
+      "mae": 25.82884611142603,
+      "annual": [
+        {
+          "year": 2025,
+          "n": 1028,
+          "mae": 25.443713345054096,
+          "rmse": 32.1504216806562,
+          "bias": 4.047296770627225,
+          "nll": 4.678408782219377,
+          "coverage_80": 0.7704280155642024,
+          "interval_coverage": 0.7704280155642024,
+          "interval_level": 0.8,
+          "interval_width_80": 82.91245136186771,
+          "brier_over_synthetic_line": 0.23020186749044633
+        },
+        {
+          "year": 2026,
+          "n": 842,
+          "mae": 26.299055712174663,
+          "rmse": 33.89125190783074,
+          "bias": 2.81052049531703,
+          "nll": 4.675871375942506,
+          "coverage_80": 0.8254156769596199,
+          "interval_coverage": 0.8254156769596199,
+          "interval_level": 0.8,
+          "interval_width_80": 89.29809976247031,
+          "brier_over_synthetic_line": 0.23039214284213516
+        }
+      ],
+      "nll": 4.677266270943909,
+      "coverage_80": 0.795187165775401,
+      "interval_width_80": 85.78770053475935,
+      "brier_over_synthetic_line": 0.23028754227446877
+    },
+    "v1_boosting": {
+      "n": 1870,
+      "mae": 25.680489839187093,
+      "annual": [
+        {
+          "year": 2025,
+          "n": 1028,
+          "mae": 25.199967140623823,
+          "rmse": 32.05397221074904,
+          "bias": 4.27618708799615,
+          "nll": 4.673747582988972,
+          "coverage_80": 0.7655642023346303,
+          "interval_coverage": 0.7655642023346303,
+          "interval_level": 0.8,
+          "interval_width_80": 82.4591439688716,
+          "brier_over_synthetic_line": 0.22775376330503888
+        },
+        {
+          "year": 2026,
+          "n": 842,
+          "mae": 26.267161257385474,
+          "rmse": 33.862515218868474,
+          "bias": 2.420320785551256,
+          "nll": 4.678654016204216,
+          "coverage_80": 0.8218527315914489,
+          "interval_coverage": 0.8218527315914489,
+          "interval_level": 0.8,
+          "interval_width_80": 88.42755344418052,
+          "brier_over_synthetic_line": 0.2334069889328817
+        }
+      ],
+      "nll": 4.67595678981637,
+      "coverage_80": 0.7909090909090909,
+      "interval_width_80": 85.14652406417112,
+      "brier_over_synthetic_line": 0.23029922639522266
+    },
+    "rich_boosting": {
+      "n": 1870,
+      "mae": 25.520914918686064,
+      "annual": [
+        {
+          "year": 2025,
+          "n": 1028,
+          "mae": 25.15605117506292,
+          "rmse": 32.07146729173519,
+          "bias": 3.8038300410068993,
+          "nll": 4.672190504796608,
+          "coverage_80": 0.7655642023346303,
+          "interval_coverage": 0.7655642023346303,
+          "interval_level": 0.8,
+          "interval_width_80": 81.56322957198444,
+          "brier_over_synthetic_line": 0.22924353111909535
+        },
+        {
+          "year": 2026,
+          "n": 842,
+          "mae": 25.966378016601258,
+          "rmse": 33.62528343140555,
+          "bias": 1.6207392785948016,
+          "nll": 4.672586755764247,
+          "coverage_80": 0.8194774346793349,
+          "interval_coverage": 0.8194774346793349,
+          "interval_level": 0.8,
+          "interval_width_80": 86.54513064133016,
+          "brier_over_synthetic_line": 0.23025490599727008
+        }
+      ],
+      "nll": 4.672368923681502,
+      "coverage_80": 0.7898395721925133,
+      "interval_width_80": 83.80641711229947,
+      "brier_over_synthetic_line": 0.2296989202353644
+    }
+  },
+  "warnings": [
+    "Deployment mean and calibration are disjoint, but deployment coverage has no untouched future validation.",
+    "2025\u20132026 comparison outcomes were inspected in v1; comparison is retrospective and did not select V2.",
+    "Feature histories use only completed earlier events. Hypothetical division is inferred from prior fighter history."
+  ],
+  "feature_count": 33,
+  "deployment": {
+    "model_version": "v2-fb2f7851859634a0",
+    "model_type": "v1_boosting_negative_binomial",
+    "selected_candidate": "v1_boosting",
+    "training_cutoff_exclusive": "2026-07-01",
+    "calibration_start_inclusive": "2026-07-01",
+    "calibration_cutoff_exclusive": "2026-10-18",
+    "data_through": "2026-10-17",
+    "train_rows": 12900,
+    "calibration_rows": 378,
+    "feature_schema_version": "v2-decay365-shrink15",
+    "feature_names": [
+      "scheduled_rounds",
+      "own_prior_bouts",
+      "own_career_mean_strikes",
+      "own_last5_mean_strikes",
+      "own_career_landed_per_min",
+      "own_last5_landed_per_min",
+      "own_career_absorbed_per_min",
+      "own_last5_absorbed_per_min",
+      "own_career_attempted_per_min",
+      "own_last5_attempted_per_min",
+      "own_career_accuracy",
+      "own_last5_accuracy",
+      "own_career_mean_duration",
+      "own_last5_mean_duration",
+      "own_career_finish_rate",
+      "own_last5_finish_rate",
+      "own_layoff_days",
+      "opponent_prior_bouts",
+      "opponent_career_mean_strikes",
+      "opponent_last5_mean_strikes",
+      "opponent_career_landed_per_min",
+      "opponent_last5_landed_per_min",
+      "opponent_career_absorbed_per_min",
+      "opponent_last5_absorbed_per_min",
+      "opponent_career_attempted_per_min",
+      "opponent_last5_attempted_per_min",
+      "opponent_career_accuracy",
+      "opponent_last5_accuracy",
+      "opponent_career_mean_duration",
+      "opponent_last5_mean_duration",
+      "opponent_career_finish_rate",
+      "opponent_last5_finish_rate",
+      "opponent_layoff_days"
+    ],
+    "seed": 42,
+    "trained_at": "2026-10-22T16:24:22.176323+00:00",
+    "artifact_sha256": "a4af9610f49a6a9aa7c02bad30435d96b297f94a7b453880c843f75cad490712",
+    "warnings": [
+      "Deployment mean and calibration are disjoint, but deployment coverage has no untouched future validation.",
+      "2025\u20132026 comparison outcomes were inspected in v1; comparison is retrospective and did not select V2.",
+      "Feature histories use only completed earlier events. Hypothetical division is inferred from prior fighter history."
+    ]
+  },
+  "retrospective_event_bootstrap_vs_v1": {
+    "events": 76,
+    "resamples": 1000,
+    "mae_difference": 0.0,
+    "ci_95": [
+      0.0,
+      0.0
+    ]
+  },
+  "selection_decision": "Rich candidate not promoted: its development NLL did not beat the selected baseline. Deployment improves calibration pairing without claiming new predictive skill.",
+  "development_aggregate": {
+    "v1_poisson": {
+      "mae": 26.457379463568916,
+      "nll": 4.767183619237371,
+      "coverage_80": 0.8099603567888999,
+      "interval_width_80": 86.93161546085233,
+      "brier_over_synthetic_line": 0.232642356654699
+    },
+    "v1_boosting": {
+      "mae": 26.091078018354207,
+      "nll": 4.758466172501154,
+      "coverage_80": 0.8077304261645193,
+      "interval_width_80": 86.68557978196233,
+      "brier_over_synthetic_line": 0.23000431293986978
+    },
+    "rich_boosting": {
+      "mae": 26.188840712135597,
+      "nll": 4.760619442108298,
+      "coverage_80": 0.8109514370664024,
+      "interval_width_80": 86.95441030723488,
+      "brier_over_synthetic_line": 0.230717206654321
+    }
+  }
+}

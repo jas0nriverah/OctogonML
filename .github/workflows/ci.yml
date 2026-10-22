@@ -1,8 +1,14 @@
 name: Validate pipeline and API
 on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
@@ -28,3 +34,30 @@ jobs:
       - run: ruff check src tests migrations
       - run: pytest --cov=cagemetrics --cov-report=term-missing
       - run: node --check src/cagemetrics/web/app.js
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t cagemetrics:ci .
+      - run: docker run -d --name cagemetrics-smoke -p 127.0.0.1:8000:8000 cagemetrics:ci
+      - name: Wait for offline bootstrap and model readiness
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          for attempt in range(60):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2) as response:
+                      health = json.load(response)
+                  assert health['status'] == 'ready'
+                  assert health['model_version'].startswith('v2-')
+                  break
+              except Exception:
+                  if attempt == 59:
+                      raise
+                  time.sleep(1)
+          PY
+      - if: always()
+        run: docker logs cagemetrics-smoke
+      - if: always()
+        run: docker rm -f cagemetrics-smoke

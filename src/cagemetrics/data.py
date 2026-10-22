@@ -6,6 +6,8 @@ from pathlib import Path
 import hashlib
 import io
 import json
+import re
+import shutil
 import urllib.request
 import pandas as pd
 
@@ -26,11 +28,21 @@ class DatasetBundle:
 
 def _download(repo, sha, name, raw, provenance):
     url = f"https://raw.githubusercontent.com/{repo}/{sha}/{name}"
-    destination = raw / repo.split("/")[0] / name
+    destination = raw / repo.split("/")[0] / sha / name
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not destination.exists():
-        with urllib.request.urlopen(url, timeout=60) as response:
-            destination.write_bytes(response.read())
+        legacy = raw / repo.split("/")[0] / name
+        manifest = raw.parent / "processed" / "provenance.json"
+        entry = json.loads(manifest.read_text()).get(repo + "/" + name, {}) if manifest.exists() else {}
+        if (
+            legacy.exists()
+            and entry.get("commit") == sha
+            and entry.get("sha256") == hashlib.sha256(legacy.read_bytes()).hexdigest()
+        ):
+            shutil.copy2(legacy, destination)
+        else:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                destination.write_bytes(response.read())
     content = destination.read_bytes()
     provenance[repo + "/" + name] = {
         "url": url,
@@ -76,9 +88,15 @@ def _complete_round_coverage(observed, names, end_round):
     return len(observed) == len(expected) and set(zip(observed.FIGHTER, observed.ROUND)) == expected
 
 
-def ingest_dataset(data_dir: Path, refresh=False) -> DatasetBundle:
+def ingest_dataset(data_dir: Path, refresh=False, increment_sha=INCREMENT_SHA) -> DatasetBundle:
     data_dir = Path(data_dir)
+    if not isinstance(increment_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", increment_sha):
+        raise ValueError("Increment commit must be an explicit lowercase 40-character hexadecimal SHA")
     if (data_dir / "processed" / "quality.json").exists() and not refresh:
+        manifest = json.loads((data_dir / "processed" / "provenance.json").read_text())
+        incremental = [entry for name, entry in manifest.items() if name.startswith("Greco1899/")]
+        if not incremental or any(entry.get("commit") != increment_sha for entry in incremental):
+            raise ValueError("Processed data use a different increment commit; refresh explicitly to rebuild")
         return load_dataset(data_dir)
     raw = data_dir / "raw"
     provenance = {}
@@ -87,7 +105,7 @@ def ingest_dataset(data_dir: Path, refresh=False) -> DatasetBundle:
         return _download("nlbair/ufc-data", BASE_SHA, name, raw, provenance)
 
     def inc(name):
-        return _download("Greco1899/scrape_ufc_stats", INCREMENT_SHA, name, raw, provenance)
+        return _download("Greco1899/scrape_ufc_stats", increment_sha, name, raw, provenance)
 
     wide = _csv(base("data/ufc_all_fights_wide.csv"))
     cross = _csv(base("data/id_crosswalk_all.csv")).set_index("fight_id")
@@ -294,7 +312,7 @@ def ingest_dataset(data_dir: Path, refresh=False) -> DatasetBundle:
     for name, value in [("provenance", provenance), ("quality", quality)]:
         (processed / f"{name}.json").write_text(json.dumps(value, indent=2))
     (data_dir / "ATTRIBUTION.md").write_text(
-        "# Data attribution\n\nHistorical base: Noah Bair, UFC Data v0.1.1 (2026), https://doi.org/10.5281/zenodo.23458636, CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Underlying sources: UFCStats, MMA Decisions, BestFightOdds, martj42 official ranking archive, UFCalendar.\n\nOctober 17 increment: Greco1899/scrape_ufc_stats, https://github.com/Greco1899/scrape_ufc_stats, repository license GPL-3.0; original license preserved under raw/Greco1899/LICENSE. No scraper code copied.\n\nChanges: normalized schema, exact identity mappings, round aggregation, standard-format filtering, NC/overturned exclusions, lagged features. Raw snapshots, original license texts, commit IDs, URLs and SHA256 hashes are preserved. Collected after events; recent predictions are reconstructed historical inference. Independent project, not affiliated with UFC or PrizePicks.\n"
+        f"# Data attribution\n\nHistorical base: Noah Bair, UFC Data v0.1.1 (2026), https://doi.org/10.5281/zenodo.23458636, CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Underlying sources: UFCStats, MMA Decisions, BestFightOdds, martj42 official ranking archive, UFCalendar. Original license: raw/nlbair/{BASE_SHA}/LICENSE.\n\nIncremental completed events: Greco1899/scrape_ufc_stats, https://github.com/Greco1899/scrape_ufc_stats, repository license GPL-3.0; original license preserved under raw/Greco1899/{increment_sha}/LICENSE. No scraper code copied.\n\nChanges: normalized schema, exact identity mappings, round aggregation, standard-format filtering, NC/overturned exclusions, lagged features. Raw snapshots, original license texts, commit IDs, URLs and SHA256 hashes are preserved. Collected after events; recent predictions are reconstructed historical inference. Independent project, not affiliated with UFC or PrizePicks.\n"
     )
     return DatasetBundle(fighters, bouts, stats, provenance, quality)
 

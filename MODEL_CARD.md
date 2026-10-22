@@ -1,4 +1,4 @@
-# CageMetrics model card
+# OctogonML model card
 
 ## Purpose and target
 
@@ -20,7 +20,9 @@ Features use prior bouts only: career and last-five strike counts/rates, absorbe
 
 Candidates include a Poisson regression and a gradient-boosted count-mean estimator. A naive historical baseline provides a simple reference. The selected mean model uses a negative-binomial count distribution with dispersion fitted on a separate chronological calibration sample. Distribution assumptions and empirical coverage are evaluated explicitly; intervals are not distribution-free guarantees. Model selection uses development-period negative log likelihood.
 
-The frozen recent artifact fits the mean before July 1, 2026, calibrates dispersion on eligible data before October 8, and freezes athlete history before October 8. The current explorer artifact refits the selected mean on all available completed history through October 17. It reuses dispersion fitted on pre-October-8 calibration predictions. **That current refitted mean/dispersion pairing has no untouched forward validation yet.** Historical report metrics describe the historical evaluation artifacts, not a fresh test of the current explorer artifact.
+The frozen recent replay artifact fits the mean before July 1, 2026, calibrates dispersion on eligible data before October 8, and freezes athlete history before October 8. The V2 serving artifact retains the selected 33-feature gradient-boosting family, fits its mean on events before July 1, and calibrates dispersion on the disjoint July 1–October 17 sample. This replaces the legacy full-history mean refit with a clean mean/calibration pairing. The legacy artifact remains available for explicit rollback. **The V2 serving artifact still has no untouched forward validation.** Historical report metrics describe the historical evaluation artifacts, not a fresh test of the newly served artifact.
+
+The declared richer-feature challenger did not beat the original feature family on development-weighted negative log likelihood (4.76062 versus 4.75847). It was not promoted even though an already-seen retrospective comparison showed a slightly lower MAE. That comparison is not a fresh holdout and did not select V2. The [experiment report](reports/experiments.json) records feature ablation, development folds, selection, deployment cutoffs, artifact hashes, and limitations.
 
 ## Evaluation design and results
 
@@ -53,15 +55,15 @@ This is reconstructed historical inference generated after the events. It is not
 
 ## Serving behavior and lineage
 
-FastAPI validates distinct known athlete IDs, supported scheduled rounds, and a finite nonnegative line. Unknown IDs and invalid inputs return explicit errors. Sparse histories, hypothetical matchups, stale pinned data, and cross-division scenarios receive warnings when detected. Startup materializes reusable athlete feature states keyed by source snapshot and as-of date in `fighter_feature_states` (Alembic migration `0002`). Each forecast reads two state rows, assembles matchup inputs, runs inference, and persists its audit trail. Exact-parity tests verify agreement with history-based feature computation. This optimization changes serving cost, not the trained model or reported evaluation.
+FastAPI validates distinct known athlete IDs, supported scheduled rounds, and a finite nonnegative line. Unknown IDs and invalid inputs return explicit errors. Sparse histories, hypothetical matchups, stale pinned data, and cross-division scenarios receive warnings when detected. Startup materializes reusable athlete feature states keyed by source snapshot and as-of date in `fighter_feature_states` (Alembic migration `0002`). V1 assembles inputs from two SQL state rows. V2 prepares a historical-state engine and bounded matchup cache, with a two-row SQL metadata lookup retained in the API path. Inference persists its audit trail in either channel. Exact-parity tests verify agreement with history-based computation. Caching changes serving cost, not the trained model or reported evaluation.
 
 For an integer line L, the service reports P(count > L), P(count < L), and P(count = L) separately. For half-point lines, push probability is zero. Forecasts retain artifact/model version, feature and data cutoffs, history counts, prediction ID, and warnings. SQL persistence records feature snapshots and the response; model registry entries include artifact hashes.
 
-The dashboard displays a finite portion of the count PMF. The API also returns tail probability; displayed bars should not be interpreted as a hard maximum count. Serving loads a prebuilt artifact and performs no fitting on startup. Building the 2,074 materialized athlete states takes roughly 0.8 seconds on the development machine. Restart after ingestion or training to refresh the loaded model and snapshot-specific state. SQLite is the verified default; local PostgreSQL 17 has also passed migration, real-data ingestion, cutoff-query, and prediction-lineage tests.
+The dashboard displays a finite portion of the count PMF. The API also returns tail probability; displayed bars should not be interpreted as a hard maximum count. Serving loads a prebuilt artifact and prepares historical state without fitting on startup. Preparation cost depends on the channel and snapshot. Restart after ingestion or training to refresh the loaded model and snapshot-specific state. SQLite is the verified default; local PostgreSQL 17 has also passed migration, real-data ingestion, cutoff-query, and prediction-lineage tests.
 
 ## Limits and maintenance
 
-- Current-artifact uncertainty has not been validated on a new untouched forward period after its mean refit.
+- V2 serving uncertainty has not been validated on a new untouched forward period. Disjoint mean fitting and calibration improve protocol hygiene; they do not establish forward accuracy.
 - A negative-binomial approximation may miss matchup-specific multimodality, early-finish mechanisms, tail behavior, and shifts in fighter style.
 - Sparse UFC histories, long layoffs, injuries, division changes, and debutants reduce the evidence supporting a forecast. No injury/news feed is included.
 - Scheduled rounds are a scenario input; changing them does not simulate a fully specified bout-duration process.
@@ -70,3 +72,19 @@ The dashboard displays a finite portion of the count PMF. The API also returns t
 - Local loopback benchmarks are environment-specific. Read both concurrency-one and concurrency-ten reports and their recorded workload/version. Current serving uses SQL feature-state lookup rather than per-request raw-history merges; regenerate benchmarks after runtime changes. Concurrency adds persistence and scheduling contention. No production capacity claim is made.
 
 After a source refresh, rerun integrity checks, rebuild point-in-time features, retrain/calibrate on explicit cutoffs, and evaluate on a genuinely later period. Preserve the previous artifacts and reports when comparing versions.
+
+## Prospective ledger and context
+
+Forward Tracker is separate from the retrospective report. A batch must be created before its timezone-aware scheduled fixture and records the immutable model/artifact/source identity, exact features, line kind, schedule kind, source URL, and recording time. The UI labels imported schedules as user-attested; a URL alone is not independent verification. Scoring requires later observed results linked to exact athlete/bout identities. An empty ledger means there is no prospective performance evidence yet. Synthetic lines remain synthetic even when the forecast itself was recorded prospectively.
+
+The optional matchup-context endpoint displays prior fight histories and group sensitivity relative to training-history medians. Groups can overlap, their changes must not be summed, and the effects are not causal attributions or additive SHAP values. Context is requested separately from the benchmarked forecast endpoint.
+
+The service rejects stale in-memory state with 503 if the ingested source-snapshot hash changes; restart to prepare the new state. Inference history cutoffs must be strictly later than the latest loaded completed-bout date, while individual history rows remain strictly before the cutoff. This is separate from the frozen recent replay protocol. Forward batches/entries are persisted through migration `0003`, with complete lineage available in CSV and structured JSON exports.
+
+## Announced upcoming cards
+
+The October 22, 2026 schedule snapshot includes six announced ESPN event cards through the end of 2026, totaling 65 bouts. The report projects both perspectives for 59 verified bout identities (118 athlete forecasts) and retains six unsupported matchups with explicit reasons. Each forecast uses the frozen issued model/data/source metadata and the announced scheduled rounds. Sourced card/segment timestamps must not be interpreted as precise walkout times.
+
+The public Upcoming Fights view shows expected significant strikes and an 80% range, without a winner probability or market-line claim. The full report retains its synthetic display threshold, count distribution, features, source hashes, and issue time. Two real future batches recorded October 22 preserve all 118 supported forecasts, with zero settled outcomes at issuance; future predictive performance remains pending. A fresh bootstrap has its own empty ledger rather than reissuing the published run.
+
+Actual athlete headshots are referenced from observed ESPN profile/CDN URLs and never synthesized. An unresolved local model identity may still have a sourced photo; a photo is not evidence that a valid model history exists. Missing/failed photos use initials. Photo presentation does not affect the model inputs or forecasts.

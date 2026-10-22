@@ -1,8 +1,8 @@
 """FastAPI inference reads SQL history and persists its complete prediction lineage."""
 
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
-import hashlib
+from functools import lru_cache
+from datetime import datetime
 import json
 import logging
 import math
@@ -12,15 +12,20 @@ from typing import Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from threadpoolctl import threadpool_limits
-import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError
 
 from .config import Settings
+from . import __version__
 from .db import Repository
+from . import forward as forward_ledger
+from .serving import LiveForecaster
+from collections import Counter, deque
+from uuid import uuid4
+import numpy as np
 
 LOGGER = logging.getLogger("cagemetrics.api")
 
@@ -70,10 +75,24 @@ class PredictionResponse(BaseModel):
     distribution: list[DistributionPoint]
     tail_probability: float
     warnings: list[str]
+    forecast_date: str | None = None
+
+
+class ForwardBatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    title: str = Field(default="Upcoming card", max_length=200)
+    idempotency_key: str = Field(min_length=1, max_length=200)
+    fixtures: list[dict] = Field(min_length=1, max_length=100)
 
 
 def _read_json(path: Path, default=None):
     return json.loads(path.read_text()) if path.exists() else default
+
+
+@lru_cache(maxsize=2)
+def _upcoming_snapshot(path: Path, modified_ns: int):
+    """Atomic report replacements invalidate this bounded read cache."""
+    return _read_json(path)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -88,25 +107,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.startup_error = None
         app.state.started_at = datetime.now(ZoneInfo("UTC")).isoformat()
         try:
-            from .modeling import ForecastEngine
-
-            forecaster = ForecastEngine(settings.artifact_dir)
-            forecaster.metadata["model_version"] = forecaster.metadata.get(
-                "model_version", forecaster.metadata["current_version"]
-            )
-            artifact = settings.artifact_dir / "current.joblib"
-            artifact_hash = hashlib.sha256(artifact.read_bytes()).hexdigest()
-            app.state.repository.register_model(forecaster.metadata, artifact_hash)
+            forecaster = LiveForecaster(settings, app.state.repository)
+            app.state.repository.register_model(forecaster.metadata, forecaster.sha256)
             app.state.forecaster = forecaster
             app.state.counts = app.state.repository.counts()
             if app.state.counts["bout_count"] == 0:
-                raise ValueError("The SQL database has no bouts; run cagemetrics demo first")
+                raise ValueError("The SQL database has no bouts; run cagemetrics bootstrap first")
             app.state.fighters = {f["fighter_id"]: f for f in app.state.repository.list_fighters()}
-            as_of = max(
-                datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
-                (datetime.fromisoformat(app.state.counts["date_end"]) + timedelta(days=1)).date().isoformat(),
-            )
+            as_of = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
             app.state.repository.materialize_feature_states(as_of)
+            warm_ids = list(app.state.fighters)[:2]
+            if len(warm_ids) == 2:
+                warm = forecaster.feature_frame(*warm_ids, 3, as_of, as_of)
+                forecaster.predict(warm, 45.5)
         except (FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
             app.state.startup_error = str(exc)
             LOGGER.warning("Model unavailable: %s", exc)
@@ -115,18 +128,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.thread_limiter.restore_original_limits()
 
     app = FastAPI(
-        title="CageMetrics",
-        version="0.1.0",
+        title="OctogonML",
+        version=__version__,
         lifespan=lifespan,
         description="UFC significant-strike forecasts with SQL provenance and chronological evaluation.",
     )
     app.state.settings = settings
+    app.state.request_latencies = deque(maxlen=2000)
+    app.state.request_statuses = Counter()
+    app.state.process_started = time.perf_counter()
 
     @app.middleware("http")
     async def request_timing(request: Request, call_next):
         start = time.perf_counter()
-        response = await call_next(request)
-        response.headers["Server-Timing"] = f"app;dur={(time.perf_counter() - start) * 1000:.3f}"
+        status_code = 500
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+        finally:
+            elapsed = (time.perf_counter() - start) * 1000
+            app.state.request_latencies.append(elapsed)
+            app.state.request_statuses[f"{status_code // 100}xx"] += 1
+        response.headers["Server-Timing"] = f"app;dur={elapsed:.3f}"
+        response.headers["X-Request-ID"] = str(uuid4())
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
@@ -135,15 +159,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(
                 503,
                 detail={
-                    "message": "Run cagemetrics demo to initialize data and models",
+                    "message": "Run cagemetrics bootstrap to initialize data and models",
                     "reason": app.state.startup_error,
                 },
             )
+        if app.state.repository.latest_snapshot_id() != app.state.forecaster.snapshot_id:
+            raise HTTPException(503, "Source snapshot changed; restart the service to load the new snapshot")
         return app.state.repository, app.state.forecaster
 
     @app.get("/health/live")
     def live():
-        return {"status": "alive", "version": "0.1.0"}
+        return {"status": "alive", "version": __version__}
 
     @app.get("/health/ready")
     def readiness():
@@ -179,25 +205,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "recent_metrics": recent.get("metrics", {}) if isinstance(recent, dict) else {},
         }
 
-    @app.post("/api/v1/predictions", response_model=PredictionResponse, status_code=201)
-    def predict(body: PredictionRequest):
+    def compute_prediction(body: PredictionRequest, forecast_date=None, persist=True, history_cutoff=None):
         repository, model = ready()
-        from .features import FEATURE_COLUMNS, assemble_matchup_features
-
         labels = app.state.fighters
         if body.fighter_id not in labels or body.opponent_id not in labels:
             raise HTTPException(404, "Unknown fighter ID; use /api/v1/fighters")
         latest_date = str(app.state.counts["date_end"])
-        as_of = max(
-            datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
-            (datetime.fromisoformat(latest_date) + timedelta(days=1)).date().isoformat(),
-        )
-        states = repository.feature_states([body.fighter_id, body.opponent_id], as_of)
-        frame = pd.DataFrame(
-            [{"fighter_id": fid, "as_of": as_of, **summary} for fid, summary in states.items()]
-        )
-        feature_frame = assemble_matchup_features(
-            frame, body.fighter_id, body.opponent_id, body.scheduled_rounds, as_of
+        as_of = history_cutoff or datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+        if latest_date >= as_of:
+            raise HTTPException(503, "Loaded observations must precede the forecast history cutoff")
+        forecast_date = forecast_date or as_of
+        if forecast_date < as_of:
+            raise ValueError("Current deployment cannot reconstruct past forecasts; use the replay view")
+        states = repository.feature_states([body.fighter_id, body.opponent_id], as_of, model.snapshot_id)
+        feature_frame = model.feature_frame(
+            body.fighter_id, body.opponent_id, body.scheduled_rounds, forecast_date, as_of
         )
         result = model.predict(feature_frame, body.line)
         dist = result.get("distribution", {})
@@ -207,7 +229,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ]
         own_count = int(feature_frame.iloc[0].get("own_prior_bouts", 0))
         opponent_count = int(feature_frame.iloc[0].get("opponent_prior_bouts", 0))
-        warnings = ["Hypothetical matchup; the supplied line is not a live market feed."]
+        warnings = ["The supplied strike line is not a live market feed."]
+        if persist:
+            warnings.insert(0, "Hypothetical matchup scenario; no confirmed booking is implied.")
         warnings.extend(result.get("warnings", []))
         if min(own_count, opponent_count) < 3:
             warnings.append(
@@ -242,6 +266,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "line": body.line,
                 "model_version": result.get("model_version", model.metadata.get("model_version")),
                 "feature_cutoff": as_of,
+                "forecast_date": forecast_date,
                 "data_cutoff": latest_date,
                 "history": {"fighter_bouts": own_count, "opponent_bouts": opponent_count},
                 "distribution": distribution,
@@ -249,8 +274,218 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "warnings": warnings,
             }
         )
-        feature_dict = {key: float(feature_frame.iloc[0][key]) for key in FEATURE_COLUMNS}
-        return repository.record_prediction(feature_dict, response, as_of)
+        feature_dict = model.feature_values(feature_frame)
+        if not persist:
+            return response | {"features": feature_dict}
+        return repository.record_prediction(feature_dict, response, as_of, model.snapshot_id)
+
+    @app.post("/api/v1/predictions", response_model=PredictionResponse, status_code=201)
+    def predict(body: PredictionRequest):
+        return compute_prediction(body)
+
+    @app.get("/api/v1/matchups")
+    def matchup(fighter_id: str, opponent_id: str, scheduled_rounds: int = Query(default=3)):
+        repository, model = ready()
+        if scheduled_rounds not in (3, 5):
+            raise HTTPException(422, "Scheduled rounds must be 3 or 5")
+        from .matchups import matchup_context
+
+        asof = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+        try:
+            return matchup_context(repository, model, fighter_id, opponent_id, scheduled_rounds, asof)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/v1/experiments")
+    def experiments():
+        ready()
+        return _read_json(settings.report_dir / "experiments.json", {"status": "not_run", "experiments": []})
+
+    @app.get("/api/v1/release")
+    def release():
+        repository, model = ready()
+        from .release import release_summary
+
+        return release_summary(settings, repository, model)
+
+    @app.get("/api/v1/fighter-photos")
+    def fighter_photos():
+        ready()
+        path = settings.data_dir / "fighter_photos.json"
+        if not path.exists():
+            path = settings.project_dir / "data" / "fighter_photos.json"
+        return _read_json(path, {"fighters": {}, "source": "No sourced headshots available"})
+
+    def upcoming_report():
+        _, model = ready()
+        path = settings.report_dir / "upcoming_predictions.json"
+        report = _upcoming_snapshot(path, path.stat().st_mtime_ns) if path.exists() else None
+        if report is None:
+            return {
+                "status": "not_generated",
+                "fixtures": [],
+                "event_count": 0,
+                "message": "Run cagemetrics refresh-schedule and cagemetrics project-upcoming",
+            }
+        if (
+            report.get("model_version") != model.metadata["model_version"]
+            or report.get("artifact_sha256") != model.sha256
+            or report.get("source_snapshot_sha256") != model.snapshot_id
+        ):
+            raise HTTPException(
+                409, "Upcoming projections use a different model or source snapshot; regenerate them"
+            )
+        return report
+
+    @app.get("/api/v1/upcoming")
+    def upcoming():
+        from .release import public_upcoming
+
+        return public_upcoming(upcoming_report())
+
+    @app.get("/api/v1/upcoming/export.json")
+    def export_upcoming():
+        return upcoming_report()
+
+    def upcoming_data():
+        path = settings.data_dir / "schedules" / "upcoming.json"
+        return _read_json(
+            path,
+            {
+                "fixtures": [],
+                "status": "manual_import",
+                "description": "Import a sourced upcoming card. No unverified schedule has been substituted.",
+            },
+        )
+
+    @app.get("/api/v1/forward")
+    def forward_dashboard():
+        repository, _ = ready()
+        from .release import public_forward
+
+        batches = forward_ledger.list_batches(repository)
+        summary = forward_ledger.forward_metrics(repository)
+        summary.update(
+            batch_count=len(batches),
+            prediction_count=summary.get("n_issued", 0),
+            pending_count=summary.get("n_pending", 0),
+            scored_count=summary.get("n_settled", 0),
+        )
+        return {
+            "batches": public_forward(batches),
+            "summary": summary,
+            "guide": {
+                "description": "Prospective records must be issued before sourced future fixtures. "
+                "Historical replay is kept separate.",
+                "steps": [
+                    "Import a future card with source URLs and timezone-aware timestamps.",
+                    "Enter a strike line or explicitly mark it synthetic.",
+                    "Issue the immutable batch before the event starts.",
+                    "After importing completed results, settle the batch using exact identities.",
+                ],
+            },
+            "upcoming": upcoming_data(),
+        }
+
+    @app.post("/api/v1/forward/batches", status_code=201)
+    def issue_batch(body: ForwardBatchRequest):
+        repository, model = ready()
+        cutoff = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+        from .forward import ForecastBatch
+        from sqlalchemy import select
+
+        # A retried HTTP request keeps the original server-selected artifact and
+        # cutoff, including across midnight or a later deployment. create_batch
+        # still compares the exact request hash and rejects changed fixtures.
+        with repository.sessions() as session:
+            original = session.scalar(
+                select(ForecastBatch).where(ForecastBatch.idempotency_key == body.idempotency_key)
+            )
+
+        def forecast(request):
+            fields = {k: request[k] for k in ("fighter_id", "opponent_id", "scheduled_rounds", "line")}
+            return compute_prediction(
+                PredictionRequest(**fields),
+                forecast_date=request["forecast_date"],
+                persist=False,
+                history_cutoff=request["history_cutoff"],
+            )
+
+        try:
+            return forward_ledger.create_batch(
+                repository,
+                forecast,
+                body.fixtures,
+                idempotency_key=body.idempotency_key,
+                model_version=original.model_version if original else model.metadata["model_version"],
+                artifact_sha256=original.artifact_sha256 if original else model.sha256,
+                provenance_sha256=original.provenance_sha256 if original else model.snapshot_id,
+                feature_cutoff=original.feature_cutoff if original else cutoff,
+                title=body.title,
+            )
+        except (ValueError, KeyError, TypeError) as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/v1/forward/batches/{batch_id}/settle")
+    def settle_forward(batch_id: str):
+        repository, _ = ready()
+        try:
+            return forward_ledger.settle_batch(repository, batch_id)
+        except ValueError as exc:
+            raise HTTPException(404 if "Unknown forecast batch" in str(exc) else 422, str(exc)) from exc
+
+    @app.get("/api/v1/forward/batches/{batch_id}")
+    def get_forward(batch_id: str):
+        repository, _ = ready()
+        try:
+            return forward_ledger.get_batch(repository, batch_id)
+        except ValueError as exc:
+            raise HTTPException(404, "Forward batch not found") from exc
+
+    @app.get("/api/v1/forward/export")
+    def export_forward():
+        repository, _ = ready()
+        from .release import forward_csv
+
+        return Response(
+            forward_csv(forward_ledger.list_batches(repository)),
+            media_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="cagemetrics-forward.csv"'},
+        )
+
+    @app.get("/api/v1/forward/export.json")
+    def export_forward_json():
+        repository, _ = ready()
+        return {"schema_version": 1, "batches": forward_ledger.list_batches(repository)}
+
+    @app.get("/api/v1/operations")
+    def operations():
+        _, model = ready()
+        values = list(app.state.request_latencies)
+        return {
+            "uptime_seconds": round(time.perf_counter() - app.state.process_started, 1),
+            "request_statuses": dict(app.state.request_statuses),
+            "sample_size": len(values),
+            "server_p50_ms": float(np.percentile(values, 50)) if values else None,
+            "server_p95_ms": float(np.percentile(values, 95)) if values else None,
+            "model_version": model.metadata["model_version"],
+            "serving_channel": model.channel,
+            "measurement": "Last 2000 server-side requests; includes dashboard and health traffic. "
+            "This is operational telemetry, distinct from the controlled HTTP benchmark.",
+        }
+
+    @app.get("/project/{document}", include_in_schema=False)
+    def project_document(document: str):
+        allowed = {
+            "RECRUITER_TOUR.md": settings.project_dir / "docs" / "RECRUITER_TOUR.md",
+            "ENGINEERING.md": settings.project_dir / "docs" / "ENGINEERING.md",
+            "INTERVIEW.md": settings.project_dir / "docs" / "INTERVIEW.md",
+            "MODEL_CARD.md": settings.project_dir / "MODEL_CARD.md",
+        }
+        path = allowed.get(document)
+        if path is None or not path.exists():
+            raise HTTPException(404, "Document not found")
+        return FileResponse(path, media_type="text/plain")
 
     @app.get("/api/v1/predictions/{prediction_id}", response_model=PredictionResponse)
     def saved_prediction(prediction_id: str):

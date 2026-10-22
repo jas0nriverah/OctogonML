@@ -56,7 +56,7 @@ def _hardware():
     return platform.processor() or platform.machine()
 
 
-async def benchmark(settings, url, requests, concurrency, warmup):
+async def benchmark(settings, url, requests, concurrency, warmup, workload="mixed"):
     latencies, statuses = [], []
     async with httpx.AsyncClient(
         base_url=url,
@@ -66,6 +66,9 @@ async def benchmark(settings, url, requests, concurrency, warmup):
         health = await client.get("/health/ready")
         health.raise_for_status()
         serving = health.json()
+        metadata_response = await client.get("/api/v1/models/current")
+        metadata_response.raise_for_status()
+        metadata = metadata_response.json()
         fighters = (await client.get("/api/v1/fighters?limit=2")).json()["fighters"]
         payload = {
             "fighter_id": fighters[0]["fighter_id"],
@@ -73,23 +76,38 @@ async def benchmark(settings, url, requests, concurrency, warmup):
             "scheduled_rounds": 3,
             "line": 45.5,
         }
+        templates = [payload]
+        if workload == "mixed":
+            replay_response = await client.get("/api/v1/recent")
+            replay_response.raise_for_status()
+            rows = replay_response.json().get("predictions", [])
+            templates = [
+                {
+                    "fighter_id": row["fighter_id"],
+                    "opponent_id": row["opponent_id"],
+                    "scheduled_rounds": 5 if i % 4 == 0 else 3,
+                    "line": [20.5, 45.0, 65.5, 90.0][i % 4],
+                }
+                for i, row in enumerate(rows)
+            ] or [payload]
+            payload = templates[0]
         cold_start = time.perf_counter()
         cold_response = await client.post("/api/v1/predictions", json=payload)
         cold_ms = (time.perf_counter() - cold_start) * 1000
         cold_response.raise_for_status()
-        for _ in range(warmup):
-            (await client.post("/api/v1/predictions", json=payload)).raise_for_status()
+        for i in range(warmup):
+            (await client.post("/api/v1/predictions", json=templates[i % len(templates)])).raise_for_status()
         gate = asyncio.Semaphore(concurrency)
 
-        async def one_request():
+        async def one_request(i):
             async with gate:
                 started = time.perf_counter()
-                response = await client.post("/api/v1/predictions", json=payload)
+                response = await client.post("/api/v1/predictions", json=templates[i % len(templates)])
                 latencies.append((time.perf_counter() - started) * 1000)
                 statuses.append(response.status_code)
 
         started = time.perf_counter()
-        await asyncio.gather(*(one_request() for _ in range(requests)))
+        await asyncio.gather(*(one_request(i) for i in range(requests)))
         elapsed = time.perf_counter() - started
     report = {
         "measured_at": datetime.now(timezone.utc).isoformat(),
@@ -111,8 +129,14 @@ async def benchmark(settings, url, requests, concurrency, warmup):
         "url": url,
         "database": serving.get("database"),
         "model_version": serving.get("model_version"),
+        "artifact_sha256": metadata.get("artifact_sha256"),
+        "serving_snapshot_id": metadata.get("serving_snapshot_id"),
+        "serving_data_through": metadata.get("serving_data_through"),
+        "workload_profile": workload,
+        "unique_scenarios": len({json.dumps(t, sort_keys=True) for t in templates}),
+        "scenario_sha256": hashlib.sha256(json.dumps(templates, sort_keys=True).encode()).hexdigest(),
         "workload": "Full HTTP POST including indexed SQL feature-state lookup, matchup assembly, inference, distribution, and persisted audit trail. Athlete history summaries are materialized before readiness.",
-        "notes": "Loopback warm-server benchmark; excludes service startup and external network latency. Semaphore wait excluded from individual request latency. Single Uvicorn worker recommended.",
+        "notes": "Loopback warm-server benchmark; excludes service startup and external network latency. Semaphore wait excluded from individual request latency. Single Uvicorn worker. Mixed profile varies real historical matchup identities, hypothetical 3/5-round scenarios and integer/half-point lines; it does not evaluate historical accuracy.",
     }
     settings.report_dir.mkdir(parents=True, exist_ok=True)
     path = settings.report_dir / "benchmark.json"
@@ -121,6 +145,9 @@ async def benchmark(settings, url, requests, concurrency, warmup):
     (settings.report_dir / f"benchmark-{serving.get('database', 'unknown')}-c{concurrency}.json").write_text(
         json.dumps(report, indent=2)
     )
+    (
+        settings.report_dir / f"benchmark-{workload}-{serving.get('database', 'unknown')}-c{concurrency}.json"
+    ).write_text(json.dumps(report, indent=2))
     return report
 
 
@@ -138,6 +165,15 @@ def main(argv=None):
             "infer-recent",
             "serve",
             "benchmark",
+            "bootstrap",
+            "experiment",
+            "forward-issue",
+            "forward-settle",
+            "forward-export",
+            "status",
+            "refresh-schedule",
+            "project-upcoming",
+            "issue-upcoming",
         ],
     )
     parser.add_argument(
@@ -149,6 +185,18 @@ def main(argv=None):
     parser.add_argument("--requests", type=int, default=300)
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument("--warmup", type=int, default=15)
+    parser.add_argument("--workload", choices=["single", "mixed"], default="mixed")
+    parser.add_argument(
+        "--increment-sha", default=None, help="Explicit pinned Greco source commit; requires --refresh"
+    )
+    parser.add_argument("--input", help="Future card JSON or CSV path")
+    parser.add_argument("--output", help="Export destination")
+    parser.add_argument("--format", choices=["csv", "json"], default="csv", help="Forward export format")
+    parser.add_argument("--batch-id")
+    parser.add_argument("--idempotency-key")
+    parser.add_argument("--title", default="Upcoming card")
+    parser.add_argument("--from-date", help="Start of announced schedule window (defaults to today)")
+    parser.add_argument("--through", default="2026-12-31", help="End of announced schedule window")
     args = parser.parse_args(argv)
     settings = Settings.from_env()
     if args.command == "serve":
@@ -159,7 +207,119 @@ def main(argv=None):
     if args.command == "benchmark":
         if args.requests < 1 or args.concurrency < 1 or args.warmup < 0:
             parser.error("Request/concurrency counts must be positive and warmup nonnegative")
-        _output(asyncio.run(benchmark(settings, args.url, args.requests, args.concurrency, args.warmup)))
+        _output(
+            asyncio.run(
+                benchmark(settings, args.url, args.requests, args.concurrency, args.warmup, args.workload)
+            )
+        )
+        return
+    if args.command == "status":
+        with httpx.Client(base_url=args.url) as client:
+            response = client.get("/api/v1/release")
+            response.raise_for_status()
+            _output(response.json())
+        return
+    if args.command == "forward-issue":
+        from pathlib import Path
+        from .forward import parse_schedule
+
+        if not args.input or not args.idempotency_key:
+            parser.error("forward-issue requires --input and --idempotency-key")
+        path = Path(args.input)
+        fixtures = parse_schedule(path.read_text(), "csv" if path.suffix.lower() == ".csv" else "json")
+        with httpx.Client(base_url=args.url, timeout=60) as client:
+            response = client.post(
+                "/api/v1/forward/batches",
+                json={"title": args.title, "idempotency_key": args.idempotency_key, "fixtures": fixtures},
+            )
+            response.raise_for_status()
+            _output(response.json())
+        return
+    if args.command in ("forward-settle", "forward-export"):
+        with httpx.Client(base_url=args.url, timeout=60) as client:
+            if args.command == "forward-settle":
+                if not args.batch_id:
+                    parser.error("forward-settle requires --batch-id")
+                response = client.post(f"/api/v1/forward/batches/{args.batch_id}/settle")
+            else:
+                response = client.get(
+                    "/api/v1/forward/export.json" if args.format == "json" else "/api/v1/forward/export"
+                )
+            response.raise_for_status()
+            if args.output:
+                from pathlib import Path
+
+                Path(args.output).write_text(response.text)
+            elif args.command == "forward-export":
+                print(response.text, end="")
+            else:
+                _output(response.json())
+        return
+    if args.command == "issue-upcoming":
+        report_path = settings.report_dir / "upcoming_predictions.json"
+        if not report_path.exists():
+            parser.error("Generate the announced projections first with project-upcoming")
+        report = json.loads(report_path.read_text())
+        fields = (
+            "fixture_id",
+            "scheduled_at",
+            "event_date",
+            "fighter_id",
+            "opponent_id",
+            "scheduled_rounds",
+            "line",
+            "line_kind",
+            "source_url",
+        )
+        fixtures = [
+            {**{key: row[key] for key in fields}, "schedule_kind": "verified"}
+            for row in report.get("predictions", [])
+        ]
+        if not fixtures:
+            parser.error("No supported announced forecasts are available to issue")
+        key = args.idempotency_key or "announced-" + report["schedule_sha256"][:24]
+        with httpx.Client(base_url=args.url, timeout=120) as client:
+            metadata_response = client.get("/api/v1/models/current")
+            metadata_response.raise_for_status()
+            metadata = metadata_response.json()
+            if (
+                metadata.get("model_version") != report["model_version"]
+                or metadata.get("artifact_sha256") != report["artifact_sha256"]
+                or metadata.get("serving_snapshot_id") != report["source_snapshot_sha256"]
+            ):
+                parser.error(
+                    "The running API differs from the projection snapshot; regenerate before issuance"
+                )
+            response = client.post(
+                "/api/v1/forward/batches",
+                json={
+                    "title": "Announced UFC cards through " + report["to"],
+                    "idempotency_key": key,
+                    "fixtures": fixtures[:100],
+                },
+            )
+            response.raise_for_status()
+            batches = [response.json()]
+            # The API caps one atomic batch at 100 athlete perspectives.
+            for index in range(100, len(fixtures), 100):
+                response = client.post(
+                    "/api/v1/forward/batches",
+                    json={
+                        "title": "Announced UFC cards through " + report["to"],
+                        "idempotency_key": f"{key}-{index // 100}",
+                        "fixtures": fixtures[index : index + 100],
+                    },
+                )
+                response.raise_for_status()
+                batches.append(response.json())
+            _output(
+                {
+                    "batch_ids": [batch["batch_id"] for batch in batches],
+                    "athlete_forecasts": sum(batch["n_entries"] for batch in batches),
+                    "line_kind": "synthetic",
+                    "future_scores": "pending",
+                }
+            )
         return
     if args.command == "evaluate":
         path = settings.report_dir / "evaluation.json"
@@ -177,12 +337,100 @@ def main(argv=None):
     migrate(settings)
     repository = Repository(settings.database_url)
     try:
-        if args.command in ("ingest", "demo"):
+        if args.command in ("ingest", "demo", "bootstrap"):
             from .data import ingest_dataset
 
-            bundle = ingest_dataset(settings.data_dir, refresh=args.refresh)
+            if not (settings.data_dir / "processed" / "quality.json").exists():
+                import shutil
+
+                committed = settings.project_dir / "data" / "processed"
+                if committed.exists() and committed.resolve() != (settings.data_dir / "processed").resolve():
+                    shutil.copytree(committed, settings.data_dir / "processed", dirs_exist_ok=True)
+
+            kwargs = {"increment_sha": args.increment_sha} if args.increment_sha else {}
+            bundle = ingest_dataset(settings.data_dir, refresh=args.refresh, **kwargs)
             counts = repository.store_dataset(bundle)
+            if args.command == "bootstrap":
+                import shutil
+
+                source_data = settings.project_dir / "data"
+                for name in ("schedules", "fighter_photos.json"):
+                    source, target = source_data / name, settings.data_dir / name
+                    if source.exists() and source.resolve() != target.resolve() and not target.exists():
+                        if source.is_dir():
+                            shutil.copytree(source, target)
+                        else:
+                            shutil.copy2(source, target)
             _output({"stage": "ingest", **counts, "quality": bundle.quality})
+        if args.command == "refresh-schedule":
+            from .schedule import refresh_schedule
+            from zoneinfo import ZoneInfo
+
+            schedule = refresh_schedule(
+                settings.data_dir,
+                repository.dataset().fighters,
+                start_date=args.from_date or datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
+                end_date=args.through,
+            )
+            _output(
+                {
+                    "stage": "refresh-schedule",
+                    "events": len(schedule["events"]),
+                    "bouts": len(schedule["fixtures"]),
+                    "observed_at": schedule["observed_at"],
+                }
+            )
+        if args.command == "project-upcoming":
+            from .serving import LiveForecaster
+            from .upcoming import generate_upcoming
+
+            schedule_path = settings.data_dir / "schedules" / "upcoming.json"
+            if not schedule_path.exists():
+                parser.error("Run refresh-schedule before generating announced projections")
+            forecaster = LiveForecaster(settings, repository)
+            report = generate_upcoming(
+                settings, forecaster, repository, json.loads(schedule_path.read_text())
+            )
+            _output(
+                {
+                    "stage": "project-upcoming",
+                    "model_version": report["model_version"],
+                    "events": report["event_count"],
+                    "bouts": report["projected_bout_count"],
+                    "athlete_projections": report["athlete_projection_count"],
+                    "unsupported_bouts": report["unsupported_bout_count"],
+                    "issued_at": report["issued_at"],
+                }
+            )
+        if args.command == "bootstrap":
+            from .serving import LiveForecaster
+
+            forecaster = LiveForecaster(settings, repository)
+            repository.register_model(forecaster.metadata, forecaster.sha256)
+            from zoneinfo import ZoneInfo
+
+            repository.materialize_feature_states(
+                datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+            )
+            _output(
+                {
+                    "stage": "bootstrap",
+                    "model": forecaster.metadata["model_version"],
+                    "serving_channel": forecaster.channel,
+                    "note": "Used committed artifacts; no model fitting.",
+                }
+            )
+        if args.command == "experiment":
+            from .experiments import run_experiments
+
+            report = run_experiments(repository.dataset(), settings.artifact_dir / "v2", settings.report_dir)
+            _output(
+                {
+                    "stage": "experiment",
+                    "selected_candidate": report["selected_candidate"],
+                    "model_version": report["model_version"],
+                }
+            )
         if args.command == "features":
             from .features import build_features
 

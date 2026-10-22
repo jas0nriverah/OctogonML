@@ -4,17 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#111c25" />
-    <title>CageMetrics · Significant strike intelligence</title>
+    <title>OctogonML · UFC strike forecasts</title>
     <link rel="stylesheet" href="/static/styles.css" />
     <script src="/static/app.js" defer></script>
   </head>
   <body>
     <header class="masthead">
-      <a class="brand" href="/" aria-label="CageMetrics home"
-        ><span class="brand-icon">C<span>M</span></span
+      <a class="brand" href="/" aria-label="OctogonML home"
+        ><span class="brand-icon octogon-mark">O</span
         ><span
-          >CAGE<span class="brand-light">METRICS</span
-          ><small>MIXED MARTIAL ARTS / ANALYTICS LAB</small></span
+          >OCTOGON<span class="brand-light">ML</span
+          ><small>UFC / STRIKE FORECASTS</small></span
         ></a
       >
       <div class="header-status">
@@ -29,41 +29,37 @@
       <section class="intro">
         <div>
           <p class="eyebrow">THE NUMBERS BEHIND THE MATCHUP</p>
-          <h1>Every strike has<br />a distribution.</h1>
+          <h1>The next card, in numbers.</h1>
           <p class="intro-copy">
-            Explore significant strike forecasts, test them against recent
-            fights, and inspect the evidence behind the model.
+            Explore announced UFC matchups, expected significant strikes,
+            and the range of outcomes behind every forecast.
           </p>
         </div>
         <aside class="intro-note">
-          <span class="note-number">01 / 03</span>
-          <p>Estimate the range.<br />Understand the uncertainty.</p>
+          <span class="note-number">2026 / UFC</span>
+          <p>The athletes.<br />The matchup. The range.</p>
           <span class="mini-rule"></span
           ><small
-            >PUBLIC DATA. REPRODUCIBLE MODELS.<br />NO LIVE BETTING FEED.</small
+            >ANNOUNCED FIGHTS. SOURCED PHOTOS.<br />NO LIVE BETTING FEED.</small
           >
         </aside>
       </section>
-      <section class="summary-strip" id="summary" aria-label="Dataset summary">
-        <div>
-          <span>HISTORICAL BOUTS</span><strong id="summary-bouts">—</strong>
-        </div>
-        <div><span>ATHLETES</span><strong id="summary-fighters">—</strong></div>
-        <div><span>LATEST DATA</span><strong id="summary-date">—</strong></div>
-        <div>
-          <span>MODEL VERSION</span><strong id="summary-model">—</strong>
-        </div>
-      </section>
       <nav class="tabs" aria-label="Analysis views">
-        <button class="tab active" data-view="explorer" aria-selected="true">
-          01 <span>Forecast Explorer</span></button
+        <button class="tab active" data-view="upcoming" aria-selected="true">
+          <span>Upcoming Fights</span></button
+        ><button class="tab" data-view="explorer" aria-selected="false">
+          <span>Matchup Lab</span></button
         ><button class="tab" data-view="recent" aria-selected="false">
-          02 <span>Recent Cards</span></button
-        ><button class="tab" data-view="evidence" aria-selected="false">
-          03 <span>Model Evidence</span>
+          <span>Recent Results</span>
         </button>
+        <details class="research-menu"><summary>Research <span>⌄</span></summary><div><button class="tab" data-view="evidence" aria-selected="false">Model Evidence</button><button class="tab" data-view="forward" aria-selected="false">Forward Tracker</button></div></details>
       </nav>
-      <section id="view-explorer" class="view">
+      <section id="view-upcoming" class="view">
+        <div class="section-heading upcoming-heading"><div><p class="eyebrow">ON THE CALENDAR</p><h2>Upcoming UFC fights</h2></div><span class="date-badge">THROUGH DECEMBER 2026</span></div>
+        <p class="section-copy">Announced matchups with forecasts for each athlete’s significant strikes landed. Ranges show uncertainty across the full fight.</p>
+        <div id="upcoming-content" aria-live="polite"><div class="panel loading-state">Loading announced fights…</div></div>
+      </section>
+      <section id="view-explorer" class="view" hidden>
         <div class="explorer-layout">
           <form id="forecast-form" class="panel matchup-panel">
             <div class="panel-heading">
@@ -168,6 +164,22 @@
           </p>
         </div>
       </section>
+      <section id="view-forward" class="view" hidden>
+        <div class="section-heading"><div><p class="eyebrow">EVIDENCE THAT STARTS BEFORE THE EVENT</p><h2>Keep the next prediction honest.</h2></div><div class="release-links"><a href="/api/v1/forward/export" class="text-link" download>Export CSV ↗</a><a href="/api/v1/forward/export.json" class="text-link" download>Export JSON ↗</a></div></div>
+        <p class="section-copy">Freeze a forecast before its scheduled fight, preserve the model and line provenance, then score it when an observed result becomes available. Forward entries are separate from retrospective replays.</p>
+        <div id="forward-content" aria-live="polite"><div class="panel loading-state">Loading forward ledger…</div></div>
+        <details class="panel forward-builder"><summary>Create a pre-event forecast batch <span class="text-link">Open editor +</span></summary>
+          <div class="builder-body"><p class="panel-description">Use a verified future fixture and its scheduled time. Copy the scenario selected in Forecast Explorer, review the JSON, and submit. Saving records a local forecast; it does not submit a wager or schedule an automated task.</p>
+          <div class="builder-fields"><div><label for="forward-title">Batch title</label><input id="forward-title" type="text" maxlength="200" placeholder="Event or research batch name"></div><div><label for="forward-scheduled">Verified scheduled time (your local timezone)</label><input id="forward-scheduled" type="datetime-local"></div></div>
+          <div class="builder-fields"><div><label for="forward-line-source">Public schedule reference URL</label><input id="forward-line-source" type="url" placeholder="https://…"></div><div><label for="forward-line-kind">Line kind</label><select id="forward-line-kind"><option value="synthetic">Synthetic research line</option><option value="actual_user">Actual line supplied by user</option></select></div></div>
+          <button id="forward-use-scenario" type="button" class="secondary-button">Build JSON from current explorer matchup</button>
+          <label for="forward-json" class="editor-label">Batch request JSON</label><textarea id="forward-json" rows="15" spellcheck="false" aria-describedby="forward-editor-help">{"title":"","idempotency_key":"","fixtures":[]}</textarea>
+          <p id="forward-editor-help" class="form-note">Each fixture needs a unique fixture_id, future scheduled_at (ISO 8601 with timezone), event_date, known fighter_id and opponent_id, scheduled_rounds, line, line_kind (actual_user or synthetic), schedule_kind, and a public source_url. The builder marks schedules user_attested: a supplied URL is not independent verification. Reusing the same idempotency key safely retries the same batch.</p>
+          <div class="builder-actions"><button id="forward-submit" type="button" class="primary-button">Freeze forecast batch <span>↗</span></button><label class="file-button" for="forward-file">Import JSON file<input id="forward-file" type="file" accept=".json,application/json"></label></div>
+          <p id="forward-message" role="status" class="form-note"></p>
+          </div>
+        </details>
+      </section>
       <section id="view-recent" class="view" hidden>
         <div class="section-heading">
           <div>
@@ -186,6 +198,12 @@
         </div>
       </section>
       <section id="view-evidence" class="view" hidden>
+        <section class="summary-strip" id="summary" aria-label="Dataset summary">
+          <div><span>HISTORICAL BOUTS</span><strong id="summary-bouts">—</strong></div>
+          <div><span>ATHLETES</span><strong id="summary-fighters">—</strong></div>
+          <div><span>LATEST DATA</span><strong id="summary-date">—</strong></div>
+          <div><span>MODEL VERSION</span><strong id="summary-model">—</strong></div>
+        </section>
         <div class="section-heading">
           <div>
             <p class="eyebrow">OPEN THE MODEL CARD</p>
@@ -197,14 +215,18 @@
           Chronological evaluation, explicit baselines, and traceable artifacts.
           Reported performance belongs to its stated sample and time window.
         </p>
+        <details class="release-overview panel" id="release-overview">
+          <summary><span><span class="eyebrow">ENGINEERING PORTFOLIO</span><strong>Two minutes inside the system</strong></span><span class="text-link">Open the project brief +</span></summary>
+          <div id="release-content" class="release-content"><p class="panel-description">Loading release evidence…</p></div>
+        </details>
         <div id="evidence-content" aria-live="polite">
           <div class="panel loading-state">Loading model evidence…</div>
         </div>
       </section>
       <footer>
         <div>
-          <strong>CAGEMETRICS</strong
-          ><span>An independent MMA forecasting portfolio.</span>
+          <strong>OCTOGONML</strong
+          ><span>Independent UFC strike forecasts.</span>
         </div>
         <p id="source-note">
           Public historical fight data · Counts are forecasts, not guarantees.

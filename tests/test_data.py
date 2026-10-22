@@ -66,8 +66,8 @@ def test_round_coverage_rejects_missing_round_and_duplicates():
 
 
 def test_observed_timestamp_comes_from_stable_cached_file(tmp_path):
-    cached = tmp_path / "owner" / "file.csv"
-    cached.parent.mkdir()
+    cached = tmp_path / "owner" / "sha" / "file.csv"
+    cached.parent.mkdir(parents=True)
     cached.write_text("x\n1\n")
     first = {}
     second = {}
@@ -75,3 +75,84 @@ def test_observed_timestamp_comes_from_stable_cached_file(tmp_path):
     _download("owner/repo", "sha", "file.csv", tmp_path, second)
     assert first == second
     assert first["owner/repo/file.csv"]["observed_at"].endswith("+00:00")
+
+
+def test_different_commits_never_share_cached_bytes(tmp_path, monkeypatch):
+    for sha, value in [("a" * 40, b"old"), ("b" * 40, b"new")]:
+        destination = tmp_path / "owner" / sha / "file.csv"
+        destination.parent.mkdir(parents=True)
+        destination.write_bytes(value)
+
+    def no_network(*args, **kwargs):
+        raise AssertionError("Versioned cache should be offline")
+
+    monkeypatch.setattr("urllib.request.urlopen", no_network)
+    assert _download("owner/repo", "a" * 40, "file.csv", tmp_path, {}) == b"old"
+    assert _download("owner/repo", "b" * 40, "file.csv", tmp_path, {}) == b"new"
+
+
+def test_verified_legacy_cache_migration_preserves_timestamp(tmp_path, monkeypatch):
+    import hashlib
+    import json
+
+    raw = tmp_path / "raw"
+    legacy = raw / "owner" / "file.csv"
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(b"legacy")
+    original_mtime = legacy.stat().st_mtime_ns
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    (processed / "provenance.json").write_text(
+        json.dumps(
+            {"owner/repo/file.csv": {"commit": "a" * 40, "sha256": hashlib.sha256(b"legacy").hexdigest()}}
+        )
+    )
+
+    def no_network(*args, **kwargs):
+        raise AssertionError("Verified legacy cache should migrate offline")
+
+    monkeypatch.setattr("urllib.request.urlopen", no_network)
+    assert _download("owner/repo", "a" * 40, "file.csv", raw, {}) == b"legacy"
+    assert (raw / "owner" / ("a" * 40) / "file.csv").stat().st_mtime_ns == original_mtime
+
+
+@pytest.mark.parametrize("requested_sha", ["a" * 40, "b" * 40])
+def test_legacy_wrong_commit_or_checksum_cannot_be_relabelled(tmp_path, monkeypatch, requested_sha):
+    import io
+    import json
+
+    raw = tmp_path / "raw"
+    legacy = raw / "owner" / "file.csv"
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(b"wrong-old-bytes")
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    (processed / "provenance.json").write_text(
+        json.dumps({"owner/repo/file.csv": {"commit": "a" * 40, "sha256": "wronghash"}})
+    )
+    urls = []
+
+    def download(url, **kwargs):
+        urls.append(url)
+        return io.BytesIO(b"requested-commit-bytes")
+
+    monkeypatch.setattr("urllib.request.urlopen", download)
+    assert _download("owner/repo", requested_sha, "file.csv", raw, {}) == b"requested-commit-bytes"
+    assert "/" + requested_sha + "/" in urls[0]
+    assert legacy.read_bytes() == b"wrong-old-bytes"
+
+
+def test_processed_commit_mismatch_requires_explicit_refresh(tmp_path):
+    import json
+    from cagemetrics.data import ingest_dataset
+
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    (processed / "quality.json").write_text("{}")
+    (processed / "provenance.json").write_text(
+        json.dumps({"Greco1899/scrape_ufc_stats/file.csv": {"commit": "a" * 40}})
+    )
+    with pytest.raises(ValueError, match="refresh explicitly"):
+        ingest_dataset(tmp_path, increment_sha="b" * 40)
+    with pytest.raises(ValueError, match="40-character"):
+        ingest_dataset(tmp_path, increment_sha="main")

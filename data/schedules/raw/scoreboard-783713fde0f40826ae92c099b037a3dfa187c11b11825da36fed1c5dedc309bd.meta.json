@@ -1,0 +1,6 @@
+{
+  "source_url": "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates=20261022-20261231&limit=1000",
+  "sha256": "783713fde0f40826ae92c099b037a3dfa187c11b11825da36fed1c5dedc309bd",
+  "observed_at": "2026-10-22T16:49:28.018096+00:00",
+  "bytes": 119176
+}

@@ -183,20 +183,44 @@ class Repository:
                     session.add(Fighter(fighter_id=fid, name=str(row["name"])))
                     existing_fighters.add(fid)
             session.flush()
-            existing_events = set(session.scalars(select(Event.event_id)))
+            existing_events = {event.event_id: event for event in session.scalars(select(Event))}
             for row in bundle.bouts.to_dict("records"):
                 eid = str(row["event_id"])
-                if eid not in existing_events:
-                    session.add(
-                        Event(
-                            event_id=eid,
-                            event_name=str(row["event_name"]),
-                            event_date=str(row["event_date"])[:10],
-                        )
-                    )
-                    existing_events.add(eid)
+                event_values = {
+                    "event_name": str(row["event_name"]),
+                    "event_date": str(row["event_date"])[:10],
+                }
+                if eid in existing_events:
+                    for field, incoming in event_values.items():
+                        if getattr(existing_events[eid], field) != incoming:
+                            raise ValueError(
+                                f"Source correction conflicts with immutable event {eid}: {field}; "
+                                "create a new dataset/version and explicitly migrate corrected history"
+                            )
+                else:
+                    event = Event(event_id=eid, **event_values)
+                    session.add(event)
+                    existing_events[eid] = event
             session.flush()
-            existing_bouts = set(session.scalars(select(Bout.bout_id)))
+            existing_bouts = {bout.bout_id: bout for bout in session.scalars(select(Bout))}
+            for row in bundle.bouts.to_dict("records"):
+                stored = existing_bouts.get(str(row["bout_id"]))
+                if stored is None:
+                    continue
+                incoming_values = {
+                    **{
+                        field: str(row[field])
+                        for field in ("event_id", "fighter_a_id", "fighter_b_id", "division", "method")
+                    },
+                    "scheduled_rounds": int(row["scheduled_rounds"]),
+                    "duration_seconds": float(row["duration_seconds"]),
+                }
+                for field, incoming in incoming_values.items():
+                    if getattr(stored, field) != incoming:
+                        raise ValueError(
+                            f"Source correction conflicts with immutable bout {stored.bout_id}: {field}; "
+                            "create a new dataset/version and explicitly migrate corrected history"
+                        )
             # Completed targets are immutable within this registry. A source correction
             # requires a new dataset/version rather than silently rewriting history.
             recorded = {
@@ -373,26 +397,37 @@ class Repository:
                     )
                 )
 
-    def feature_states(self, fighter_ids: list[str], as_of: str) -> dict[str, dict]:
-        """Retrieve point-in-time feature states with one indexed SQL read."""
+    def latest_snapshot_id(self) -> str | None:
         with self.sessions() as session:
-            snapshot = session.scalar(
-                select(SourceSnapshot).order_by(SourceSnapshot.observed_at.desc()).limit(1)
+            return session.scalar(
+                select(SourceSnapshot.snapshot_id)
+                .order_by(SourceSnapshot.observed_at.desc(), SourceSnapshot.snapshot_id)
+                .limit(1)
             )
-            if snapshot is None:
-                raise ValueError("No source dataset has been ingested")
-            values = session.scalars(
-                select(FighterFeatureState).where(
-                    FighterFeatureState.fighter_id.in_(fighter_ids),
-                    FighterFeatureState.as_of == as_of,
-                    FighterFeatureState.snapshot_id == snapshot.snapshot_id,
+
+    def feature_states(
+        self, fighter_ids: list[str], as_of: str, snapshot_id: str | None = None
+    ) -> dict[str, dict]:
+        """Retrieve point-in-time feature states with one indexed SQL read."""
+        source_id = snapshot_id or self.latest_snapshot_id()
+        if source_id is None:
+            raise ValueError("No source dataset has been ingested")
+        for attempt in range(2):
+            with self.sessions() as session:
+                values = session.scalars(
+                    select(FighterFeatureState).where(
+                        FighterFeatureState.fighter_id.in_(fighter_ids),
+                        FighterFeatureState.as_of == as_of,
+                        FighterFeatureState.snapshot_id == source_id,
+                    )
                 )
-            )
-            result = {row.fighter_id: row.summary for row in values}
-        if len(result) != len(set(fighter_ids)):
+                result = {row.fighter_id: row.summary for row in values}
+            if len(result) == len(set(fighter_ids)):
+                return result
+            if attempt or source_id != self.latest_snapshot_id():
+                raise ValueError("Feature states unavailable for the requested source snapshot")
             self.materialize_feature_states(as_of)
-            return self.feature_states(fighter_ids, as_of)
-        return result
+        raise ValueError("Unknown fighter ID")
 
     def materialize_feature_states(self, as_of: str) -> dict:
         """Summarize raw SQL history once per source snapshot/day, before serving."""
@@ -451,12 +486,18 @@ class Repository:
             if not session.get(EvaluationRun, key):
                 session.add(EvaluationRun(evaluation_id=key, report=report))
 
-    def record_prediction(self, features: dict, response: dict, as_of: str) -> dict:
+    def record_prediction(
+        self, features: dict, response: dict, as_of: str, snapshot_id: str | None = None
+    ) -> dict:
         payload = json_safe(features)
+        source_id = snapshot_id or self.latest_snapshot_id()
+        if source_id is None:
+            raise ValueError("No canonical source snapshot has been ingested")
         feature_id = hashlib.sha256(
             json.dumps(
                 {
                     "as_of": as_of,
+                    "snapshot_id": source_id,
                     "features": payload,
                     "fighter_id": response["fighter"]["id"],
                     "opponent_id": response["opponent"]["id"],
@@ -467,10 +508,7 @@ class Repository:
         prediction_id = str(uuid4())
         response = response | {"prediction_id": prediction_id}
         with self._write_lock, self.sessions.begin() as session:
-            source = session.scalar(
-                select(SourceSnapshot).order_by(SourceSnapshot.observed_at.desc()).limit(1)
-            )
-            if source is None:
+            if session.get(SourceSnapshot, source_id) is None:
                 raise ValueError("No canonical source snapshot has been ingested")
             if not session.get(FeatureSnapshot, feature_id):
                 session.add(
@@ -480,7 +518,7 @@ class Repository:
                         opponent_id=response["opponent"]["id"],
                         as_of=as_of,
                         features=payload,
-                        snapshot_id=source.snapshot_id,
+                        snapshot_id=source_id,
                     )
                 )
                 session.flush()

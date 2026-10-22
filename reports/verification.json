@@ -1,0 +1,11 @@
+{
+  "tests": "136 passed; SQLite and PostgreSQL 17.11",
+  "coverage": "75.5% overall",
+  "lint": "Ruff, JavaScript syntax, shell syntax and diff checks passed",
+  "bootstrap": "Fresh SQLite runtime and real V2 inference, offline and without fitting",
+  "browser": "Four views and matchup context verified on desktop and 390px mobile",
+  "packaging": "Python 0.2.0 wheel built",
+  "containers": "Docker/Compose and CI smoke check included; Docker unavailable locally",
+  "deployment": "Local service verified; private GitHub integration and hosted CI in progress",
+  "forward_evidence": "118 issued athlete forecasts across59 bouts; zero settled outcomes"
+}

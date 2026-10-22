@@ -1,0 +1,44 @@
+{
+  "verified_at": "2026-10-22T16:42:39.773601+00:00",
+  "tests": 136,
+  "failures": 0,
+  "skipped": 0,
+  "coverage_pct": 75.51848512173129,
+  "source_sha256": "10bc423def47beea2808e15bdf08b2b1c6f193e38c963da5e0dd4116afd23b7c",
+  "test_command": "CAGEMETRICS_TEST_DATABASE_URL=<dedicated PostgreSQL URL> pytest --cov=cagemetrics --cov-report=json:reports/coverage.json --junitxml=reports/test-results.xml",
+  "benchmark_reports": [
+    "benchmark-mixed-sqlite-c1.json",
+    "benchmark-mixed-sqlite-c10.json",
+    "benchmark-mixed-postgresql-c10.json"
+  ],
+  "browser_checks": {
+    "desktop": true,
+    "mobile_width": 390,
+    "overflow": false,
+    "console_errors": 0
+  },
+  "unverified": [
+    "Public hosting",
+    "External GitHub Actions run",
+    "Local Docker build",
+    "Prospective accuracy"
+  ],
+  "packaging": {
+    "wheel_build": "passed",
+    "installed_wheel_dashboard_and_readiness": "passed",
+    "extracted_archive_fresh_bootstrap_and_http": "passed",
+    "archive_integrity": "passed",
+    "archive_files": 112,
+    "developer_database_and_environment_excluded": true
+  },
+  "upcoming": {
+    "events": 6,
+    "announced_bouts": 65,
+    "projected_bouts": 59,
+    "athlete_forecasts": 118,
+    "unsupported_bouts": 6,
+    "canonical_photos": 126,
+    "window_end": "2026-12-31",
+    "settled": 0
+  }
+}

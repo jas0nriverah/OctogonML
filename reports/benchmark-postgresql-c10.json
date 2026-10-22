@@ -1,13 +1,14 @@
 {
-  "measured_at": "2026-10-22T16:15:06.013882+00:00",
+  "measured_at": "2026-10-22T16:41:21.202730+00:00",
   "requests": 500,
   "concurrency": 10,
-  "warmup_requests": 20,
-  "p50_ms": 45.48520799835387,
-  "p95_ms": 71.43813779766788,
-  "p99_ms": 73.03145041838434,
-  "max_ms": 80.5330840012175,
-  "requests_per_second": 206.2494582446967,
+  "warmup_requests": 100,
+  "first_request_ms": 15.704249999544118,
+  "p50_ms": 50.74704149956233,
+  "p95_ms": 78.89724964898042,
+  "p99_ms": 109.44052291964907,
+  "max_ms": 111.30591700202785,
+  "requests_per_second": 186.54317347424438,
   "error_count": 0,
   "error_rate": 0.0,
   "environment": "Darwin 25.5.0 / arm64",
@@ -16,12 +17,13 @@
   "python": "3.12.14",
   "url": "http://127.0.0.1:8001",
   "database": "postgresql",
-  "model_version": "current-2026-10-17",
+  "model_version": "v2-fb2f7851859634a0",
+  "artifact_sha256": "a4af9610f49a6a9aa7c02bad30435d96b297f94a7b453880c843f75cad490712",
+  "serving_snapshot_id": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+  "serving_data_through": "2026-10-17",
+  "workload_profile": "mixed",
+  "unique_scenarios": 50,
+  "scenario_sha256": "4ed3e73b658d7db4481bd30ab86c0a6c675387ea2b3c622dd08d37740cf96c66",
   "workload": "Full HTTP POST including indexed SQL feature-state lookup, matchup assembly, inference, distribution, and persisted audit trail. Athlete history summaries are materialized before readiness.",
-  "notes": "Loopback warm-server benchmark; excludes service startup and external network latency. Semaphore wait excluded from individual request latency. Single Uvicorn worker recommended.",
-  "native_thread_defaults": {
-    "OMP_NUM_THREADS": 1,
-    "OPENBLAS_NUM_THREADS": 1
-  },
-  "first_request_ms": 30.39254100076505
+  "notes": "Loopback warm-server benchmark; excludes service startup and external network latency. Semaphore wait excluded from individual request latency. Single Uvicorn worker. Mixed profile varies real historical matchup identities, hypothetical 3/5-round scenarios and integer/half-point lines; it does not evaluate historical accuracy."
 }

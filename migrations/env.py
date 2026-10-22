@@ -1,6 +1,7 @@
 from alembic import context
 from cagemetrics.config import Settings
 from cagemetrics.db import Base, make_engine
+import cagemetrics.forward  # noqa: F401 -- register prospective ledger metadata
 
 config = context.config
 config.set_main_option("sqlalchemy.url", Settings.from_env().database_url.replace("%", "%%"))

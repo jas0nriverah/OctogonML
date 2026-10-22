@@ -204,6 +204,195 @@ def test_unknown_fighter_and_prediction_are_not_found(client):
     assert client.get("/api/v1/predictions/missing").status_code == 404
 
 
+@pytest.mark.parametrize("rounds", [3, 5])
+def test_matchup_context_accepts_round_query_strings(client, rounds):
+    response = client.get(f"/api/v1/matchups?fighter_id=a&opponent_id=b&scheduled_rounds={rounds}")
+    assert response.status_code == 200, response.text
+    context = response.json()
+    assert context["fighter_name"] == "Athlete A"
+    assert len(context["comparison"]) == 6
+    assert len(context["fighter_recent"]) == 2
+    assert "not causal" in context["explanation_note"]
+
+
+def test_context_validation_release_and_operations(client):
+    assert client.get("/api/v1/matchups?fighter_id=a&opponent_id=b&scheduled_rounds=4").status_code == 422
+    assert client.get("/api/v1/matchups?fighter_id=missing&opponent_id=b").status_code == 422
+    result = client.get("/api/v1/release")
+    assert result.status_code == 200
+    assert result.json()["model_evidence"]["future_validation"].startswith("Pending")
+    assert len(result.headers["X-Request-ID"]) == 36
+    operations = client.get("/api/v1/operations").json()
+    assert operations["request_statuses"]["4xx"] == 2
+    assert operations["sample_size"] >= 3
+    assert operations["serving_channel"] == "v1"
+    assert client.get("/project/private.txt").status_code == 404
+
+
+def _future_fixture(**patch):
+    from datetime import datetime, timedelta, timezone
+
+    future = datetime.now(timezone.utc) + timedelta(days=2)
+    return {
+        "fixture_id": "http-test-only-fixture",
+        "scheduled_at": future.isoformat(),
+        "event_date": future.date().isoformat(),
+        "fighter_id": "a",
+        "opponent_id": "b",
+        "scheduled_rounds": 3,
+        "line": 30.5,
+        "line_kind": "synthetic",
+        "schedule_kind": "user_attested",
+        "source_url": "https://example.com/test-fixture",
+        **patch,
+    }
+
+
+def test_http_forward_issuance_audit_exports_and_pending_settlement(client, monkeypatch):
+    import csv
+    import io
+    from datetime import datetime, timedelta
+    import cagemetrics.api as api_module
+
+    payload = {"title": "HTTP fixture", "idempotency_key": "http-retry", "fixtures": [_future_fixture()]}
+    response = client.post("/api/v1/forward/batches", json=payload)
+    assert response.status_code == 201, response.text
+    batch = response.json()
+    entry = batch["entries"][0]
+    assert batch["mode"] == "prospective" and batch["status"] == "pending"
+    assert entry["prediction"]["feature_cutoff"] == batch["feature_cutoff"]
+    assert entry["prediction"]["forecast_date"] == payload["fixtures"][0]["event_date"]
+    assert len(batch["artifact_sha256"]) == len(batch["provenance_sha256"]) == 64
+    assert entry["features"]["own_prior_bouts"] == 2
+    assert client.post("/api/v1/forward/batches", json=payload).json()["batch_id"] == batch["batch_id"]
+    dashboard = client.get("/api/v1/forward").json()
+    assert dashboard["summary"]["n_pending"] == 1
+    assert dashboard["summary"]["mae"] is None
+    assert client.get(f"/api/v1/forward/batches/{batch['batch_id']}").json() == batch
+    portable = client.get("/api/v1/forward/export.json").json()
+    assert portable["batches"] == [batch]
+    exported = list(csv.DictReader(io.StringIO(client.get("/api/v1/forward/export").text)))
+    assert exported[0]["artifact_sha256"] == batch["artifact_sha256"]
+    assert exported[0]["provenance_sha256"] == batch["provenance_sha256"]
+    assert json.loads(exported[0]["features_json"]) == entry["features"]
+    assert json.loads(exported[0]["prediction_json"]) == entry["prediction"]
+    assert client.post(f"/api/v1/forward/batches/{batch['batch_id']}/settle").json()["n_settled"] == 0
+    assert client.post("/api/v1/forward/batches/missing/settle").status_code == 404
+    assert client.get("/api/v1/forward/batches/missing").status_code == 404
+    changed = {**payload, "fixtures": [{**payload["fixtures"][0], "line": 40.5}]}
+    assert client.post("/api/v1/forward/batches", json=changed).status_code == 422
+
+    class LaterDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime.now(tz) + timedelta(days=3)
+
+    monkeypatch.setattr(api_module, "datetime", LaterDateTime)
+    assert client.post("/api/v1/forward/batches", json=payload).json()["batch_id"] == batch["batch_id"]
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [
+        {"scheduled_rounds": 3.9},
+        {"scheduled_at": "2099-01-01T18:00:00"},
+        {"source_url": ""},
+        {"artifact_sha256": "forged"},
+    ],
+)
+def test_http_forward_bad_fixture_never_writes_partial_batch(client, patch):
+    response = client.post(
+        "/api/v1/forward/batches", json={"idempotency_key": "invalid", "fixtures": [_future_fixture(**patch)]}
+    )
+    assert response.status_code == 422, response.text
+    assert client.get("/api/v1/forward").json()["batches"] == []
+
+
+def test_live_snapshot_change_requires_reload(client, repository):
+    from cagemetrics.db import SourceSnapshot
+    from datetime import datetime, timedelta, timezone
+
+    with repository.sessions.begin() as session:
+        session.add(
+            SourceSnapshot(
+                snapshot_id="e" * 64,
+                manifest={"test": "new snapshot"},
+                observed_at=datetime.now(timezone.utc) + timedelta(seconds=1),
+            )
+        )
+    response = client.get("/health/ready")
+    assert response.status_code == 503
+    assert "restart" in response.json()["detail"]
+    assert (
+        client.post(
+            "/api/v1/predictions",
+            json={
+                "fighter_id": "a",
+                "opponent_id": "b",
+                "scheduled_rounds": 3,
+                "line": 30.5,
+            },
+        ).status_code
+        == 503
+    )
+
+
+def test_adapter_rejects_history_cutoff_that_excludes_loaded_observations(client):
+    forecaster = client.app.state.forecaster
+    with pytest.raises(ValueError, match="precede"):
+        forecaster.feature_frame("a", "b", 3, "2026-10-24", "2026-10-17")
+
+
+def test_upcoming_compact_view_full_export_and_snapshot_guard(client):
+    settings = client.app.state.settings
+    model = client.app.state.forecaster
+    assert client.get("/api/v1/upcoming").json()["status"] == "not_generated"
+    settings.report_dir.mkdir(parents=True, exist_ok=True)
+    report = {
+        "model_version": model.metadata["model_version"],
+        "artifact_sha256": model.sha256,
+        "source_snapshot_sha256": model.snapshot_id,
+        "event_count": 1,
+        "predictions": [{"features": {"own_prior_bouts": 2}}],
+        "fixtures": [
+            {
+                "fixture_id": "test",
+                "projections": [
+                    {
+                        "mean": 30,
+                        "features": {"own_prior_bouts": 2},
+                        "distribution": {"pmf": []},
+                    }
+                ],
+            }
+        ],
+    }
+    path = settings.report_dir / "upcoming_predictions.json"
+    path.write_text(json.dumps(report))
+    result = client.get("/api/v1/upcoming").json()
+    assert result["fixtures"][0]["projections"] == [{"mean": 30}]
+    assert "predictions" not in result
+    assert client.get("/api/v1/upcoming/export.json").json() == report
+    replacement = path.with_suffix(".new")
+    replacement.write_text(json.dumps({**report, "model_version": "other"}))
+    replacement.replace(path)
+    assert client.get("/api/v1/upcoming").status_code == 409
+
+
+def test_sourced_photo_map_missing_and_available(client):
+    assert client.get("/api/v1/fighter-photos").json()["fighters"] == {}
+    data_dir = client.app.state.settings.data_dir
+    data_dir.mkdir(parents=True, exist_ok=True)
+    photos = {"fighters": {"a": {"photo_url": "https://a.espncdn.com/example.png", "credit": "ESPN"}}}
+    (data_dir / "fighter_photos.json").write_text(json.dumps(photos))
+    assert client.get("/api/v1/fighter-photos").json() == photos
+
+
+def test_unknown_materialized_fighter_raises_instead_of_recursing(repository):
+    with pytest.raises(ValueError, match="unavailable"):
+        repository.feature_states(["missing"], "2026-10-22")
+
+
 def test_no_artifact_is_live_but_not_ready(tmp_path):
     data = tmp_path / "data"
     data.mkdir()
