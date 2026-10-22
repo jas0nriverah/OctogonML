@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from cagemetrics.data import load_dataset
 from cagemetrics.winner_context import (
     FEATURE_COLUMNS,
     WinnerContext,
@@ -137,11 +138,41 @@ def test_context_roundtrip_keeps_source_provenance_and_missing_values(tmp_path):
 
 def test_retained_real_source_pairs_cover_canonical_data():
     data = Path(__file__).resolve().parents[1] / "data"
-    if not (data / "processed/provenance.json").exists():
-        pytest.skip("Retained source snapshot unavailable")
-    context = load_context(data)
+    # The distribution includes normalized observations, not the raw download cache.
+    context = load_saved_context(data)
+    bundle = load_dataset(data)
     assert len(context.observations) == 13278
     assert not context.observations.duplicated(["bout_id", "fighter_id"]).any()
+    assert set(context.observations[["bout_id", "fighter_id"]].itertuples(index=False, name=None)) == set(
+        bundle.stats[["bout_id", "fighter_id"]].itertuples(index=False, name=None)
+    )
+    aligned = context.observations.merge(
+        bundle.bouts[["bout_id", "event_date", "duration_seconds"]],
+        on="bout_id", validate="many_to_one", suffixes=("_context", "_canonical"),
+    )
+    assert aligned.event_date_context.equals(aligned.event_date_canonical)
+    np.testing.assert_allclose(aligned.duration_seconds_context, aligned.duration_seconds_canonical)
     assert set(context.observations.source) == {"nlbair", "Greco1899"}
     assert context.rankings.board_date.max() == "2026-10-06"
     assert context.provenance["measurement_caveat"]
+    for identity, source in context.provenance["sources"].items():
+        assert source == bundle.provenance[identity]
+
+
+def test_raw_source_reconstruction_matches_packaged_context_when_available():
+    data = Path(__file__).resolve().parents[1] / "data"
+    saved = load_saved_context(data)
+    for identity, source in saved.provenance["sources"].items():
+        owner, _repo, filename = identity.split("/", 2)
+        candidates = [data / "raw" / owner / source["commit"] / filename,
+                      data / "raw" / owner / filename]
+        if not any(path.is_file() for path in candidates):
+            pytest.skip("Optional raw reconstruction requires the pinned source downloads")
+    rebuilt = load_context(data)
+    assert rebuilt.provenance == saved.provenance
+    for field, keys in (("bios", ["fighter_id"]),
+                        ("observations", ["bout_id", "fighter_id"]),
+                        ("rankings", ["fighter_id", "board_date", "division"])):
+        expected = getattr(saved, field).sort_values(keys).reset_index(drop=True)
+        actual = getattr(rebuilt, field).sort_values(keys).reset_index(drop=True)
+        pd.testing.assert_frame_equal(expected, actual, check_dtype=False, check_exact=False)
