@@ -29,7 +29,7 @@ Use this as a factual starting point. Be ready to explain the code, reproduce th
 | Model serving | FastAPI/Pydantic validation, artifact loading, finite-count probabilities, saved prediction retrieval, error responses |
 | Performance | Full HTTP benchmark, database-aware measurements, thread limits, precomputed state with exact parity |
 | Product communication | Responsive UI, uncertainty visualization, methodology labels, loading/error states, noncausal sensitivity context |
-| Software quality | Unit/integration tests, migration checks, dependency constraints, CI configuration, documented smoke tour |
+| Software quality | 136 passing tests, 75.5% measured coverage, migration checks, dependency constraints, hosted Linux/PostgreSQL CI, Docker build/V2-readiness verification |
 
 ## Resume bullets grounded in the artifacts
 

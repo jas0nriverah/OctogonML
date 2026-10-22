@@ -1,10 +1,12 @@
 # OctogonML
 
+[![CI](https://github.com/jas0nriverah/OctogonML/actions/workflows/ci.yml/badge.svg)](https://github.com/jas0nriverah/OctogonML/actions/workflows/ci.yml)
+
 **A reproducible UFC significant-strike forecasting system, from pinned source data to SQL-backed FastAPI inference.**
 
 OctogonML opens with announced UFC fight cards through December 2026: real athlete photos, expected significant strikes for both sides, and an 80% outcome range. Choose a card to browse its matchups. Matchup Lab supports hypothetical pairings; Recent Results shows the historical replay. Model Evidence and the forward ledger live under the Research menu.
 
-The public project is **OctogonML**; the Python distribution, imports, and CLI remain `cagemetrics`. Source: [jas0nriverah/OctogonML](https://github.com/jas0nriverah/OctogonML).
+The application is **OctogonML**; the Python distribution, imports, and CLI remain `cagemetrics`. Source: [jas0nriverah/OctogonML](https://github.com/jas0nriverah/OctogonML).
 
 This portfolio project demonstrates work relevant to a PrizePicks ML engineering internship: point-in-time feature construction, count prediction, probability evaluation, relational data pipelines, API validation, inference lineage, and measured serving performance. It is independent of PrizePicks and UFC. There is no live market feed or profitability claim.
 
@@ -17,6 +19,8 @@ Start with the [two-minute recruiter tour](docs/RECRUITER_TOUR.md), then inspect
 Python 3.12 is the verified runtime. From the project root:
 
 ```bash
+git clone https://github.com/jas0nriverah/OctogonML.git
+cd OctogonML
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -c requirements-lock.txt -e '.[dev,postgres]'
@@ -57,6 +61,8 @@ A **fresh bootstrap starts its own empty local ledger**. This repository also pr
 ## Announced cards and athlete photos
 
 The October 22 schedule snapshot contains **six announced events and 65 bouts** through December 31, 2026. Of these, 59 bouts have forecasts for both athlete perspectives; six retain their announced matchup/photos but show an explicit unavailable forecast because identity/history could not be verified. No unannounced December cards or substitute opponents are invented.
+
+For a quick review, download the [compact upcoming results CSV](reports/upcoming_predictions.csv). Full feature/distribution lineage remains in the JSON report and [issued forecast export](reports/issued_forecasts.json).
 
 Schedules are sourced from ESPN fight-center data with source links and observation timestamps. Published times identify a card or segment start; they are not exact individual bout walkout times. The browser loads actual ESPN athlete-profile headshots from their CDN where identities are resolved. Missing or failed images use initials. Remote images are not bundled or rehosted; offline operation preserves forecasts with the initials fallback. This project is independent of ESPN and UFC.
 
@@ -154,7 +160,9 @@ pytest
 ruff check src tests
 ```
 
-The verified local suite passes **136 tests**, including real PostgreSQL, offline fresh bootstrap, and real V2 HTTP inference, with approximately **76% overall coverage**. Checks cover data normalization, temporal exclusions, grouped partitions, distribution arithmetic, migrations, feature parity, experiments, forward settlement/export, and API behavior. Inspect the [test results](reports/test-results.xml) and [coverage report](reports/coverage.json) for the exact current run/count; the release-verification report records the accompanying checks. PostgreSQL integration tests opt in through `CAGEMETRICS_TEST_DATABASE_URL`, which must point to a dedicated test database. The CI workflow installs the constrained dependencies and runs the configured checks; local success does not claim a completed external CI run.
+The verified local suite passes **136 tests**, including real PostgreSQL, offline fresh bootstrap, and real V2 HTTP inference, with **75.5% overall coverage**. Checks cover data normalization, temporal exclusions, grouped partitions, distribution arithmetic, migrations, feature parity, experiments, forward settlement/export, and API behavior. Inspect the [test results](reports/test-results.xml) and [coverage report](reports/coverage.json) for the exact current run/count; the release-verification report records the accompanying checks. PostgreSQL integration tests opt in through `CAGEMETRICS_TEST_DATABASE_URL`, which must point to a dedicated test database.
+
+[Hosted CI succeeded for source commit `89000e6`](https://github.com/jas0nriverah/OctogonML/actions/runs/39818568750): Linux/PostgreSQL ran all 136 tests, and a separate Linux Docker job built the image and verified V2 readiness. This verifies container execution in hosted CI; it does not establish a public hosting deployment.
 
 With the server running in another terminal:
 
@@ -178,7 +186,7 @@ Inspect both [concurrency-one](reports/benchmark-c1.json) and [concurrency-ten](
 ## Screenshots and project map
 
 - [Desktop forecast](reports/forecast-desktop.jpg), [recent replay](reports/recent-desktop.jpg), [model evidence](reports/evidence-desktop.jpg).
-- [Announced fight cards](reports/upcoming-desktop.jpg), [December card](reports/upcoming-december.jpg).
+- [Announced fight cards](reports/upcoming-desktop.jpg), [mobile cards](reports/upcoming-mobile.jpg), [December card](reports/upcoming-december.jpg).
 - [Mobile forecast](reports/forecast-mobile.jpg), [recent replay](reports/recent-mobile.jpg), [model evidence](reports/evidence-mobile.jpg).
 - [Matchup history and sensitivity](reports/context-desktop.jpg), [forward tracker on mobile](reports/forward-mobile.jpg).
 - `src/cagemetrics/`: ingestion, SQL repository, features, modeling, CLI, API, and dashboard.

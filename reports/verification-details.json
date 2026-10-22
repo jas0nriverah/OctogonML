@@ -1,10 +1,10 @@
 {
-  "verified_at": "2026-10-22T16:42:39.773601+00:00",
+  "verified_at": "2026-10-22T17:01:23.868324+00:00",
   "tests": 136,
   "failures": 0,
   "skipped": 0,
   "coverage_pct": 75.51848512173129,
-  "source_sha256": "10bc423def47beea2808e15bdf08b2b1c6f193e38c963da5e0dd4116afd23b7c",
+  "source_sha256": "fd691c6133cac77a548d8b9c1d79fd5a0e1557ba8a9f3784482c5c2e813abe02",
   "test_command": "CAGEMETRICS_TEST_DATABASE_URL=<dedicated PostgreSQL URL> pytest --cov=cagemetrics --cov-report=json:reports/coverage.json --junitxml=reports/test-results.xml",
   "benchmark_reports": [
     "benchmark-mixed-sqlite-c1.json",
@@ -19,16 +19,14 @@
   },
   "unverified": [
     "Public hosting",
-    "External GitHub Actions run",
-    "Local Docker build",
-    "Prospective accuracy"
+    "Untouched prospective model performance"
   ],
   "packaging": {
     "wheel_build": "passed",
     "installed_wheel_dashboard_and_readiness": "passed",
     "extracted_archive_fresh_bootstrap_and_http": "passed",
     "archive_integrity": "passed",
-    "archive_files": 112,
+    "archive_files": 394,
     "developer_database_and_environment_excluded": true
   },
   "upcoming": {
@@ -40,5 +38,15 @@
     "canonical_photos": 126,
     "window_end": "2026-12-31",
     "settled": 0
+  },
+  "ci": {
+    "status": "success",
+    "run_id": 39818568750,
+    "commit": "89000e6b5e650e1fee4e13efbc24b5de726bad60",
+    "url": "https://github.com/jas0nriverah/OctogonML/actions/runs/39818568750",
+    "jobs": {
+      "test": "success",
+      "container": "success"
+    }
   }
 }

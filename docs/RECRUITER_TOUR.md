@@ -26,4 +26,4 @@ Useful code entry points:
 - [`forward.py`](../src/cagemetrics/forward.py): the forward forecast lifecycle.
 - [`tests/`](../tests): meaningful data, temporal, distribution, API, and database checks.
 
-For deeper review, read [engineering decisions](ENGINEERING.md), [the model card](../MODEL_CARD.md), and [the interview discussion guide](INTERVIEW.md). Deployment and CI configuration are included; a configured workflow or hosting manifest is not evidence of a completed external CI run or live hosting release.
+For a compact result table, inspect [the upcoming forecast CSV](../reports/upcoming_predictions.csv). For deeper review, read [engineering decisions](ENGINEERING.md), [the model card](../MODEL_CARD.md), and [the interview discussion guide](INTERVIEW.md). [Hosted CI passed Linux/PostgreSQL tests and a Docker/V2-readiness check for source commit `89000e6`](https://github.com/jas0nriverah/OctogonML/actions/runs/39818568750). The application has not been publicly hosted.
