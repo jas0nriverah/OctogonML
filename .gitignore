@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 .coverage
+.coverage.*
 build/
 dist/
 data/raw/
@@ -15,3 +16,4 @@ reports/coverage.json
 reports/test-results.xml
 reports/verification*.json
 .env
+.secrets/

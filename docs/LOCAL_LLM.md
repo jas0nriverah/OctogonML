@@ -1,4 +1,4 @@
-# Optional local matchup analysis
+# Matchup analysis providers
 
 OctogonML uses a local Ollama provider by default for evidence-linked matchup explanations. Standard forecast models run without it. The optional AI probability overlay is separate from the ML baseline and is **experimental, unvalidated, and limited to ±5 percentage points**. No reported winner accuracy includes this overlay.
 
@@ -56,19 +56,58 @@ The basic actual `/api/chat` check used a JSON schema, `stream: false`, `think: 
 
 Both checked orientations proposed zero percentage-point adjustment and preserved the complementary 78.1%/21.9% ML baseline. These are successful workflow examples, not proof of universal semantic correctness, calibrated AI probabilities, or reliability under every machine/load. Timeouts and grounding rejections remain explicit failure states. The prompt version includes a hash of the entire analysis implementation, so selection changes invalidate the cache. The service allows at most a 90-second provider timeout and bounded local concurrency; keep output/context budgets appropriate for the machine.
 
+The enriched packet passed a subsequent live `POST /api/v1/matchup-analysis` check in **61.5 seconds**, using prompt `grounded-matchup-v3-ai5pp-catalogue-daa3e583dd29`. Its [saved response](../reports/matchup-analysis-local-enriched.json) retains 63 facts, with 24 supplied to Ollama, including both frozen strength summaries and latest covered results. It proposed zero adjustment, preserved the ML baseline, and returned the same immutable record through GET and a repeated POST. Tests ran concurrently, so this observation does not provide a controlled latency comparison with the earlier checks. It used Ollama only; no OpenAI request was made.
+
 The app's analysis endpoint accepts saved matching prediction IDs only. It builds facts on the server, verifies source/date alignment, validates citations/identities/numbers, and stores successful evidence/output immutably. Numerical and schema checks do not prove semantic truth. The original ML forecast remains unchanged, even when experimental adjusted probabilities are displayed.
 
 Official protocol references: [Ollama chat API](https://docs.ollama.com/api/chat) and [structured output documentation](https://docs.ollama.com/capabilities/structured-outputs).
 
-## Optional OpenAI provider
+## OpenAI provider
 
-For a later hosted setup, configure the server explicitly:
+The native service can use OpenAI instead of Ollama. Run this from the project directory:
 
 ```bash
-export CAGEMETRICS_LLM_PROVIDER=openai
-export OPENAI_MODEL=your-enabled-model-id
-export OPENAI_API_KEY=your-server-side-key
-cagemetrics serve
+cagemetrics setup-openai
 ```
 
-Use an enabled model that supports the adapter's structured Responses API contract. The provider is optional; no OpenAI account, key, or successful hosted-provider test is implied by local setup. Keep keys in the server environment/secret manager, never browser code or Git. The adapter uses the official HTTPS API endpoint. Restart after changing provider configuration.
+The command reports the key-file path and whether a key is configured; it never prints the secret. By default it creates `.secrets/openai_api_key`, with mode `0600` for a new file, and preserves an existing file. The parent directory is private when newly created. Open the reported file in your editor and save only the key text: no quotes, variable assignment, or extra spaces. Do not paste the key into chat or browser code.
+
+Start the server after saving the file:
+
+```bash
+cagemetrics serve --llm-provider openai
+```
+
+The command selects `openai` and defaults `OPENAI_MODEL` to [`gpt-6.1-sol`](https://developers.openai.com/api/docs/models/gpt-6.1-sol). An existing `OPENAI_MODEL` value wins. The model supports structured output through the Responses API; account access and API usage billing still apply. Ordinary `cagemetrics serve` keeps the configured provider, defaulting to Ollama when none is set. Saving a key alone never enables OpenAI requests, and the local provider never reads that credential. Restart the Python service after changing provider, model, or credential configuration.
+
+Credential precedence is:
+
+1. A nonempty `OPENAI_API_KEY` environment secret.
+2. The file selected by `OPENAI_API_KEY_FILE`.
+3. `.secrets/openai_api_key` under the project root (`CAGEMETRICS_HOME` when configured).
+
+An explicitly selected missing or invalid file is an error rather than a silent fallback. `OPENAI_API_KEY_FILE` also selects the file created by `setup-openai`. Keep keys server-side. The project's `.secrets/` directory is excluded from Git, Docker build context, and source archives. Container deployments must supply their own server environment secret or explicitly mounted private file; the image does not contain the native key file.
+
+### Evidence and generation bounds
+
+The OpenAI path uses a larger server-built evidence package than the small local model. It does not accept client-written facts or browse for new information during a request.
+
+| Provider | Evidence selection | Output budget |
+|---|---|---|
+| Ollama | Up to 24 facts and 6,500 characters | 640 generated tokens |
+| OpenAI | Up to 80 facts and 24,000 UTF-8 bytes | 4,096 output tokens by default |
+
+The local packet prioritizes supported tactical facts, sample sizes, frozen strength indices, and the latest covered results. Redundant URLs, hashes, and source metadata stay in the full saved audit record rather than consuming local context. Fact IDs, text, identities, and relevant dates remain intact. OpenAI receives the full bounded packet.
+
+OpenAI instructions allow up to three sourced advantages per athlete, four uncertainty options, and six supported route choices. Missing observations permit abstention. Additional context does not relax identity, numerical, citation, or source/date validation. Successful responses retain the full evidence hash and the selected evidence IDs, plus available input/output/total token usage and cached/reasoning token counts. The OpenAI output budget includes reasoning and visible output.
+
+Optional server environment settings:
+
+```bash
+export CAGEMETRICS_OPENAI_MAX_OUTPUT_TOKENS=4096
+export CAGEMETRICS_OPENAI_REASONING_EFFORT=low
+```
+
+The output budget accepts integers from `256` through `8192`. For `gpt-6.1-sol`, reasoning defaults to `low`; supported efforts are `low`, `medium`, `high`, `xhigh`, and `max`. An explicitly selected unknown model receives no default reasoning setting unless configured. These are request controls, not evidence of improved accuracy. Restart after changing them.
+
+**Verification:** local Ollama workflow checks above passed. A live OpenAI request for this setup remains pending. Neither provider selection nor a successful API response establishes predictive improvement for the experimental overlay.

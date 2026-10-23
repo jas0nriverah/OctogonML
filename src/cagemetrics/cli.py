@@ -178,12 +178,14 @@ def main(argv=None):
             "refresh-schedule",
             "project-upcoming",
             "issue-upcoming",
+            "setup-openai",
         ],
     )
     parser.add_argument(
         "--refresh", action="store_true", help="Rebuild processed data from pinned source files"
     )
     parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--llm-provider", choices=["ollama", "openai"], help="Explanation provider for serve")
     parser.add_argument("--port", type=int, default=int(os.getenv("PORT", "8000")))
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     parser.add_argument("--requests", type=int, default=300)
@@ -202,10 +204,31 @@ def main(argv=None):
     parser.add_argument("--from-date", help="Start of announced schedule window (defaults to today)")
     parser.add_argument("--through", default="2026-12-31", help="End of announced schedule window")
     args = parser.parse_args(argv)
+    if args.llm_provider is not None and args.command != "serve":
+        parser.error("--llm-provider applies to serve only")
     settings = Settings.from_env()
+    if args.command == "setup-openai":
+        from .secrets_config import DEFAULT_OPENAI_MODEL, ensure_openai_key_file, read_openai_key
+
+        try:
+            path = ensure_openai_key_file(settings.project_dir)
+            configured = bool(read_openai_key())
+        except ValueError as exc:
+            parser.error(str(exc))
+        _output({"key_file": str(path), "configured": configured,
+                 "model": os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL),
+                 "next_command": "cagemetrics serve --llm-provider openai",
+                 "instruction": "Save the key itself in the private file; do not paste it into chat or source code."})
+        return
     if args.command == "serve":
         import uvicorn
 
+        if args.llm_provider is not None:
+            os.environ["CAGEMETRICS_LLM_PROVIDER"] = args.llm_provider
+        if os.getenv("CAGEMETRICS_LLM_PROVIDER") == "openai":
+            from .secrets_config import DEFAULT_OPENAI_MODEL
+
+            os.environ.setdefault("OPENAI_MODEL", DEFAULT_OPENAI_MODEL)
         uvicorn.run("cagemetrics.api:app", host=args.host, port=args.port, log_level="warning")
         return
     if args.command == "benchmark":

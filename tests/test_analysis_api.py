@@ -96,6 +96,8 @@ def test_bounded_overlay_roundtrip_cache_and_original_forecast_immutability(anal
     response = analysis_client.post("/api/v1/matchup-analysis", json=body)
     assert response.status_code == 201, response.text
     result = response.json()
+    assert result["source_provenance"]["source_snapshot_sha256"] == winner["source_snapshot_sha256"]
+    assert result["source_provenance"]["feature_cutoff_exclusive"] == winner["feature_cutoff"]
     guidance = result["ai_guidance"]
     assert guidance["p_fighter_win"] == pytest.approx(0.70)
     assert guidance["p_fighter_win"] + guidance["p_opponent_win"] == pytest.approx(1)

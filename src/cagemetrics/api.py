@@ -784,7 +784,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if existing is not None:
                 return existing
             if not app.state.analysis_capacity.acquire(blocking=False):
-                raise HTTPException(429, "A local matchup analysis is running; retry shortly", headers={"Retry-After": "5"})
+                raise HTTPException(429, "A matchup analysis is running; retry shortly", headers={"Retry-After": "5"})
             try:
                 narrative = analyst.generate(evidence)
             finally:
@@ -820,6 +820,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "model_versions": evidence["model_versions"],
             "as_of": evidence["as_of"],
             "ranking_snapshot": evidence["ranking_snapshot"],
+            "source_provenance": evidence["source_provenance"],
             "warnings": [RESEARCH_NOTICE, "AI guidance is experimental; its backtest performance is not established."],
         }
         return repository.record_analysis(evidence, payload, key, forecaster.snapshot_id)

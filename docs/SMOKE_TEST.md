@@ -17,4 +17,6 @@ Run against the final service after automated tests. Record the actual loaded mo
 13. **Automated verification.** Run `ruff check src tests migrations scripts`, `pytest`, and `node --check src/cagemetrics/web/app.js`. PostgreSQL checks use a dedicated `CAGEMETRICS_TEST_DATABASE_URL`. Inspect the current CI test/container jobs. Do not publish a stale test count as the final result.
 14. **Rollback and performance.** Restart with explicit strike `v1`/`v2`/`v3` and winner `v1`/`v2` channels, check identities, then restore intended settings. No request may retrain or mutate an old forecast. Retained millisecond benchmarks cover strikes with SQL writes, not AI generation; regenerate serial/concurrent reports after runtime changes and preserve errors as well as latency.
 
+The enriched local packet's [saved response](../reports/matchup-analysis-local-enriched.json) passed a later live HTTP check in 61.5 seconds, including immutable GET/retry verification. It selected 24 of 63 facts and proposed no adjustment. This used local Ollama; live OpenAI verification remains pending.
+
 The result is a recorded verification outcome, including any unavailable optional feature. A working Ollama server, passing mocked API tests, and a fully grounded real matchup narrative are three different checks.

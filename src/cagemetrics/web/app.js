@@ -456,7 +456,7 @@ function appendMatchupAnalysis(ids,athletes,winner) {
   const selection=matchupSelectionVersion;
   const heading='<p class="eyebrow">MATCHUP BREAKDOWN</p><h3>How this fight could unfold</h3>';
   const load=async()=>{
-    panel.innerHTML=heading+'<div class="analysis-loading"><span class="loading-pulse"></span><p>Building a local breakdown from saved estimates and observed history. This can take up to 90 seconds; your forecasts remain available above.</p></div>';panel.setAttribute('aria-busy','true');
+    panel.innerHTML=heading+'<div class="analysis-loading"><span class="loading-pulse"></span><p>Building a matchup breakdown from saved estimates and observed history. This can take up to 90 seconds; your forecasts remain available above.</p></div>';panel.setAttribute('aria-busy','true');
     if(!ids.winner_prediction_id){panel.innerHTML=heading+'<p class="panel-description">A saved winner forecast is required to build this breakdown. Compare the fighters again when that model is available.</p>';panel.setAttribute('aria-busy','false');return;}
     try{
       const report=await api('/api/v1/matchup-analysis',{method:'POST',body:JSON.stringify(Object.fromEntries(Object.entries(ids).filter(([,value])=>Boolean(value))))});

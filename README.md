@@ -44,6 +44,26 @@ cagemetrics serve
 
 No API key is needed for local Ollama. [Local setup notes](docs/LOCAL_LLM.md) explain the prepared workspace runtime, model license, structured output checks, and optional server-side OpenAI configuration. A clone does not contain model weights. A basic JSON check and complete local analyses in both fighter orientations passed. The complete checks took approximately 38 and 57 seconds; both proposed zero adjustment. These verify the checked workflows, not predictive accuracy or universal semantic reliability. Provider or grounding failures return an explicit unavailable/error state.
 
+### Optional OpenAI analysis
+
+Create a private server-side key file from the project directory:
+
+```bash
+cagemetrics setup-openai
+```
+
+Open the reported `.secrets/openai_api_key` file in your editor and save **only the key text**, without quotes or `OPENAI_API_KEY=`. Keep the key out of chat, browser code, and Git. The command creates a new file with mode `0600` and preserves an existing file. `.secrets/` is excluded from Git, Docker build context, and the source archive.
+
+Then start the service explicitly with OpenAI:
+
+```bash
+cagemetrics serve --llm-provider openai
+```
+
+This selects [`gpt-6.1-sol`](https://developers.openai.com/api/docs/models/gpt-6.1-sol) by default; an explicit `OPENAI_MODEL` environment value overrides it. Credentials resolve from `OPENAI_API_KEY`, then `OPENAI_API_KEY_FILE`, then the project's private key file. An explicitly configured missing key file is an error. Ollama remains the default unless you switch providers; saving a key alone never enables paid requests. Restart after configuration changes.
+
+The OpenAI adapter uses the Responses API; account/model access and API billing apply separately. A live OpenAI request has not yet been verified for this setup. Provider configuration alone does not establish better predictions or explanations. See [provider setup and request bounds](docs/LOCAL_LLM.md).
+
 ## Data and interface
 
 The pinned completed-fight snapshot contains **6,639 bouts, 13,278 athlete-bout observations, and 2,074 fighters**, spanning February 2013–October 17, 2026. It combines Noah Bair's UFC Data with an exact-ID UFCStats increment from Greco1899. [Attribution](data/ATTRIBUTION.md) documents licenses, commits, hashes, retrieval times, and transformations. Raw source downloads are Git-ignored; the prepared project archive retains them. An explicit ingestion command can recover the pinned sources for a clone.
@@ -108,7 +128,7 @@ The narrator receives server-authored evidence tied to saved forecast IDs. It se
 
 Analyses retain all server evidence, the IDs of the bounded subset used by the narrator, cited claims, provider/model identity, prompt version, original prediction IDs, and experimental guidance in immutable SQL records. Repeated identical requests reuse the saved result. Client-supplied facts and mismatched athlete, round, date, or source snapshots are rejected.
 
-The [saved local example](reports/matchup-analysis-example.json) includes the actual evidence, selected routes, hashes, and unchanged baseline. [Desktop analysis](reports/matchup-analysis-desktop.jpg) and [mobile analysis](reports/comparison-mobile.jpg) show that response in the dashboard.
+The [latest local example](reports/matchup-analysis-local-enriched.json) retains 63 server facts and the 24 used by the narrator, including both athletes' frozen strength summaries and latest results. Its live HTTP check took 61.5 seconds, proposed zero adjustment, and passed immutable GET/retry checks. This is a workflow observation, not a capacity benchmark. The [earlier example](reports/matchup-analysis-example.json), [desktop analysis](reports/matchup-analysis-desktop.jpg), and [mobile analysis](reports/comparison-mobile.jpg) retain the previous prompt's response and layout.
 
 ## Architecture and reproducibility
 

@@ -377,3 +377,171 @@ def test_provider_configuration_and_invalid_evidence_fail_before_network(evidenc
     wrong["facts"].append(wrong["facts"][0])
     with pytest.raises(AnalysisValidationError, match="unique"):
         output_schema(wrong)
+
+
+def test_cloud_full_evidence_usage_and_reasoning_budget(evidence, narrative):
+    rich = deepcopy(evidence)
+    for index in range(35):
+        rich["facts"].append({"id": f"source{index}", "text": "An additional covered-history observation."})
+    original = deepcopy(rich)
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={
+                "status": "completed",
+                "id": "cloud-result",
+                "output": [
+                    {"type": "reasoning", "summary": []},
+                    {"type": "message", "content": [{"type": "output_text", "text": json.dumps(narrative)}]},
+                ],
+                "usage": {
+                    "input_tokens": 100,
+                    "output_tokens": 200,
+                    "total_tokens": 300,
+                    "input_tokens_details": {"cached_tokens": 20},
+                    "output_tokens_details": {"reasoning_tokens": 90},
+                    "secret": "never expose",
+                },
+            },
+        )
+
+    analyst = MatchupAnalyst(
+        provider="openai", model="gpt-6.1-sol", api_key="mock-secret", client=client_for(handler)
+    )
+    result = analyst.generate(rich)
+    body = requests[0]
+    supplied = json.loads(body["input"][1]["content"])["evidence"]
+    assert supplied == rich == original
+    assert len(selected_evidence(rich)["facts"]) <= 24
+    assert body["reasoning"] == {"effort": "low"}
+    assert body["max_output_tokens"] == 4096
+    assert "temperature" not in body and "top_p" not in body
+    assert result["usage"] == {
+        "input_tokens": 100,
+        "output_tokens": 200,
+        "total_tokens": 300,
+        "cached_input_tokens": 20,
+        "reasoning_tokens": 90,
+    }
+    assert result["evidence_budget"]["supplied_facts"] == len(rich["facts"])
+    assert "never expose" not in json.dumps(result)
+    assert analyst.generate(rich)["cached"] and len(requests) == 1
+
+
+def test_rich_claim_bounds_preserve_grounding(evidence, narrative):
+    richer = deepcopy(narrative)
+    richer["fighter_case"]["advantages"] *= 2
+    richer["uncertainties"] = UNCERTAINTIES[:3]
+    assert validate_narrative(richer, evidence, "openai")
+    with pytest.raises(AnalysisValidationError):
+        validate_narrative(richer, evidence)
+    richer["fighter_case"]["advantages"][0]["text"] = "An invented superior ability."
+    with pytest.raises(AnalysisValidationError):
+        validate_narrative(richer, evidence, "openai")
+
+
+@pytest.mark.parametrize("budget", [255, 8193, 256.5, True, "garbage"])
+def test_cloud_budget_rejects_invalid_values(budget):
+    with pytest.raises(ValueError, match="budget"):
+        MatchupAnalyst(provider="openai", model="gpt-6.1-sol", api_key="mock", max_output_tokens=budget)
+
+
+def test_cloud_settings_fingerprint_and_secret_helper(monkeypatch):
+    from cagemetrics import secrets_config
+
+    monkeypatch.setattr(secrets_config, "read_openai_key", lambda: "mock-private-file")
+    base = MatchupAnalyst(provider="openai", model="gpt-6.1-sol")
+    changed = MatchupAnalyst(
+        provider="openai", model="gpt-6.1-sol", max_output_tokens=8192, reasoning_effort="high"
+    )
+    assert base.prompt_version != changed.prompt_version
+    unknown = MatchupAnalyst(provider="openai", model="explicit-other-model")
+    assert "reasoning" not in unknown.generation_config
+    with pytest.raises(ValueError, match="effort"):
+        MatchupAnalyst(provider="openai", model="gpt-6.1-sol", reasoning_effort="none")
+
+    def broken():
+        raise ValueError("sensitive credential detail")
+
+    monkeypatch.setattr(secrets_config, "read_openai_key", broken)
+    with pytest.raises(AnalysisUnavailable) as error:
+        MatchupAnalyst(provider="openai", model="gpt-6.1-sol")
+    assert "sensitive" not in str(error.value)
+
+
+@pytest.mark.parametrize("status", [401, 429])
+def test_cloud_auth_and_rate_errors_are_redacted(evidence, status):
+    analyst = MatchupAnalyst(
+        provider="openai",
+        model="gpt-6.1-sol",
+        api_key="mock-sensitive",
+        client=client_for(lambda request: httpx.Response(status, json={"error": "mock-sensitive"})),
+    )
+    with pytest.raises(AnalysisUnavailable) as error:
+        analyst.generate(evidence)
+    assert "mock-sensitive" not in str(error.value)
+    assert not analyst._cache and not analyst._inflight
+
+
+def test_cloud_reasoning_budget_incomplete_never_publishes(evidence, narrative):
+    analyst = MatchupAnalyst(
+        provider="openai",
+        model="gpt-6.1-sol",
+        api_key="mock",
+        client=client_for(
+            lambda request: httpx.Response(
+                200,
+                json={
+                    "status": "incomplete",
+                    "incomplete_details": {"reason": "max_output_tokens"},
+                    "output": [
+                        {
+                            "type": "message",
+                            "content": [{"type": "output_text", "text": json.dumps(narrative)}],
+                        }
+                    ],
+                },
+            )
+        ),
+    )
+    with pytest.raises(AnalysisValidationError, match="incomplete"):
+        analyst.generate(evidence)
+    assert not analyst._cache and not analyst._inflight
+
+
+def test_local_rich_packet_balances_strength_and_removes_provenance_overhead(evidence):
+    rich = deepcopy(evidence)
+    rich["source_provenance"] = {"hashes": "a" * 2000}
+    for index in range(28):
+        rich["facts"].append(
+            {
+                "id": f"comparison.metric{index}",
+                "text": "A covered striking comparison.",
+                "source_url": "https://example.com/" + "x" * 100,
+            }
+        )
+    for side, identity in (("fighter", "a"), ("opponent", "b")):
+        rich["facts"].append(
+            {
+                "id": side + ".model_strength",
+                "fighter_id": identity,
+                "text": "Frozen prior-result strength summary; derived, not an official ranking.",
+                "as_of": "2026-10-22",
+                "source_url": "https://example.com/source",
+            }
+        )
+    original = deepcopy(rich)
+    packet = selected_evidence(rich)
+    facts = {fact["id"]: fact for fact in packet["facts"]}
+    assert {"fighter.model_strength", "opponent.model_strength"} <= facts.keys()
+    assert "source_provenance" not in packet
+    assert facts["fighter.model_strength"]["as_of"] == "2026-10-22"
+    assert all("source_url" not in fact for fact in facts.values())
+    assert sum(len(json.dumps(fact, ensure_ascii=False)) for fact in packet["facts"]) <= 6500
+    for routes in tactical_route_catalogue(packet).values():
+        assert all(set(route["evidence_ids"]) <= facts.keys() for route in routes)
+    assert rich == original
+    assert selected_evidence(rich, "openai") == original
