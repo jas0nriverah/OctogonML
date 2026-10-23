@@ -20,8 +20,11 @@ from urllib.parse import urlparse
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from .analysis_selector import LOCAL_SELECTION_PROMPT, expand_selection, selection_schema
+
 GUIDANCE_POLICY = "bounded-ai-guidance-v1-max5pp-untested"
 ROUTE_POLICY = "observed-style-route-selection-v1"
+MAX_EVIDENCE_BYTES = 32000
 POLICY_RATIONALES = [
     "The supplied observations do not establish an additional validated signal beyond the saved model.",
     "Any proposed adjustment is an unvalidated scenario judgment, not an empirically calibrated probability.",
@@ -118,7 +121,7 @@ class Evidence(BaseModel):
 
 class Claim(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    text: str = Field(min_length=5, max_length=500)
+    text: str = Field(min_length=5, max_length=1200)
     evidence_ids: list[str] = Field(min_length=1, max_length=8)
 
 
@@ -180,6 +183,7 @@ PROMPT_VERSION = (
             + ROUTE_POLICY
             + json.dumps(Narrative.model_json_schema(), sort_keys=True)
             + hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+            + hashlib.sha256(Path(__file__).with_name("analysis_selector.py").read_bytes()).hexdigest()
         ).encode()
     ).hexdigest()[:12]
 )
@@ -199,8 +203,8 @@ def canonical_evidence(evidence):
         payload = json.dumps(
             evidence, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
         )
-        if len(payload.encode()) > 24000:
-            raise ValueError("Evidence exceeds local context budget; select concise facts")
+        if len(payload.encode()) > MAX_EVIDENCE_BYTES:
+            raise ValueError("Evidence exceeds the bounded source-context budget")
         return parsed, payload
     except (ValidationError, ValueError, TypeError) as exc:
         raise AnalysisValidationError("Invalid matchup evidence: " + str(exc)) from exc
@@ -369,19 +373,26 @@ def selected_evidence(evidence, provider="ollama"):
         if match:
             recent[match[1]] = max(recent.get(match[1], -1), int(match[2]))
 
+    first_comparison = next((fact["id"] for fact in evidence["facts"]
+                             if fact["id"].startswith("comparison.")), None)
+
     def priority(item):
         index, fact = item
         identity = fact["id"]
-        if identity in ("model.outcome", "model.scope"):
+        if identity in ("model.outcome", "model.scope", "model.publication"):
             return 0, index
         if identity in route_facts:
             return 1, index
-        if identity.endswith((".model_strength", ".sample")):
+        if identity.endswith((".weekly_rank", ".ranked_opposition", ".adjusted_striking", ".sample")):
+            return 2, index
+        if identity == first_comparison:
             return 2, index
         if any(identity == f"{side}.recent{latest}" for side, latest in recent.items()):
-            return 2, index
+            return 3, 0, index
+        if identity.endswith(".model_strength"):
+            return 3, 1, index
         if identity.endswith(".model_rank") or identity.startswith("ranking."):
-            return 3, index
+            return 4, index
         if identity.startswith("comparison.") or identity == "model.duration":
             return 4, index
         if identity.endswith((".accuracy", ".defense")):
@@ -607,8 +618,8 @@ class MatchupAnalyst:
             )
         ).rstrip("/")
         self._api_key = None
-        self.generation_config = {}
-        self.system_prompt = SYSTEM_PROMPT
+        self.generation_config = {"temperature": 0.2, "num_predict": 384, "num_ctx": 4096}
+        self.system_prompt = LOCAL_SELECTION_PROMPT
         if self.provider == "openai":
             from .secrets_config import read_openai_key
 
@@ -683,6 +694,19 @@ class MatchupAnalyst:
             },
         ]
         if self.provider == "ollama":
+            catalogue = tactical_route_catalogue(evidence)
+            schema = selection_schema(evidence, catalogue, UNCERTAINTIES, POLICY_RATIONALES)
+            messages[1]["content"] = json.dumps(
+                {
+                    "evidence": evidence,
+                    "tactical_route_catalogue": catalogue,
+                    "zero_adjustment_policy_rationales": {
+                        f"@policy{index}": text for index, text in enumerate(POLICY_RATIONALES)
+                    },
+                    "uncertainty_options": dict(enumerate(UNCERTAINTIES)),
+                },
+                ensure_ascii=False, allow_nan=False,
+            )
             url = self.base_url + "/api/chat"
             payload = {
                 "model": self.model,
@@ -690,7 +714,7 @@ class MatchupAnalyst:
                 "format": schema,
                 "stream": False,
                 "think": False,
-                "options": {"temperature": 0.2, "num_predict": 640, "num_ctx": 4096},
+                "options": deepcopy(self.generation_config),
             }
             headers = {}
         else:
@@ -753,6 +777,11 @@ class MatchupAnalyst:
         if not isinstance(content, str) or not content or len(content) > 16000:
             raise AnalysisValidationError("Provider did not return a narrative")
         usage = {}
+        if self.provider == "ollama":
+            for source, target in (("prompt_eval_count", "input_tokens"), ("eval_count", "output_tokens")):
+                value = result.get(source)
+                if type(value) is int and value >= 0:
+                    usage[target] = value
         raw_usage = result.get("usage")
         if self.provider == "openai" and isinstance(raw_usage, dict):
             for name in ("input_tokens", "output_tokens", "total_tokens"):
@@ -806,7 +835,10 @@ class MatchupAnalyst:
             content, served_model, response_id, usage = self._request(
                 supplied, output_schema(supplied, self.provider)
             )
-            narrative = validate_narrative(content, supplied, self.provider)
+            expanded = expand_selection(
+                content, supplied, tactical_route_catalogue(supplied), UNCERTAINTIES, POLICY_RATIONALES
+            ) if self.provider == "ollama" else content
+            narrative = validate_narrative(expanded, supplied, self.provider)
         except Exception as exc:
             with self._lock:
                 pending.set_exception(exc)
@@ -821,12 +853,15 @@ class MatchupAnalyst:
             "evidence_sha256": evidence_sha,
             "evidence_used_ids": [fact["id"] for fact in supplied["facts"]],
             "output_sha256": hashlib.sha256(content.encode()).hexdigest(),
+            "narrative_sha256": hashlib.sha256(
+                json.dumps(narrative, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+            ).hexdigest(),
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "provider_response_id": response_id,
             "usage": usage,
             "generation_config": deepcopy(self.generation_config),
             "evidence_budget": {
-                "policy": "full-80-facts-24000-bytes"
+                "policy": "full-80-facts-32000-bytes"
                 if self.provider == "openai"
                 else "selected-24-facts-6500-characters",
                 "available_facts": len(frozen["facts"]),
@@ -845,7 +880,8 @@ class MatchupAnalyst:
             ],
             "guidance_policy": GUIDANCE_POLICY,
             "tactical_route_policy": ROUTE_POLICY,
-            "narrative_mode": "llm_selected_evidence_and_conditional_routes",
+            "narrative_mode": "llm_selected_grounded_ids"
+            if self.provider == "ollama" else "llm_selected_evidence_and_conditional_routes",
         }
         with self._lock:
             self._cache[key] = deepcopy(result)

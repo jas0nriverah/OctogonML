@@ -81,7 +81,7 @@ Hypothetical scenarios require known last covered UFC divisions within the same 
 
 **Fighters** provides searchable, division-filtered profiles for all 2,074 canonical athletes. **2,036 have verified portraits**: 1,844 ESPN and 192 UFC. The other 38 use initials: 36 lack a qualifying verified portrait and two have ambiguous identities. A filename identity audit removed 96 unverified, opponent, or placeholder assets. [Photo coverage](data/fighter_profiles/ufc_coverage.json) and the [asset audit](data/fighter_profiles/ufc_image_identity_audit.json) retain the evidence; no images are generated or rehosted.
 
-A separate [official UFC rankings observation](data/rankings/current.json) contains 206 mapped entries across 13 boards. Its page provides no explicit weekly board date, so the project records observation time and leaves `published_board_date` null. Display observations never backfill historical model inputs. Missing or stale dated ranking evidence means **unknown**, not unranked.
+A separate [official UFC rankings observation](data/rankings/current.json) contains 206 mapped entries across 13 boards. The media footer gives “Tuesday, Oct. 20” without a year; the [media snapshot](data/rankings/current_media.json) explicitly labels its inferred 2026 date and retains the actual retrieval timestamp, with `published_board_date` null. Display observations never backfill historical model inputs. Missing or stale dated ranking evidence means **unknown**, not unranked.
 
 ## Model evidence
 
@@ -99,6 +99,8 @@ The gated **99-feature Winner V2** uses lagged striking, grappling, control, pri
 V2 was chosen from four fixed candidates using **2021–2023 only**, not the 2024 results. Development log loss improves from 0.674881 to 0.653719. Its paired event-bootstrap difference is −0.021162, with a 95% interval of [−0.030922, −0.011478] across 128 events. The stored promotion gates also check Brier nonregression, calibration stability, and annual consistency. These checks do not establish future accuracy or justify an extreme probability for an individual matchup.
 
 See [Winner V2 evaluation](reports/winner_v2_evaluation.json), [selection](reports/winner_v2_selection.json), [prediction rows](reports/winner_v2_predictions.csv), and [metadata](artifacts/winner_v2/metadata.json). The default independent winner channel is `auto`, with `CAGEMETRICS_WINNER_CHANNEL=v1` for rollback.
+
+Two additional studies tested exposure shrinkage, opponent-adjusted striking, full dated weekly ranking boards, and ranked-opponent history. Neither passed the predeclared replacement gates; V2 remains the default. Their candidates, failed checks, subgroup results, and retrospective comparisons are preserved in [winner research](docs/WINNER_RESEARCH.md).
 
 ### Elapsed rounds
 
@@ -128,7 +130,11 @@ The narrator receives server-authored evidence tied to saved forecast IDs. It se
 
 Analyses retain all server evidence, the IDs of the bounded subset used by the narrator, cited claims, provider/model identity, prompt version, original prediction IDs, and experimental guidance in immutable SQL records. Repeated identical requests reuse the saved result. Client-supplied facts and mismatched athlete, round, date, or source snapshots are rejected.
 
-The [latest local example](reports/matchup-analysis-local-enriched.json) retains 63 server facts and the 24 used by the narrator, including both athletes' frozen strength summaries and latest results. Its live HTTP check took 61.5 seconds, proposed zero adjustment, and passed immutable GET/retry checks. This is a workflow observation, not a capacity benchmark. The [earlier example](reports/matchup-analysis-example.json), [desktop analysis](reports/matchup-analysis-desktop.jpg), and [mobile analysis](reports/comparison-mobile.jpg) retain the previous prompt's response and layout.
+Matchup reports add a factual comparison, recent results, dated strength-of-schedule evidence, opponent-adjusted striking, and the separate duration outlook. Context-only statistics are labeled separately from inputs actually used by the saved model. Unknown ranks do not become unranked observations, and no finish method or exact winning round is invented.
+
+For an observed unranked athlete with at most three covered UFC bouts facing a verified current top-five/champion opponent with at least eight, the interface withholds a published favorite and collapses the numerical research output. This is a stated publication policy, not a learned confidence score or an altered probability. Full forecast records remain inspectable.
+
+The current [Riley–Lopes example](reports/matchup-analysis-riley-lopes.json) retains 68 facts, with 24 supplied to the local model, including both latest results and dated opponent-quality context. The compact ID-selection protocol passed live checks in both fighter orders in 14.8 and 15.0 seconds; saved GET and repeated POST results matched exactly. Both proposed zero probability adjustment. See [verification details](reports/matchup-analysis-riley-lopes-verification.json). These are workflow observations on Apple M4, not a capacity benchmark or predictive improvement claim. [Earlier enriched](reports/matchup-analysis-local-enriched.json) and [original](reports/matchup-analysis-example.json) responses preserve their previous prompt versions.
 
 ## Architecture and reproducibility
 
@@ -160,7 +166,7 @@ cagemetrics project-upcoming
 
 These are explicit pipeline stages, not prerequisites for serving packaged artifacts. Winner/duration commands reuse existing artifacts only after verification; they do not promise byte-identical refits from serialized joblib files. For an independent refit, use fresh `CAGEMETRICS_ARTIFACT_DIR` and `CAGEMETRICS_REPORT_DIR` paths, retain the baseline prerequisite for Winner V2, and recover the pinned raw sources where required. Source revision changes require an explicit `ingest --increment-sha <40-hex-commit> --refresh`; existing conflicting source records are rejected rather than silently corrected.
 
-`CAGEMETRICS_MODEL_CHANNEL=auto` chooses an available V3 strike artifact, then V2, then V1. Pin `v1`, `v2`, or `v3` for a strike rollback. Winner selection is independently controlled by `CAGEMETRICS_WINNER_CHANNEL=auto|v1|v2`; `auto` promotes only a verified V2 artifact with passing gates. Restart after changes. Previous forecasts are never rewritten, and replaced upcoming reports are archived byte-for-byte.
+`CAGEMETRICS_MODEL_CHANNEL=auto` chooses an available V3 strike artifact, then V2, then V1. Pin `v1`, `v2`, or `v3` for a strike rollback. Winner selection is independently controlled by `CAGEMETRICS_WINNER_CHANNEL=auto|v1|v2|v3|v4`; `auto` selects the newest verified artifact with passing gates, currently V2. V3 and V4 require explicit selection as research channels. Restart after changes. Previous forecasts are never rewritten, and replaced upcoming reports are archived byte-for-byte.
 
 Photo jobs are independent of modeling: `python scripts/refresh_fighter_photos.py --workers 8` resumes ESPN observations; `--profile-fallback` checks verified profiles, `--ufc-fallback` recovers missing official portraits, and `--audit-ufc-images` quarantines assets without verified filename identities. `--retry-failures` explicitly revisits unresolved queries. `python scripts/refresh_rankings.py` freezes a separate official ranking observation. Serving performs none of these network refreshes.
 

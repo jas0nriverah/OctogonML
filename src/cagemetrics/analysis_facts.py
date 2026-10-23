@@ -4,7 +4,7 @@ import math
 from datetime import date
 import json
 
-from .analysis import AnalysisValidationError
+from .analysis import AnalysisValidationError, MAX_EVIDENCE_BYTES
 from .matchups import _observed_comparison
 
 
@@ -20,9 +20,9 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
     def add(identity, text, fighter_id=None, source_url=None, **metadata):
         if len(text) > 1200:
             raise AnalysisValidationError("Evidence fact exceeds its bounded text contract")
-        facts.append(
-            {"id": identity, "text": text, "fighter_id": fighter_id, "source_url": source_url, **metadata}
-        )
+        facts.append({key: value for key, value in
+                      {"id": identity, "text": text, "fighter_id": fighter_id,
+                       "source_url": source_url, **metadata}.items() if value is not None})
 
     def finite(value):
         return isinstance(value, (int, float)) and math.isfinite(value)
@@ -38,6 +38,12 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
         f"Completed UFC history ends {outcome['data_cutoff']}; features are frozen before {cutoff}. "
         "Draws and no contests are outside the winner model's scope. These are research estimates, not betting advice.",
     )
+    publication = (outcome.get("evidence_quality") or {}).get("publication") or {}
+    if publication.get("publish_probability") is False:
+        add("model.publication",
+            "This matchup has insufficient comparable UFC history for a published win probability. "
+            + publication.get("reason", "The available evidence does not support a published favorite.")
+            + " The numerical model output is retained as a research estimate.")
     accuracy = outcome.get("evaluation", {}).get("accuracy")
     if finite(accuracy):
         add(
@@ -51,6 +57,7 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
         label = names[identity]
         observed = window[side]
         context = (outcome.get("fighter_context") or {}).get(side, {})
+        comparison_context = (outcome.get("comparison_context") or {}).get(side, {})
         add(
             f"{side}.sample",
             f"{label}'s observed sample is {observed['covered_bouts']} prior UFC bouts "
@@ -189,6 +196,7 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
                 identity,
                 as_of=cutoff,
                 source_kind="frozen_outcome_labels",
+                record={"wins": wins, "losses": losses, "draws": draws, "covered_bouts": len(history)},
             )
         # Never describe imputed neutral ML values as actual observed histories.
         if finite(context.get("grappling_prior_bouts")) and context["grappling_prior_bouts"] > 0:
@@ -236,6 +244,63 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
                     as_of=cutoff,
                     source_kind="saved_winner_context",
                 )
+        weekly = context.get("weekly_ranking") or comparison_context.get("weekly_ranking") or {}
+        if weekly:
+            used = bool(weekly.get("used_by_model", True))
+            status = weekly.get("status")
+            rank_text = (
+                "champion" if weekly.get("is_champion")
+                else f"rank {weekly['rank']}" if status == "ranked"
+                else "observed unranked on a complete division board" if status == "unranked"
+                else "unknown; missing evidence is not an unranked status"
+            )
+            timing = weekly.get("observed_at") or weekly.get("board_date") or "date unavailable"
+            add(
+                f"{side}.weekly_rank",
+                f"{label}'s weekly media ranking {'input' if used else 'comparison context'} is {rank_text}; "
+                f"source date/observation {timing}. "
+                + ("This is a saved model input." if used else "This context is not an input to the saved win model."),
+                identity,
+                weekly.get("source_url"),
+                ranking={key: weekly.get(key) for key in
+                         ("status", "rank", "is_champion", "board_date", "observed_at",
+                          "published_label", "published_date_inferred", "scope")},
+                used_by_model=used,
+            )
+        opposition = context.get("ranked_opposition") or comparison_context.get("ranked_opposition") or {}
+        if opposition:
+            used = bool(opposition.get("used_by_model", True))
+            add(
+                f"{side}.ranked_opposition",
+                f"{label}'s last-five covered opponent sample: {opposition['covered_opponents']} bouts, "
+                f"{opposition['known_rank_opponents']} with a known pre-bout opponent rank; "
+                f"{opposition['prior_ranked_wins']} wins in {opposition['ranked_decisive_opponents']} "
+                "decisive bouts against then-ranked opponents. Unknown ranks are excluded, not counted as unranked.",
+                identity,
+                "https://www.kaggle.com/datasets/martj42/ufc-rankings",
+                metrics={key: opposition[key] for key in
+                         ("covered_opponents", "known_rank_opponents", "prior_ranked_wins",
+                          "ranked_decisive_opponents")},
+                as_of=cutoff,
+                used_by_model=used,
+            )
+        adjusted = context.get("reliable_striking") or comparison_context.get("reliable_striking") or {}
+        if adjusted:
+            used = bool(adjusted.get("used_by_model", True))
+            add(
+                f"{side}.adjusted_striking",
+                f"{label}'s last-five opponent-adjusted striking: "
+                f"{adjusted['last5_adjusted_landed']:+.2f} landed/min above opponent-based expectation; "
+                f"{adjusted['last5_adjusted_absorbed']:+.2f} absorbed/min above expectation (lower is better). "
+                "Expectations use each opponent's strictly pre-bout rates, with a fixed 30-minute shrinkage prior; "
+                f"these are derived {'model inputs' if used else 'comparison estimates'}, "
+                "not official rates or causal reasons for winning.",
+                identity,
+                metrics={key: adjusted[key] for key in
+                         ("last5_adjusted_landed", "last5_adjusted_absorbed", "last5_reliability")},
+                as_of=cutoff,
+                used_by_model=used,
+            )
         weight = (outcome.get("weight_context") or {}).get(side) or {}
         division = weight.get("division") or {}
         if division and weight.get("event_date") and weight["event_date"] < cutoff:
@@ -251,6 +316,30 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
                 source_kind="canonical_history",
             )
         pairs.append((observed, context))
+
+    opposition_pair = [
+        (outcome.get("fighter_context") or {}).get(side, {}).get("ranked_opposition")
+        or (outcome.get("comparison_context") or {}).get(side, {}).get("ranked_opposition")
+        for side in ("fighter", "opponent")
+    ]
+    if all(opposition_pair):
+        parts = []
+        for side, identity, opposition in zip(("fighter", "opponent"), (a, b), opposition_pair):
+            count = dashboard["windows"]["career"][side]["covered_bouts"]
+            win_label = "win" if opposition["prior_ranked_wins"] == 1 else "wins"
+            parts.append(
+                f"{names[identity]} has {count} covered UFC bouts; in the last-five sample, "
+                f"{opposition['prior_ranked_wins']} {win_label} in {opposition['ranked_decisive_opponents']} "
+                f"decisive bouts against then-ranked opponents, with opponent ranks known for "
+                f"{opposition['known_rank_opponents']} of {opposition['covered_opponents']} bouts"
+            )
+        add(
+            "comparison.experience_and_opposition",
+            ". ".join(parts) + ". Unknown opponent ranks remain unknown, not unranked; "
+            "unequal exposure and opponent samples limit direct comparisons.",
+            as_of=cutoff,
+            source_kind="covered_history_and_strict_prior_ranking_context",
+        )
 
     for key, title, higher in (
         ("sig_landed_per_min", "striking output", True),
@@ -355,8 +444,9 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
             add(
                 f"ranking.observation{index}",
                 f"Official UFC page observation {rankings['observed_at']}: "
-                f"{entry['name']} listed as {rank} in {entry['division']}. The page publishes no explicit board date; "
-                "this display observation is separate from frozen model inputs.",
+                f"{entry['name']} listed as {rank} in {entry['division']}. "
+                "This display observation is separate from frozen model inputs; "
+                "the retrieval timestamp does not establish historical publication availability.",
                 entry["fighter_id"],
                 rankings.get("source_url"),
             )
@@ -367,17 +457,19 @@ def build_evidence(bundle, winner_engine, predictions, rankings=None):
         "model_versions": {key: value["model_version"] for key, value in predictions.items() if value},
         "as_of": cutoff,
         "ranking_snapshot": ranking_snapshot,
+        "publication": publication,
         "source_provenance": {
             "source_snapshot_sha256": outcome.get("source_snapshot_sha256"),
             "winner_artifact_sha256": outcome.get("artifact_sha256"),
             "outcome_labels_sha256": outcome.get("outcome_labels_sha256"),
             "feature_cutoff_exclusive": cutoff,
             "forecast_date": outcome.get("forecast_date"),
+            "comparison_context": (outcome.get("comparison_context") or {}).get("source_provenance"),
             "history_policy": "Canonical UFC history strictly before cutoff; retrospective source observations; no web retrieval during analysis.",
         },
     }
     if len(facts) > 80 or len({fact["id"] for fact in facts}) != len(facts):
         raise AnalysisValidationError("Evidence exceeds unique-fact budget")
-    if len(json.dumps(evidence, sort_keys=True, allow_nan=False).encode()) > 24000:
-        raise AnalysisValidationError("Evidence exceeds 24KB budget")
+    if len(json.dumps(evidence, sort_keys=True, allow_nan=False).encode()) > MAX_EVIDENCE_BYTES:
+        raise AnalysisValidationError("Evidence exceeds 32KB budget")
     return evidence

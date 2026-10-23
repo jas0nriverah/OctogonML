@@ -1,0 +1,605 @@
+{
+  "model_version": "winner-v2-d04e8f09a8abcbb4",
+  "artifact_sha256": "78779bc7dfb0019265db4c9cb094d2a139c5985aa14f783aa064c28272d49163",
+  "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+  "context_sha256": "2341d45eff29d8adac5e29d6b0b0807a08d356dea4ced24e23d809a42f7d2883",
+  "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+  "data_through": "2026-10-17",
+  "training_cutoff_exclusive": "2026-07-01",
+  "calibration_cutoff_exclusive": "2026-10-18",
+  "selected_candidate": "enriched_hgb_regularized",
+  "promotion_passed": true,
+  "promotion": {
+    "passed": true,
+    "checks": {
+      "log_loss_gain": true,
+      "brier_nonregression": true,
+      "calibration_stable": true,
+      "annual_consistency": true,
+      "paired_event_uncertainty": true
+    },
+    "pooled": {
+      "baseline_v1_hgb": {
+        "n_bouts": 1497,
+        "log_loss": 0.6748810277710537,
+        "brier_score": 0.24095642470443454,
+        "accuracy": 0.5828323313293253,
+        "calibration": [
+          {
+            "predicted": 0.28245187858457543,
+            "observed": 0.375,
+            "n": 8
+          },
+          {
+            "predicted": 0.3656802697250536,
+            "observed": 0.4277456647398844,
+            "n": 173
+          },
+          {
+            "predicted": 0.4535247422558249,
+            "observed": 0.5248756218905473,
+            "n": 402
+          },
+          {
+            "predicted": 0.5485185157517151,
+            "observed": 0.6075949367088608,
+            "n": 553
+          },
+          {
+            "predicted": 0.6399284154589732,
+            "observed": 0.6729559748427673,
+            "n": 318
+          },
+          {
+            "predicted": 0.7195542767596366,
+            "observed": 0.6744186046511628,
+            "n": 43
+          }
+        ],
+        "ece": 0.05696299966336672
+      },
+      "enriched_hgb": {
+        "n_bouts": 1497,
+        "log_loss": 0.6550200910361605,
+        "brier_score": 0.23152788004906893,
+        "accuracy": 0.6088844355377422,
+        "calibration": [
+          {
+            "predicted": 0.27677843603742813,
+            "observed": 0.4090909090909091,
+            "n": 22
+          },
+          {
+            "predicted": 0.3602760145306399,
+            "observed": 0.36231884057971014,
+            "n": 207
+          },
+          {
+            "predicted": 0.4513254346783373,
+            "observed": 0.5225464190981433,
+            "n": 377
+          },
+          {
+            "predicted": 0.5473964158366332,
+            "observed": 0.5866666666666667,
+            "n": 375
+          },
+          {
+            "predicted": 0.6432439383479879,
+            "observed": 0.6763925729442971,
+            "n": 377
+          },
+          {
+            "predicted": 0.7329823096514014,
+            "observed": 0.7936507936507936,
+            "n": 126
+          },
+          {
+            "predicted": 0.82669319268775,
+            "observed": 0.8461538461538461,
+            "n": 13
+          }
+        ],
+        "ece": 0.04362367889689696
+      },
+      "enriched_hgb_regularized": {
+        "n_bouts": 1497,
+        "log_loss": 0.65371869117753,
+        "brier_score": 0.2309332998799437,
+        "accuracy": 0.6085504342017368,
+        "calibration": [
+          {
+            "predicted": 0.2712373125386874,
+            "observed": 0.3870967741935484,
+            "n": 31
+          },
+          {
+            "predicted": 0.3588869756085345,
+            "observed": 0.39622641509433965,
+            "n": 212
+          },
+          {
+            "predicted": 0.45243708724287857,
+            "observed": 0.5093833780160858,
+            "n": 373
+          },
+          {
+            "predicted": 0.5503199622998444,
+            "observed": 0.5956284153005464,
+            "n": 366
+          },
+          {
+            "predicted": 0.6446424638340824,
+            "observed": 0.6675977653631285,
+            "n": 358
+          },
+          {
+            "predicted": 0.7353826995570649,
+            "observed": 0.7928571428571428,
+            "n": 140
+          },
+          {
+            "predicted": 0.8240334043081404,
+            "observed": 0.7647058823529411,
+            "n": 17
+          }
+        ],
+        "ece": 0.04449195231903971
+      },
+      "enriched_logistic": {
+        "n_bouts": 1497,
+        "log_loss": 0.6680223183705388,
+        "brier_score": 0.2372256385267635,
+        "accuracy": 0.5918503674014696,
+        "calibration": [
+          {
+            "predicted": 0.07803671156871411,
+            "observed": 1.0,
+            "n": 1
+          },
+          {
+            "predicted": 0.17191316664692918,
+            "observed": 0.4,
+            "n": 5
+          },
+          {
+            "predicted": 0.2648454541648903,
+            "observed": 0.3333333333333333,
+            "n": 33
+          },
+          {
+            "predicted": 0.36064149713139954,
+            "observed": 0.4041095890410959,
+            "n": 146
+          },
+          {
+            "predicted": 0.45512306609825726,
+            "observed": 0.5247524752475248,
+            "n": 404
+          },
+          {
+            "predicted": 0.5461684613658156,
+            "observed": 0.5910714285714286,
+            "n": 560
+          },
+          {
+            "predicted": 0.6444591406096054,
+            "observed": 0.7114624505928854,
+            "n": 253
+          },
+          {
+            "predicted": 0.7370400164794424,
+            "observed": 0.7692307692307693,
+            "n": 78
+          },
+          {
+            "predicted": 0.8378492475372703,
+            "observed": 0.625,
+            "n": 16
+          },
+          {
+            "predicted": 0.942651086434085,
+            "observed": 1.0,
+            "n": 1
+          }
+        ],
+        "ece": 0.0580296825868763
+      }
+    },
+    "annual_log_loss_differences": [
+      -0.015314342466215769,
+      -0.024682857678092085,
+      -0.02341216483929709
+    ],
+    "paired_event_bootstrap": {
+      "events": 128,
+      "resamples": 2000,
+      "direction": "Negative favors selected classifier",
+      "log_loss": {
+        "difference": -0.0211623365935238,
+        "ci_95": [
+          -0.03092179430507841,
+          -0.011477933436963338
+        ]
+      },
+      "brier_score": {
+        "difference": -0.010023124824490812,
+        "ci_95": [
+          -0.014642500979832818,
+          -0.005361551295580678
+        ]
+      }
+    },
+    "scope": "Development OOF selection evidence, not independent holdout or future guarantee"
+  },
+  "feature_names": [
+    "difference_prior_bouts",
+    "difference_career_mean_strikes",
+    "difference_last5_mean_strikes",
+    "difference_career_landed_per_min",
+    "difference_last5_landed_per_min",
+    "difference_career_absorbed_per_min",
+    "difference_last5_absorbed_per_min",
+    "difference_career_attempted_per_min",
+    "difference_last5_attempted_per_min",
+    "difference_career_accuracy",
+    "difference_last5_accuracy",
+    "difference_career_mean_duration",
+    "difference_last5_mean_duration",
+    "difference_career_finish_rate",
+    "difference_last5_finish_rate",
+    "difference_layoff_days",
+    "elo_difference",
+    "win_rate_difference",
+    "decisive_experience_difference",
+    "lagged_weight_limit_difference",
+    "lagged_weight_missing_difference",
+    "weight_gap_experience_interaction",
+    "weight_context_pace_difference",
+    "five_round_difference_prior_bouts",
+    "five_round_difference_career_mean_strikes",
+    "five_round_difference_last5_mean_strikes",
+    "five_round_difference_career_landed_per_min",
+    "five_round_difference_last5_landed_per_min",
+    "five_round_difference_career_absorbed_per_min",
+    "five_round_difference_last5_absorbed_per_min",
+    "five_round_difference_career_attempted_per_min",
+    "five_round_difference_last5_attempted_per_min",
+    "five_round_difference_career_accuracy",
+    "five_round_difference_last5_accuracy",
+    "five_round_difference_career_mean_duration",
+    "five_round_difference_last5_mean_duration",
+    "five_round_difference_career_finish_rate",
+    "five_round_difference_last5_finish_rate",
+    "five_round_difference_layoff_days",
+    "five_round_elo_difference",
+    "five_round_win_rate_difference",
+    "five_round_decisive_experience_difference",
+    "five_round_lagged_weight_limit_difference",
+    "five_round_lagged_weight_missing_difference",
+    "five_round_weight_gap_experience_interaction",
+    "five_round_weight_context_pace_difference",
+    "context_age",
+    "context_age_missing",
+    "context_height_cm",
+    "context_height_missing",
+    "context_reach_cm",
+    "context_reach_missing",
+    "context_rank_observed",
+    "context_rank_missing",
+    "context_rank_board_age_days",
+    "context_champion_observed",
+    "context_p4p_observed",
+    "context_p4p_missing",
+    "context_grappling_prior_bouts",
+    "context_career_td_landed_per_minute",
+    "context_career_td_attempted_per_minute",
+    "context_career_sub_attempted_per_minute",
+    "context_career_control_seconds_per_minute",
+    "context_career_knockdowns_per_minute",
+    "context_last5_td_landed_per_minute",
+    "context_last5_td_attempted_per_minute",
+    "context_last5_sub_attempted_per_minute",
+    "context_last5_control_seconds_per_minute",
+    "context_last5_knockdowns_per_minute",
+    "context_missing_age",
+    "context_missing_age_missing",
+    "context_missing_height_cm",
+    "context_missing_height_missing",
+    "context_missing_reach_cm",
+    "context_missing_reach_missing",
+    "context_missing_rank_observed",
+    "context_missing_rank_missing",
+    "context_missing_rank_board_age_days",
+    "context_missing_champion_observed",
+    "context_missing_p4p_observed",
+    "context_missing_p4p_missing",
+    "context_missing_grappling_prior_bouts",
+    "context_missing_career_td_landed_per_minute",
+    "context_missing_career_td_attempted_per_minute",
+    "context_missing_career_sub_attempted_per_minute",
+    "context_missing_career_control_seconds_per_minute",
+    "context_missing_career_knockdowns_per_minute",
+    "context_missing_last5_td_landed_per_minute",
+    "context_missing_last5_td_attempted_per_minute",
+    "context_missing_last5_sub_attempted_per_minute",
+    "context_missing_last5_control_seconds_per_minute",
+    "context_missing_last5_knockdowns_per_minute",
+    "age_curve_difference",
+    "strength_decayed_elo",
+    "strength_recent_win_rate",
+    "strength_opposition_strength",
+    "strength_win_quality",
+    "strength_streak",
+    "strength_finish_win_rate"
+  ],
+  "fingerprint_input": {
+    "protocol": {
+      "candidates": [
+        "baseline_v1_hgb",
+        "enriched_logistic",
+        "enriched_hgb",
+        "enriched_hgb_regularized"
+      ],
+      "logistic_C": 0.1,
+      "hgb": {
+        "max_iter": 120,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 60,
+        "l2_regularization": 10.0,
+        "learning_rate": 0.05,
+        "early_stopping": false
+      },
+      "hgb_regularized": {
+        "max_iter": 180,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 60,
+        "l2_regularization": 20.0,
+        "learning_rate": 0.05,
+        "early_stopping": false
+      },
+      "seed": 42,
+      "features": "V1 46 signed contrasts; auxiliary own-minus-opponent numeric inputs with neutral missing fills and separate antisymmetric missingness; squared age distance from 30 contrast; strictly prior recency Elo/opposition/win-quality/streak/finish-win summaries",
+      "strength": "Decayed Elo half-life 730 days, K32; recent form and last5 opponent quality half-life 365 days; observations and opponent prematch strength frozen before same-date updates; draw/NC excluded",
+      "rank": "Only strictly prior ranking board evidence no older than 35 days; unknown distinct from observed unranked; no betting odds",
+      "calibration": "Mirrored training and symmetric predictions, then disjoint zero-intercept temperature calibration logT in [-1.5, 1.5]",
+      "selection": "Minimum pooled decisive-bout log loss on 2021\u20132023 only",
+      "annual_splits": "Train before preceding July 1; calibrate July\u2013December; score next calendar year",
+      "promotion": {
+        "minimum_log_loss_gain": 0.002,
+        "brier_nonregression": true,
+        "max_ece_regression": 0.015,
+        "minimum_improved_years": 2,
+        "maximum_annual_log_loss_regression": 0.005,
+        "event_bootstrap_upper_95_below_zero": true
+      },
+      "report": "2024 retrospective comparison, already inspected previously; never used to choose or promote",
+      "deployment_train_before": "2026-07-01",
+      "deployment_calibration_before": "2026-10-18"
+    },
+    "features": [
+      "difference_prior_bouts",
+      "difference_career_mean_strikes",
+      "difference_last5_mean_strikes",
+      "difference_career_landed_per_min",
+      "difference_last5_landed_per_min",
+      "difference_career_absorbed_per_min",
+      "difference_last5_absorbed_per_min",
+      "difference_career_attempted_per_min",
+      "difference_last5_attempted_per_min",
+      "difference_career_accuracy",
+      "difference_last5_accuracy",
+      "difference_career_mean_duration",
+      "difference_last5_mean_duration",
+      "difference_career_finish_rate",
+      "difference_last5_finish_rate",
+      "difference_layoff_days",
+      "elo_difference",
+      "win_rate_difference",
+      "decisive_experience_difference",
+      "lagged_weight_limit_difference",
+      "lagged_weight_missing_difference",
+      "weight_gap_experience_interaction",
+      "weight_context_pace_difference",
+      "five_round_difference_prior_bouts",
+      "five_round_difference_career_mean_strikes",
+      "five_round_difference_last5_mean_strikes",
+      "five_round_difference_career_landed_per_min",
+      "five_round_difference_last5_landed_per_min",
+      "five_round_difference_career_absorbed_per_min",
+      "five_round_difference_last5_absorbed_per_min",
+      "five_round_difference_career_attempted_per_min",
+      "five_round_difference_last5_attempted_per_min",
+      "five_round_difference_career_accuracy",
+      "five_round_difference_last5_accuracy",
+      "five_round_difference_career_mean_duration",
+      "five_round_difference_last5_mean_duration",
+      "five_round_difference_career_finish_rate",
+      "five_round_difference_last5_finish_rate",
+      "five_round_difference_layoff_days",
+      "five_round_elo_difference",
+      "five_round_win_rate_difference",
+      "five_round_decisive_experience_difference",
+      "five_round_lagged_weight_limit_difference",
+      "five_round_lagged_weight_missing_difference",
+      "five_round_weight_gap_experience_interaction",
+      "five_round_weight_context_pace_difference",
+      "context_age",
+      "context_age_missing",
+      "context_height_cm",
+      "context_height_missing",
+      "context_reach_cm",
+      "context_reach_missing",
+      "context_rank_observed",
+      "context_rank_missing",
+      "context_rank_board_age_days",
+      "context_champion_observed",
+      "context_p4p_observed",
+      "context_p4p_missing",
+      "context_grappling_prior_bouts",
+      "context_career_td_landed_per_minute",
+      "context_career_td_attempted_per_minute",
+      "context_career_sub_attempted_per_minute",
+      "context_career_control_seconds_per_minute",
+      "context_career_knockdowns_per_minute",
+      "context_last5_td_landed_per_minute",
+      "context_last5_td_attempted_per_minute",
+      "context_last5_sub_attempted_per_minute",
+      "context_last5_control_seconds_per_minute",
+      "context_last5_knockdowns_per_minute",
+      "context_missing_age",
+      "context_missing_age_missing",
+      "context_missing_height_cm",
+      "context_missing_height_missing",
+      "context_missing_reach_cm",
+      "context_missing_reach_missing",
+      "context_missing_rank_observed",
+      "context_missing_rank_missing",
+      "context_missing_rank_board_age_days",
+      "context_missing_champion_observed",
+      "context_missing_p4p_observed",
+      "context_missing_p4p_missing",
+      "context_missing_grappling_prior_bouts",
+      "context_missing_career_td_landed_per_minute",
+      "context_missing_career_td_attempted_per_minute",
+      "context_missing_career_sub_attempted_per_minute",
+      "context_missing_career_control_seconds_per_minute",
+      "context_missing_career_knockdowns_per_minute",
+      "context_missing_last5_td_landed_per_minute",
+      "context_missing_last5_td_attempted_per_minute",
+      "context_missing_last5_sub_attempted_per_minute",
+      "context_missing_last5_control_seconds_per_minute",
+      "context_missing_last5_knockdowns_per_minute",
+      "age_curve_difference",
+      "strength_decayed_elo",
+      "strength_recent_win_rate",
+      "strength_opposition_strength",
+      "strength_win_quality",
+      "strength_streak",
+      "strength_finish_win_rate"
+    ],
+    "implementations": {
+      "winner_v2": "7fa7d786b348b61905c102d8527d175ad7a535846b6fdee33336a39254ed9b0f",
+      "winner_context": "de11aaa71956fa05891b14107f00ba56bbf8a34e51701a977e18f50ed0012166",
+      "winner": "9d432d4950a4cb80ea7bd69687356e6e47d1cb6303fdb755d3ff84360d772d41",
+      "divisions": "04c288808060e50f601767ecfe6d86c6d6c5551e78ebbc6b23b678291671c0ab",
+      "features": "ec7d2c312600035a34778f00e014a93b68fb24da5088d41175786e79d4dcdbef",
+      "experiments": "e47c681feb2ec7bb3d7ec971ee6b3d6de614bfd9dc03d2a01a85ce9e84ac53c5"
+    },
+    "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+    "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+    "context_sha256": "2341d45eff29d8adac5e29d6b0b0807a08d356dea4ced24e23d809a42f7d2883",
+    "dependencies": {
+      "python": "3.12.14",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1"
+    }
+  },
+  "context_provenance": {
+    "sources": {
+      "nlbair/ufc-data/data/ufc_all_fights_wide.csv": {
+        "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+        "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+        "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+        "bytes": 11337448,
+        "observed_at": "2026-10-22T15:57:32.386326+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fighter_tott.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fighter_tott.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "3296e67941f984cd5484488226e5a5d94de3249c63fe289fbc66d98546311ea1",
+        "bytes": 508399,
+        "observed_at": "2026-10-22T15:57:34.898566+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fight_stats.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_stats.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "bdbb8cd050ccf0a3ee329bf16d361e87997853ab21703682f720fe7aa013767b",
+        "bytes": 7671898,
+        "observed_at": "2026-10-22T15:57:34.617503+00:00"
+      },
+      "Greco1899/scrape_ufc_stats/ufc_fight_results.csv": {
+        "url": "https://raw.githubusercontent.com/Greco1899/scrape_ufc_stats/3e2f3db5751c14b5d4ea52e41921982ca23b9b23/ufc_fight_results.csv",
+        "commit": "3e2f3db5751c14b5d4ea52e41921982ca23b9b23",
+        "sha256": "da1d46420a13419f1afa28653e9b08c7aa1173005138e5f87fe7dea904cd98e2",
+        "bytes": 2107396,
+        "observed_at": "2026-10-22T15:57:33.844436+00:00"
+      }
+    },
+    "policy": "Strictly earlier event days for grappling; strictly earlier dated rank boards; stale ranking evidence (>35days) masked; blank board is unknown.",
+    "ranking_source": "martj42 official UFC weekly ranking archive through June2026; UFCalendar API thereafter, via nlbair CC BY4.0 retained source.",
+    "measurement_caveat": "Retrospectively observed UFCStats heights/reaches; historical measurement availability is not established. DOB fixed, age computed at forecast date.",
+    "rank_board_observations": 3791,
+    "grappling_observations": 13278
+  },
+  "trained_at": "2026-10-22T20:20:05.836880+00:00",
+  "evaluation": {
+    "n_bouts": 507,
+    "log_loss": 0.642838360110822,
+    "brier_score": 0.22552901061175828,
+    "accuracy": 0.6390532544378699,
+    "calibration": [
+      {
+        "predicted": 0.17723811632822342,
+        "observed": 1.0,
+        "n": 2
+      },
+      {
+        "predicted": 0.26271367852766725,
+        "observed": 0.15,
+        "n": 20
+      },
+      {
+        "predicted": 0.3497477973115696,
+        "observed": 0.38028169014084506,
+        "n": 71
+      },
+      {
+        "predicted": 0.4477092286531649,
+        "observed": 0.411214953271028,
+        "n": 107
+      },
+      {
+        "predicted": 0.5491585476576465,
+        "observed": 0.5583333333333333,
+        "n": 120
+      },
+      {
+        "predicted": 0.6522285802462865,
+        "observed": 0.6752136752136753,
+        "n": 117
+      },
+      {
+        "predicted": 0.7431003762541507,
+        "observed": 0.75,
+        "n": 56
+      },
+      {
+        "predicted": 0.8238759131251031,
+        "observed": 0.8571428571428571,
+        "n": 14
+      }
+    ],
+    "ece": 0.028826307165576194,
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "2024 retrospective comparison, already inspected previously; never used to choose or promote"
+  },
+  "train_rows": 6402,
+  "calibration_rows": 188,
+  "warnings": [
+    "Win probabilities are conditional on a decisive result; draw/no-contest probability is not modeled.",
+    "Only covered UFC history is available; missing earlier history and sparse histories limit reliability.",
+    "2024 winner outcomes were inspected in the initial 38-feature study; this weight-feature revision is a retrospective temporal comparison, not a fresh holdout.",
+    "Weight inputs are prior observed division limits, not measured current body weights; cross-division winner evidence is limited.",
+    "Future winner accuracy and calibration require prospective evaluation; this is not a market probability or betting recommendation.",
+    "Additional rankings are dated and expire after 35 days; absence of a recent board is unknown, not proof of being unranked.",
+    "Height/reach are retrospective profile observations, not verified contemporaneous measurements. Age is computed from recorded DOB.",
+    "Historical UFC matchups reflect matchmaker selection; probabilities for unusual strength mismatches have limited direct validation.",
+    "No market odds or requested example probability is used as a training target."
+  ]
+}

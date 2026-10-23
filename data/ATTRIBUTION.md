@@ -16,6 +16,12 @@ Winner V2's auxiliary observations come from the same pinned wide UFC Data sourc
 
 UFC Data's source notes attribute weekly rankings through June 2026 to [martj42/ufc-rankings](https://www.kaggle.com/datasets/martj42/ufc-rankings), with UFCalendar's ranking API thereafter. The retained wide file contains dated, bout-linked ranking observations rather than a full current board archive. Boards must strictly predate a modeled bout; evidence older than 35 days is masked. Absent/stale evidence is unknown, not proof of being unranked. DOB supplies scenario age; height/reach are retrospectively observed UFCStats profile measurements, not verified historical measurement availability.
 
+## Full dated weekly ranking archive
+
+Research Winner V3/V4 additionally retain Mart Jürisoo (`martj42`), [UFC Rankings, version 47](https://www.kaggle.com/datasets/martj42/ufc-rankings/versions/47), labeled [CC0: Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) by its author. The author describes recovering official UFC media rankings through Internet Archive, with missing weeks. This is separate from the bout-linked V2 context and canonical completed-fight manifest; it does not modify either frozen artifact.
+
+The pinned archive contains 100,065 rows across 532 dated boards from February 4, 2013 through June 2, 2026. Normalization maps 99,900 rows by exact canonical identities/documented source-anchored aliases. Of 6,643 division/date boards, 4,350 satisfy conservative completeness checks. Partial, ambiguous or contradictory boards cannot establish unranked status by absence. Retrieval after historical events supports reconstruction, not proof of real-time archival availability. Source version, original metadata, hashes, observation time and licensing are retained in [historical provenance](rankings/history/provenance.json), with [detailed attribution and identity policy](rankings/history/ATTRIBUTION.md).
+
 ## Announced schedule
 
 [ESPN's public UFC scoreboard](https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard) and athlete APIs supply the observed October 22–December 31, 2026 schedule. Exact original responses, observation timestamps, URLs, and SHA256 hashes are retained under [schedules](schedules/). These are published bookings at observation time, subject to changes/cancellations. Card and segment starts are not individual walkout times.
@@ -38,7 +44,9 @@ The complete audit removed **96 unverified/opponent/placeholder assets across 90
 
 The [official UFC ranking page](https://www.ufc.com/rankings) is frozen separately in [rankings/current.json](rankings/current.json): 206 entries across 13 boards, mapped to canonical IDs with unique exact names/verified aliases and explicit Latin transliteration. The snapshot records original HTML SHA, source URL, observation UTC, rank/champion/P4P fields, official athlete links, and a compressed raw cache reference.
 
-The page supplies **no explicit weekly board date**. `published_board_date` remains null; observation time is not invented as a historical board date. This display snapshot does not backfill historical model features. Absence is not a claim of being unranked. `python scripts/refresh_rankings.py` is an explicit refresh; previous JSON bytes are archived.
+The retained media table has an explicit **yearless** footer, “Last updated: Tuesday, Oct. 20”. The separately parsed [media snapshot](rankings/current_media.json) records `published_label` and `published_date_inferred=2026-10-20`, with the year explicitly inferred from the unique nearby weekday/date match. `published_board_date` remains null because the page omits the year. Actual source availability begins at `2026-10-22T20:17:16.420435+00:00`, never at the inferred October 20 date. The media poll is distinct from the page's algorithmic Meta table, which is excluded.
+
+Neither current snapshot backfills historical model inputs. In the complete, fully identity-resolved media board, absence from the relevant division may establish explicitly observed unranked status; partial/unresolved boards and missing or stale history remain unknown. `python scripts/refresh_rankings.py` is an explicit refresh; previous JSON bytes are archived.
 
 ## Optional language model
 

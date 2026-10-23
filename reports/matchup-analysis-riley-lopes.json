@@ -1,0 +1,807 @@
+{
+  "summary": {
+    "text": "The saved ML model estimates Luke Riley at 54.6% and Diego Lopes at 45.4% to win, conditional on a decisive result.",
+    "evidence_ids": [
+      "model.outcome"
+    ]
+  },
+  "fighter_case": {
+    "fighter_id": "b1de86d835638319",
+    "advantages": [],
+    "path_to_victory": {
+      "text": "If Luke Riley sustains striking activity while limiting incoming strikes, a striking route could improve the chance of winning.",
+      "evidence_ids": [
+        "fighter.sig_landed_per_min",
+        "fighter.sig_absorbed_per_min"
+      ]
+    }
+  },
+  "opponent_case": {
+    "fighter_id": "f166e93d04a8c274",
+    "advantages": [],
+    "path_to_victory": {
+      "text": "If Diego Lopes sustains striking activity while limiting incoming strikes, a striking route could improve the chance of winning.",
+      "evidence_ids": [
+        "opponent.sig_landed_per_min",
+        "opponent.sig_absorbed_per_min"
+      ]
+    }
+  },
+  "key_matchup": {
+    "text": "Luke Riley has 3 covered UFC bouts; in the last-five sample, 0 wins in 0 decisive bouts against then-ranked opponents, with opponent ranks known for 0 of 3 bouts. Diego Lopes has 10 covered UFC bouts; in the last-five sample, 3 wins in 5 decisive bouts against then-ranked opponents, with opponent ranks known for 5 of 5 bouts. Unknown opponent ranks remain unknown, not unranked; unequal exposure and opponent samples limit direct comparisons.",
+    "evidence_ids": [
+      "comparison.experience_and_opposition"
+    ]
+  },
+  "uncertainties": [
+    "Historical observations do not guarantee a future outcome."
+  ],
+  "probability_adjustment": {
+    "favor_fighter_id": "b1de86d835638319",
+    "delta_percentage_points": 0.0,
+    "rationale": {
+      "text": "The supplied observations do not establish an additional validated signal beyond the saved model.",
+      "evidence_ids": [
+        "model.outcome"
+      ]
+    }
+  },
+  "provider": "ollama",
+  "model": "qwen3:4b",
+  "served_model": "qwen3:4b",
+  "prompt_version": "grounded-matchup-v3-ai5pp-catalogue-60d9a5e9397f",
+  "evidence_sha256": "d85baea671554c43807b4d7459932c0a40508fb4bc558168c7377b83fe5175da",
+  "evidence_used_ids": [
+    "model.outcome",
+    "model.scope",
+    "model.publication",
+    "fighter.sig_landed_per_min",
+    "fighter.sig_absorbed_per_min",
+    "fighter.last5_knockdowns_per_minute",
+    "fighter.last5_control_seconds_per_minute",
+    "opponent.sig_landed_per_min",
+    "opponent.sig_absorbed_per_min",
+    "opponent.last5_td_landed_per_minute",
+    "opponent.last5_knockdowns_per_minute",
+    "opponent.last5_control_seconds_per_minute",
+    "fighter.sample",
+    "fighter.weekly_rank",
+    "fighter.ranked_opposition",
+    "fighter.adjusted_striking",
+    "opponent.sample",
+    "opponent.weekly_rank",
+    "opponent.ranked_opposition",
+    "opponent.adjusted_striking",
+    "comparison.experience_and_opposition",
+    "fighter.recent2",
+    "opponent.recent4",
+    "fighter.model_rank"
+  ],
+  "output_sha256": "e369fbca48dff664c9c2a05cad3d0fd3ec148dbc2fb37aef466474a6e61bddda",
+  "narrative_sha256": "f0b2d5a9180ef08560489f34d0549cc06a19f78b10692444b328857e6eeb968e",
+  "generated_at": "2026-10-23T00:51:54.235195+00:00",
+  "provider_response_id": null,
+  "usage": {
+    "input_tokens": 3130,
+    "output_tokens": 122
+  },
+  "generation_config": {
+    "temperature": 0.2,
+    "num_predict": 384,
+    "num_ctx": 4096
+  },
+  "evidence_budget": {
+    "policy": "selected-24-facts-6500-characters",
+    "available_facts": 68,
+    "supplied_facts": 24,
+    "supplied_bytes": 6743
+  },
+  "cached": false,
+  "validation": [
+    "schema",
+    "fighter_identity",
+    "evidence_references",
+    "cited_numbers",
+    "conditional_paths"
+  ],
+  "guidance_policy": "bounded-ai-guidance-v1-max5pp-untested",
+  "tactical_route_policy": "observed-style-route-selection-v1",
+  "narrative_mode": "llm_selected_grounded_ids",
+  "status": "ready",
+  "matchup_brief": {
+    "version": "evidence-brief-v1-4aee93ac2502",
+    "as_of": "2026-10-22",
+    "generation_mode": "server_authored_context_with_validated_llm_routes",
+    "comparison_rows": [
+      {
+        "label": "Covered UFC record",
+        "fighter_value": "3\u20130\u20130",
+        "opponent_value": "7\u20133\u20130",
+        "scope": "Wins\u2013losses\u2013draws in covered UFC history since 2013; excludes no contests. Not full MMA records.",
+        "evidence_ids": [
+          "fighter.covered_results",
+          "opponent.covered_results"
+        ]
+      },
+      {
+        "label": "Observed weekly ranking",
+        "fighter_value": "Observed unranked",
+        "opponent_value": "#2",
+        "scope": "Dated media board; observed unranked requires a complete board. Unknown remains separate. Comparison context, separate from saved model inputs.",
+        "evidence_ids": [
+          "fighter.weekly_rank",
+          "opponent.weekly_rank"
+        ]
+      },
+      {
+        "label": "Wins against ranked opponents",
+        "fighter_value": "No known ranked-opponent bouts",
+        "opponent_value": "3 / 5",
+        "scope": "Last five covered bouts; opponent rank frozen before each bout. Unknown ranks excluded.",
+        "evidence_ids": [
+          "fighter.ranked_opposition",
+          "opponent.ranked_opposition"
+        ]
+      },
+      {
+        "label": "Opponent-adjusted output",
+        "fighter_value": "+0.98 / min",
+        "opponent_value": "+0.25 / min",
+        "scope": "Landed/min above opponent-based expectation, with exposure shrinkage. Derived comparison context; separate from saved model inputs.",
+        "evidence_ids": [
+          "fighter.adjusted_striking",
+          "opponent.adjusted_striking"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "id": "experience",
+        "title": "Experience & recent results",
+        "text": "Luke Riley's covered UFC results: 3 wins, 0 losses, 0 draws. Last covered bout: 2026-07-11; 103 days to the feature cutoff 2026-10-22. This is not a full MMA career record. Diego Lopes's covered UFC results: 7 wins, 3 losses, 0 draws. Last covered bout: 2026-06-14; 130 days to the feature cutoff 2026-10-22. This is not a full MMA career record.",
+        "evidence_ids": [
+          "fighter.covered_results",
+          "opponent.covered_results"
+        ]
+      },
+      {
+        "id": "recent",
+        "title": "Recent competition",
+        "text": "On 2026-07-11, Luke Riley won against Kai Kamaka III in the retained completed UFC results. On 2026-03-21, Luke Riley won against Michael Aswell Jr. in the retained completed UFC results. On 2026-06-14, Diego Lopes won against Steve Garcia in the retained completed UFC results. On 2026-01-31, Diego Lopes lost against Alexander Volkanovski in the retained completed UFC results.",
+        "evidence_ids": [
+          "fighter.recent2",
+          "fighter.recent1",
+          "opponent.recent4",
+          "opponent.recent3"
+        ]
+      },
+      {
+        "id": "opposition",
+        "title": "Strength of schedule",
+        "text": "Luke Riley's last-five covered opponent sample: 3 bouts, 0 with a known pre-bout opponent rank; 0 wins in 0 decisive bouts against then-ranked opponents. Unknown ranks are excluded, not counted as unranked. Diego Lopes's last-five covered opponent sample: 5 bouts, 5 with a known pre-bout opponent rank; 3 wins in 5 decisive bouts against then-ranked opponents. Unknown ranks are excluded, not counted as unranked.",
+        "evidence_ids": [
+          "fighter.ranked_opposition",
+          "opponent.ranked_opposition"
+        ]
+      },
+      {
+        "id": "striking",
+        "title": "Striking in context",
+        "text": "Luke Riley's last-five opponent-adjusted striking: +0.98 landed/min above opponent-based expectation; -0.31 absorbed/min above expectation (lower is better). Expectations use each opponent's strictly pre-bout rates, with a fixed 30-minute shrinkage prior; these are derived comparison estimates, not official rates or causal reasons for winning. Diego Lopes's last-five opponent-adjusted striking: +0.25 landed/min above opponent-based expectation; -0.10 absorbed/min above expectation (lower is better). Expectations use each opponent's strictly pre-bout rates, with a fixed 30-minute shrinkage prior; these are derived comparison estimates, not official rates or causal reasons for winning.",
+        "evidence_ids": [
+          "fighter.adjusted_striking",
+          "opponent.adjusted_striking"
+        ]
+      },
+      {
+        "id": "duration",
+        "title": "Fight-time outlook",
+        "text": "The separate duration model estimates 33.9% probability of completing scheduled time. Completion includes a stoppage recorded at the final bell; it does not establish a decision or a winner.",
+        "evidence_ids": [
+          "model.duration"
+        ]
+      }
+    ],
+    "assessment": {
+      "text": "This matchup has insufficient comparable UFC history for a published win probability. Luke Riley has 3 covered UFC bouts and is observed unranked on a complete current division board; Diego Lopes has 10 covered bouts and is verified #2. There is insufficient comparable UFC history to publish a favorite. The numerical model output is retained as a research estimate.",
+      "evidence_ids": [
+        "model.publication"
+      ]
+    },
+    "source_links": [
+      {
+        "label": "UFCStats bout 5e6a74db89f5410c",
+        "url": "http://ufcstats.com/fight-details/5e6a74db89f5410c"
+      },
+      {
+        "label": "UFCStats bout fa534aaa5b997a69",
+        "url": "http://ufcstats.com/fight-details/fa534aaa5b997a69"
+      },
+      {
+        "label": "UFCStats bout 930317fde9dbc55e",
+        "url": "http://ufcstats.com/fight-details/930317fde9dbc55e"
+      },
+      {
+        "label": "Official UFC media rankings",
+        "url": "https://www.ufc.com/rankings"
+      },
+      {
+        "label": "Historical media ranking archive",
+        "url": "https://www.kaggle.com/datasets/martj42/ufc-rankings"
+      },
+      {
+        "label": "UFCStats bout 2335e75ce63805b6",
+        "url": "http://ufcstats.com/fight-details/2335e75ce63805b6"
+      },
+      {
+        "label": "UFCStats bout e733f148060bef2a",
+        "url": "http://ufcstats.com/fight-details/e733f148060bef2a"
+      },
+      {
+        "label": "UFCStats bout de1a3734be60e6a1",
+        "url": "http://ufcstats.com/fight-details/de1a3734be60e6a1"
+      },
+      {
+        "label": "UFCStats bout b06b43670238c2d8",
+        "url": "http://ufcstats.com/fight-details/b06b43670238c2d8"
+      },
+      {
+        "label": "UFCStats bout 127ba4a1ccb3d4a6",
+        "url": "http://ufcstats.com/fight-details/127ba4a1ccb3d4a6"
+      }
+    ],
+    "note": "Historical context is computed on the server. The language model selects cited matchup factors and conditional tactical routes; it does not establish feature attribution or an exact finish."
+  },
+  "ai_guidance": {
+    "status": "experimental",
+    "validated": false,
+    "baseline_p_fighter_win": 0.5459810689946616,
+    "baseline_p_opponent_win": 0.4540189310053384,
+    "p_fighter_win": 0.5459810689946616,
+    "p_opponent_win": 0.4540189310053384,
+    "applied_shift_percentage_points": 0.0,
+    "max_shift_percentage_points": 5,
+    "policy_version": "bounded-ai-guidance-v1-max5pp-untested",
+    "explanation": {
+      "text": "The supplied observations do not establish an additional validated signal beyond the saved model.",
+      "evidence_ids": [
+        "model.outcome"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "model.outcome",
+      "text": "The saved ML model estimates Luke Riley at 54.6% and Diego Lopes at 45.4% to win, conditional on a decisive result."
+    },
+    {
+      "id": "model.scope",
+      "text": "This is a hypothetical 3-round matchup. Completed UFC history ends 2026-10-17; features are frozen before 2026-10-22. Draws and no contests are outside the winner model's scope. These are research estimates, not betting advice."
+    },
+    {
+      "id": "model.publication",
+      "text": "This matchup has insufficient comparable UFC history for a published win probability. Luke Riley has 3 covered UFC bouts and is observed unranked on a complete current division board; Diego Lopes has 10 covered bouts and is verified #2. There is insufficient comparable UFC history to publish a favorite. The numerical model output is retained as a research estimate."
+    },
+    {
+      "id": "model.evaluation",
+      "text": "The ML model's retrospective evaluation accuracy is 63.9%; this does not validate an AI adjustment or guarantee this fight."
+    },
+    {
+      "id": "fighter.sample",
+      "text": "Luke Riley's observed sample is 3 prior UFC bouts and 23.6 minutes, using at most the last five covered bouts.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.sig_landed_per_min",
+      "text": "Luke Riley: 6.67 significant strikes landed per minute in that observed sample.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.sig_absorbed_per_min",
+      "text": "Luke Riley: 3.86 significant strikes absorbed per minute in that observed sample.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.accuracy",
+      "text": "Luke Riley: 58.80% significant-strike accuracy in that observed sample.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.defense",
+      "text": "Luke Riley: 61.11% share of opposing significant-strike attempts avoided in that observed sample.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.age",
+      "text": "Luke Riley: 27.31 years old at the scenario date. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.height_cm",
+      "text": "Luke Riley: 175.26 cm in retained height observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.reach_cm",
+      "text": "Luke Riley: 175.26 cm in retained reach observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.last5_td_landed_per_minute",
+      "text": "Luke Riley: 0.00 takedowns landed per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.last5_sub_attempted_per_minute",
+      "text": "Luke Riley: 0.00 submission attempts per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.last5_knockdowns_per_minute",
+      "text": "Luke Riley: 1.27 knockdowns per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.last5_control_seconds_per_minute",
+      "text": "Luke Riley: 0.18 minutes of control per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.model_rank",
+      "text": "Luke Riley's dated ranking input is unavailable or stale in this frozen model. Missing ranking evidence does not mean the fighter is unranked.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "fighter.recent0",
+      "text": "On 2025-11-22, Luke Riley won against Bogdan Grad in the retained completed UFC results.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "http://ufcstats.com/fight-details/5e6a74db89f5410c",
+      "bout_id": "5e6a74db89f5410c",
+      "event_date": "2025-11-22",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "fighter.recent1",
+      "text": "On 2026-03-21, Luke Riley won against Michael Aswell Jr. in the retained completed UFC results.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "http://ufcstats.com/fight-details/fa534aaa5b997a69",
+      "bout_id": "fa534aaa5b997a69",
+      "event_date": "2026-03-21",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "fighter.recent2",
+      "text": "On 2026-07-11, Luke Riley won against Kai Kamaka III in the retained completed UFC results.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "http://ufcstats.com/fight-details/930317fde9dbc55e",
+      "bout_id": "930317fde9dbc55e",
+      "event_date": "2026-07-11",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "fighter.career_striking",
+      "text": "Luke Riley's all-covered UFC history since 2013: 3 covered bouts; 23.6 observed minutes; 6.67 significant strikes landed/min; 3.86 absorbed/min; 11.34 attempted/min; 2.80 net significant strikes/min; 58.80 accuracy percent; 61.11 opposing attempts avoided percent. Rates use aggregate counts divided by aggregate exposure, not averages of per-bout rates.",
+      "fighter_id": "b1de86d835638319",
+      "window": "career",
+      "as_of": "2026-10-22",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "fighter.last5_extended",
+      "text": "Luke Riley's last-five covered sample: 11.34 significant-strike attempts/min; 2.80 net significant strikes/min; 52.33 mean significant strikes/bout; 7.85 mean bout duration in minutes; 33.33 percent reaching scheduled time. Reaching scheduled time does not by itself establish a decision.",
+      "fighter_id": "b1de86d835638319",
+      "window": "last5",
+      "as_of": "2026-10-22",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "fighter.covered_results",
+      "text": "Luke Riley's covered UFC results: 3 wins, 0 losses, 0 draws. Last covered bout: 2026-07-11; 103 days to the feature cutoff 2026-10-22. This is not a full MMA career record.",
+      "fighter_id": "b1de86d835638319",
+      "as_of": "2026-10-22",
+      "source_kind": "frozen_outcome_labels",
+      "record": {
+        "wins": 3,
+        "losses": 0,
+        "draws": 0,
+        "covered_bouts": 3
+      }
+    },
+    {
+      "id": "fighter.career_grappling",
+      "text": "Luke Riley's frozen all-covered grappling sample (3 bouts): 0.00 takedowns landed/15min; 0.00 takedowns attempted/15min; 0.00 submission attempts/15min; 0.18 control minutes/15min; 1.27 knockdowns/15min.",
+      "fighter_id": "b1de86d835638319",
+      "window": "career",
+      "as_of": "2026-10-22",
+      "source_kind": "saved_winner_context"
+    },
+    {
+      "id": "fighter.model_strength",
+      "text": "Luke Riley's frozen prior-result strength summaries: 1538.05 recency-decayed Elo rating; 1503.23 shrunk last-five opponent pre-bout Elo index; 75.11 smoothed recency-weighted win share percent; 0.24 shrunk last-five outcome-minus-expected index; 33.67 smoothed recency-weighted finish-win share percent; 3.00 signed consecutive decisive-result streak, capped at five. These are model-specific derived indices, not official rankings, complete records, or probabilities of this matchup.",
+      "fighter_id": "b1de86d835638319",
+      "as_of": "2026-10-22",
+      "source_kind": "saved_winner_context"
+    },
+    {
+      "id": "fighter.weekly_rank",
+      "text": "Luke Riley's weekly media ranking comparison context is observed unranked on a complete division board; source date/observation 2026-10-22T20:17:16.420435+00:00. This context is not an input to the saved win model.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "https://www.ufc.com/rankings",
+      "ranking": {
+        "status": "unranked",
+        "rank": null,
+        "is_champion": false,
+        "board_date": null,
+        "observed_at": "2026-10-22T20:17:16.420435+00:00",
+        "published_label": "Last updated: Tuesday, Oct. 20",
+        "published_date_inferred": "2026-10-20",
+        "scope": "live_observed_media"
+      },
+      "used_by_model": false
+    },
+    {
+      "id": "fighter.ranked_opposition",
+      "text": "Luke Riley's last-five covered opponent sample: 3 bouts, 0 with a known pre-bout opponent rank; 0 wins in 0 decisive bouts against then-ranked opponents. Unknown ranks are excluded, not counted as unranked.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "https://www.kaggle.com/datasets/martj42/ufc-rankings",
+      "metrics": {
+        "covered_opponents": 3,
+        "known_rank_opponents": 0,
+        "prior_ranked_wins": 0,
+        "ranked_decisive_opponents": 0
+      },
+      "as_of": "2026-10-22",
+      "used_by_model": false
+    },
+    {
+      "id": "fighter.adjusted_striking",
+      "text": "Luke Riley's last-five opponent-adjusted striking: +0.98 landed/min above opponent-based expectation; -0.31 absorbed/min above expectation (lower is better). Expectations use each opponent's strictly pre-bout rates, with a fixed 30-minute shrinkage prior; these are derived comparison estimates, not official rates or causal reasons for winning.",
+      "fighter_id": "b1de86d835638319",
+      "metrics": {
+        "last5_adjusted_landed": 0.976874481457434,
+        "last5_adjusted_absorbed": -0.30996237062620186,
+        "last5_reliability": 0.4397759103641457
+      },
+      "as_of": "2026-10-22",
+      "used_by_model": false
+    },
+    {
+      "id": "fighter.covered_division",
+      "text": "Luke Riley's last covered division is Featherweight (ceiling 145 lb), observed 2026-07-11. A division ceiling is not measured body weight or current booking eligibility.",
+      "fighter_id": "b1de86d835638319",
+      "source_url": "http://ufcstats.com/fight-details/930317fde9dbc55e",
+      "event_date": "2026-07-11",
+      "bout_id": "930317fde9dbc55e",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "opponent.sample",
+      "text": "Diego Lopes's observed sample is 5 prior UFC bouts and 82.5 minutes, using at most the last five covered bouts.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.sig_landed_per_min",
+      "text": "Diego Lopes: 4.08 significant strikes landed per minute in that observed sample.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.sig_absorbed_per_min",
+      "text": "Diego Lopes: 4.96 significant strikes absorbed per minute in that observed sample.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.accuracy",
+      "text": "Diego Lopes: 44.40% significant-strike accuracy in that observed sample.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.defense",
+      "text": "Diego Lopes: 49.44% share of opposing significant-strike attempts avoided in that observed sample.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.age",
+      "text": "Diego Lopes: 31.81 years old at the scenario date. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.height_cm",
+      "text": "Diego Lopes: 180.34 cm in retained height observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.reach_cm",
+      "text": "Diego Lopes: 182.88 cm in retained reach observations. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.last5_td_landed_per_minute",
+      "text": "Diego Lopes: 1.09 takedowns landed per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.last5_sub_attempted_per_minute",
+      "text": "Diego Lopes: 0.00 submission attempts per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.last5_knockdowns_per_minute",
+      "text": "Diego Lopes: 0.55 knockdowns per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.last5_control_seconds_per_minute",
+      "text": "Diego Lopes: 1.35 minutes of control per 15 minutes. Combat rates use at most five prior covered UFC bouts; physical measurements were retrospectively collected.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.model_rank",
+      "text": "Diego Lopes's dated ranking input is unavailable or stale in this frozen model. Missing ranking evidence does not mean the fighter is unranked.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "opponent.recent0",
+      "text": "On 2024-09-14, Diego Lopes won against Brian Ortega in the retained completed UFC results.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/2335e75ce63805b6",
+      "bout_id": "2335e75ce63805b6",
+      "event_date": "2024-09-14",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "opponent.recent1",
+      "text": "On 2025-04-12, Diego Lopes lost against Alexander Volkanovski in the retained completed UFC results.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/e733f148060bef2a",
+      "bout_id": "e733f148060bef2a",
+      "event_date": "2025-04-12",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "opponent.recent2",
+      "text": "On 2025-09-13, Diego Lopes won against Jean Silva in the retained completed UFC results.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/de1a3734be60e6a1",
+      "bout_id": "de1a3734be60e6a1",
+      "event_date": "2025-09-13",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "opponent.recent3",
+      "text": "On 2026-01-31, Diego Lopes lost against Alexander Volkanovski in the retained completed UFC results.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/b06b43670238c2d8",
+      "bout_id": "b06b43670238c2d8",
+      "event_date": "2026-01-31",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "opponent.recent4",
+      "text": "On 2026-06-14, Diego Lopes won against Steve Garcia in the retained completed UFC results.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/127ba4a1ccb3d4a6",
+      "bout_id": "127ba4a1ccb3d4a6",
+      "event_date": "2026-06-14",
+      "source_kind": "frozen_outcome_labels"
+    },
+    {
+      "id": "opponent.career_striking",
+      "text": "Diego Lopes's all-covered UFC history since 2013: 10 covered bouts; 117.1 observed minutes; 3.94 significant strikes landed/min; 4.68 absorbed/min; 8.38 attempted/min; -0.73 net significant strikes/min; 47.05 accuracy percent; 47.21 opposing attempts avoided percent. Rates use aggregate counts divided by aggregate exposure, not averages of per-bout rates.",
+      "fighter_id": "f166e93d04a8c274",
+      "window": "career",
+      "as_of": "2026-10-22",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "opponent.last5_extended",
+      "text": "Diego Lopes's last-five covered sample: 9.20 significant-strike attempts/min; -0.87 net significant strikes/min; 67.40 mean significant strikes/bout; 16.50 mean bout duration in minutes; 60.00 percent reaching scheduled time. Reaching scheduled time does not by itself establish a decision.",
+      "fighter_id": "f166e93d04a8c274",
+      "window": "last5",
+      "as_of": "2026-10-22",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "opponent.covered_results",
+      "text": "Diego Lopes's covered UFC results: 7 wins, 3 losses, 0 draws. Last covered bout: 2026-06-14; 130 days to the feature cutoff 2026-10-22. This is not a full MMA career record.",
+      "fighter_id": "f166e93d04a8c274",
+      "as_of": "2026-10-22",
+      "source_kind": "frozen_outcome_labels",
+      "record": {
+        "wins": 7,
+        "losses": 3,
+        "draws": 0,
+        "covered_bouts": 10
+      }
+    },
+    {
+      "id": "opponent.career_grappling",
+      "text": "Diego Lopes's frozen all-covered grappling sample (10 bouts): 0.90 takedowns landed/15min; 1.92 takedowns attempted/15min; 1.02 submission attempts/15min; 1.64 control minutes/15min; 0.77 knockdowns/15min.",
+      "fighter_id": "f166e93d04a8c274",
+      "window": "career",
+      "as_of": "2026-10-22",
+      "source_kind": "saved_winner_context"
+    },
+    {
+      "id": "opponent.model_strength",
+      "text": "Diego Lopes's frozen prior-result strength summaries: 1531.82 recency-decayed Elo rating; 1524.80 shrunk last-five opponent pre-bout Elo index; 60.20 smoothed recency-weighted win share percent; 0.06 shrunk last-five outcome-minus-expected index; 32.27 smoothed recency-weighted finish-win share percent; 1.00 signed consecutive decisive-result streak, capped at five. These are model-specific derived indices, not official rankings, complete records, or probabilities of this matchup.",
+      "fighter_id": "f166e93d04a8c274",
+      "as_of": "2026-10-22",
+      "source_kind": "saved_winner_context"
+    },
+    {
+      "id": "opponent.weekly_rank",
+      "text": "Diego Lopes's weekly media ranking comparison context is rank 2; source date/observation 2026-10-22T20:17:16.420435+00:00. This context is not an input to the saved win model.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "https://www.ufc.com/rankings",
+      "ranking": {
+        "status": "ranked",
+        "rank": 2,
+        "is_champion": false,
+        "board_date": null,
+        "observed_at": "2026-10-22T20:17:16.420435+00:00",
+        "published_label": "Last updated: Tuesday, Oct. 20",
+        "published_date_inferred": "2026-10-20",
+        "scope": "live_observed_media"
+      },
+      "used_by_model": false
+    },
+    {
+      "id": "opponent.ranked_opposition",
+      "text": "Diego Lopes's last-five covered opponent sample: 5 bouts, 5 with a known pre-bout opponent rank; 3 wins in 5 decisive bouts against then-ranked opponents. Unknown ranks are excluded, not counted as unranked.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "https://www.kaggle.com/datasets/martj42/ufc-rankings",
+      "metrics": {
+        "covered_opponents": 5,
+        "known_rank_opponents": 5,
+        "prior_ranked_wins": 3,
+        "ranked_decisive_opponents": 5
+      },
+      "as_of": "2026-10-22",
+      "used_by_model": false
+    },
+    {
+      "id": "opponent.adjusted_striking",
+      "text": "Diego Lopes's last-five opponent-adjusted striking: +0.25 landed/min above opponent-based expectation; -0.10 absorbed/min above expectation (lower is better). Expectations use each opponent's strictly pre-bout rates, with a fixed 30-minute shrinkage prior; these are derived comparison estimates, not official rates or causal reasons for winning.",
+      "fighter_id": "f166e93d04a8c274",
+      "metrics": {
+        "last5_adjusted_landed": 0.24991618383724934,
+        "last5_adjusted_absorbed": -0.10452337153961057,
+        "last5_reliability": 0.7333333333333333
+      },
+      "as_of": "2026-10-22",
+      "used_by_model": false
+    },
+    {
+      "id": "opponent.covered_division",
+      "text": "Diego Lopes's last covered division is Featherweight (ceiling 145 lb), observed 2026-06-14. A division ceiling is not measured body weight or current booking eligibility.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "http://ufcstats.com/fight-details/127ba4a1ccb3d4a6",
+      "event_date": "2026-06-14",
+      "bout_id": "127ba4a1ccb3d4a6",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "comparison.experience_and_opposition",
+      "text": "Luke Riley has 3 covered UFC bouts; in the last-five sample, 0 wins in 0 decisive bouts against then-ranked opponents, with opponent ranks known for 0 of 3 bouts. Diego Lopes has 10 covered UFC bouts; in the last-five sample, 3 wins in 5 decisive bouts against then-ranked opponents, with opponent ranks known for 5 of 5 bouts. Unknown opponent ranks remain unknown, not unranked; unequal exposure and opponent samples limit direct comparisons.",
+      "as_of": "2026-10-22",
+      "source_kind": "covered_history_and_strict_prior_ranking_context"
+    },
+    {
+      "id": "comparison.sig_landed_per_min",
+      "text": "Luke Riley has the higher observed striking output: Luke Riley 6.67 versus Diego Lopes 4.08. The samples involve different opponents and do not prove a causal matchup advantage.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "comparison.sig_absorbed_per_min",
+      "text": "Luke Riley has the lower observed strikes absorbed per minute: Luke Riley 3.86 versus Diego Lopes 4.96. The samples involve different opponents and do not prove a causal matchup advantage.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "comparison.last5_td_landed_per_minute",
+      "text": "Diego Lopes has the higher observed takedown rate per 15 minutes: Luke Riley 0.00 versus Diego Lopes 1.09. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "comparison.last5_knockdowns_per_minute",
+      "text": "Luke Riley has the higher observed knockdown rate per 15 minutes: Luke Riley 1.27 versus Diego Lopes 0.55. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "comparison.last5_control_seconds_per_minute",
+      "text": "Diego Lopes has the higher observed control minutes per 15 minutes: Luke Riley 0.18 versus Diego Lopes 1.35. This supports a conditional tactical possibility, not a guaranteed way to win.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "comparison.career_differences",
+      "text": "All-covered signed differences (Luke Riley minus Diego Lopes): +2.72 significant strikes landed/min; -0.81 absorbed/min; +3.54 net significant strikes/min. Different opponents and unequal samples prevent a causal interpretation.",
+      "as_of": "2026-10-22",
+      "window": "career",
+      "source_kind": "canonical_history"
+    },
+    {
+      "id": "model.duration",
+      "text": "The separate duration model estimates 33.9% probability of completing scheduled time. Completion includes a stoppage recorded at the final bell; it does not establish a decision or a winner."
+    },
+    {
+      "id": "model.duration_detail",
+      "text": "Separate saved duration forecast: approximate mean 9.46 minutes; at 1.5 elapsed rounds: 61.0% over, 38.8% under, 0.2% exact boundary; at 2.5 elapsed rounds: 42.3% over, 57.7% under, 0.0% exact boundary. One round equals five minutes; boundary mass is explicit and interior means are approximate.",
+      "source_kind": "saved_duration_prediction"
+    },
+    {
+      "id": "model.fighter_strikes",
+      "text": "The separate strike model estimates 61.9 significant strikes for Luke Riley. More projected strikes do not establish a higher win probability.",
+      "fighter_id": "b1de86d835638319"
+    },
+    {
+      "id": "model.opponent_strikes",
+      "text": "The separate strike model estimates 44.7 significant strikes for Diego Lopes. More projected strikes do not establish a higher win probability.",
+      "fighter_id": "f166e93d04a8c274"
+    },
+    {
+      "id": "ranking.observation49",
+      "text": "Official UFC page observation 2026-10-22T20:17:16.420435+00:00: Diego Lopes listed as rank 2 in Featherweight. This display observation is separate from frozen model inputs; the retrieval timestamp does not establish historical publication availability.",
+      "fighter_id": "f166e93d04a8c274",
+      "source_url": "https://www.ufc.com/rankings"
+    }
+  ],
+  "prediction_ids": {
+    "winner": "be6ce268-1e11-4c84-9955-fd0a51247759",
+    "rounds": "800327db-fe2b-41ca-84d1-57ca7675d2ef",
+    "fighter_strikes": "411a3f26-9116-4f74-bcfa-baf4b89c6332",
+    "opponent_strikes": "cb0178a3-654d-43d9-bf44-0076091d7e94"
+  },
+  "model_versions": {
+    "winner": "winner-v2-d04e8f09a8abcbb4",
+    "rounds": "rounds-8f9fc4ebaff2963e",
+    "fighter_strikes": "v3-5108e9766d66f10b",
+    "opponent_strikes": "v3-5108e9766d66f10b",
+    "narrator": "qwen3:4b@359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+  },
+  "as_of": "2026-10-22",
+  "ranking_snapshot": {
+    "source_url": "https://www.ufc.com/rankings",
+    "observed_at": "2026-10-22T20:17:16.420435+00:00",
+    "published_board_date": null,
+    "sha256": "2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0",
+    "source_cache": "rankings/raw/2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0.html.gz"
+  },
+  "source_provenance": {
+    "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+    "winner_artifact_sha256": "78779bc7dfb0019265db4c9cb094d2a139c5985aa14f783aa064c28272d49163",
+    "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+    "feature_cutoff_exclusive": "2026-10-22",
+    "forecast_date": "2026-10-22",
+    "comparison_context": {
+      "context_version": "opponent-evidence-v1-analysis-only",
+      "used_by_model": false,
+      "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+      "outcome_identity_sha256": "9dadcb39b8066b98152e0b97a6f865fa070314aeee3f4eab1f8b108962add439",
+      "ranking_csv_sha256": "a31032fc11db4ec2ef3b43f940937118f07dbd0b3bd622d27bf22f672fad2437",
+      "ranking_identity_crosswalk_sha256": "b7e0598de9bca905df94a08ef8166786340407d1f79acfa97e26f6fd6ccedba2",
+      "ranking_normalized_records_sha256": "0b7055d8e987aafde9a5f7c9960abbc8a225a85c244789e302a89a1367aebc8a",
+      "ranking_archive_source_url": "https://www.kaggle.com/datasets/martj42/ufc-rankings",
+      "ranking_archive_observed_at": "2026-10-23T00:15:58.335559+00:00",
+      "live_observed_at": "2026-10-22T20:17:16.420435+00:00",
+      "live_source_sha256": "2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0",
+      "live_snapshot_sha256": "837282a71c48717f11ce20cd02177dbfb40536311e6e45e28193b3b185b0cfbe",
+      "live_source_url": "https://www.ufc.com/rankings",
+      "data_from": "2013-02-16",
+      "data_through": "2026-10-17",
+      "implementation_sha256": {
+        "evidence_context": "6359413a263108ae39f7edf9b8d7a256c231cb416fd611cdeab38d8d9c318cd1",
+        "winner_v3": "b255926439e0aaf2feddce0c3529f0b0ab65c625b94cf7889f5f04ab0578dd9a",
+        "ranking_context": "52c8ee05d946ebe0625e2c24b7208e80ab9a3b17c2c3075a7932fe9fc81a4094",
+        "divisions": "04c288808060e50f601767ecfe6d86c6d6c5551e78ebbc6b23b678291671c0ab",
+        "features": "ec7d2c312600035a34778f00e014a93b68fb24da5088d41175786e79d4dcdbef"
+      },
+      "context_snapshot_sha256": "4ff3281e6f6e0cb3f7417decf4d1722d4ae62dac583cef606d45a8231d1313bc"
+    },
+    "history_policy": "Canonical UFC history strictly before cutoff; retrospective source observations; no web retrieval during analysis."
+  },
+  "warnings": [
+    "Research only, not betting advice. Model estimates can be wrong; do not use them to place bets or risk money. You are responsible for how you use these estimates.",
+    "AI guidance is experimental; its backtest performance is not established."
+  ],
+  "analysis_id": "a75fb02b-d3cc-488b-bff1-3a413bff1ceb",
+  "created_at": "2026-10-23T00:51:54.238421+00:00"
+}

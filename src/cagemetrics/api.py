@@ -26,6 +26,7 @@ from . import __version__
 from .db import Repository
 from . import forward as forward_ledger
 from .serving import LiveForecaster
+from .reliability import winner_evidence_quality
 from collections import Counter, deque
 from uuid import uuid4
 from threading import BoundedSemaphore
@@ -127,6 +128,8 @@ class WinnerPredictionResponse(BaseModel):
     history: dict
     weight_context: dict
     fighter_context: dict | None = None
+    comparison_context: dict | None = None
+    evidence_quality: dict | None = None
     evaluation: dict
     warnings: list[str]
 
@@ -203,6 +206,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.repository = Repository(settings.database_url)
         app.state.forecaster = None
         app.state.winner = None
+        app.state.evidence_context = None
         app.state.winner_startup_error = "Run cagemetrics train-winner to install the outcome model"
         app.state.rounds = None
         app.state.rounds_startup_error = "Run cagemetrics train-rounds to install the duration model"
@@ -228,18 +232,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if app.state.forecaster is not None and app.state.startup_error is None:
             try:
                 channel = os.getenv("CAGEMETRICS_WINNER_CHANNEL", "auto")
-                if channel not in {"auto", "v1", "v2"}:
-                    raise ValueError("Winner channel must be auto, v1, or v2")
-                challenger_path = settings.artifact_dir / "winner_v2"
-                challenger = _read_json(challenger_path / "metadata.json", {})
-                if channel == "v2" or (channel == "auto" and challenger.get("promotion_passed")):
-                    from .winner_v2 import WinnerV2Engine
+                from .winner_serving import load_winner
 
-                    winner = WinnerV2Engine(challenger_path)
-                else:
-                    from .winner import WinnerEngine
-
-                    winner = WinnerEngine(settings.artifact_dir / "winner")
+                winner = load_winner(settings.artifact_dir, channel)
                 if winner.metadata["source_snapshot_sha256"] != app.state.forecaster.snapshot_id:
                     raise ValueError("Winner model and SQL history use different source snapshots")
                 if len(warm_ids) == 2:
@@ -250,6 +245,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             except (ImportError, FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
                 app.state.winner_startup_error = str(exc)
                 LOGGER.warning("Winner model unavailable: %s", exc)
+            if app.state.winner is not None:
+                from .evidence_context import EvidenceContext, EvidenceContextUnavailable
+
+                try:
+                    app.state.evidence_context = EvidenceContext(
+                        app.state.forecaster.bundle, app.state.winner.labels, settings.data_dir
+                    )
+                except EvidenceContextUnavailable:
+                    LOGGER.info("Optional opponent-quality comparison context is unavailable")
             try:
                 from .rounds import RoundsEngine
 
@@ -546,7 +550,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/v1/winner-evaluation")
     def winner_evaluation():
         _, _, model = winner_ready()
-        name = "winner_v2_evaluation.json" if model.metadata.get("promotion_passed") else "winner_evaluation.json"
+        version = model.metadata["model_version"]
+        family = next((key for key in ("v4", "v3", "v2") if version.startswith(f"winner-{key}-")), None)
+        name = f"winner_{family}_evaluation.json" if family else "winner_evaluation.json"
         report = _read_json(settings.report_dir / name)
         if report is None:
             raise HTTPException(404, "Run cagemetrics train-winner to generate the evaluation")
@@ -595,9 +601,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "history": result["history"],
             "weight_context": weight_context,
             "fighter_context": result.get("fighter_context"),
+            "comparison_context": None,
             "evaluation": model.metadata.get("evaluation", {}),
             "warnings": list(dict.fromkeys(warnings)),
         }
+        if app.state.evidence_context is not None:
+            response["comparison_context"] = app.state.evidence_context.compare(
+                fighter_id, opponent_id, forecast_date, datetime.now(ZoneInfo("UTC")).isoformat()
+            )
+        try:
+            ranking_snapshot = observed_rankings()
+        except (OSError, ValueError):
+            ranking_snapshot = None
+        response["evidence_quality"] = winner_evidence_quality(
+            {**result, "comparison_context": response["comparison_context"]},
+            response["fighter"], response["opponent"], ranking_snapshot
+        )
         return repository.record_prediction(
             result["features"], response, today, forecaster.snapshot_id, kind="winner_hypothetical"
         )
@@ -728,6 +747,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         repository, forecaster, winner = winner_ready()
         from .analysis import MatchupAnalyst, AnalysisUnavailable, AnalysisValidationError
         from .analysis_facts import build_evidence
+        from .matchup_brief import BRIEF_VERSION, build_matchup_brief
 
         records = {}
         for key, identity, kind in (
@@ -778,7 +798,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     raise AnalysisUnavailable("The configured local model is not available") from exc
             key = hashlib.sha256(json.dumps(
                 {"evidence": evidence, "provider": analyst.provider, "model": analyst.model,
-                 "prompt_version": analyst.prompt_version}, sort_keys=True, allow_nan=False
+                 "prompt_version": analyst.prompt_version, "brief_version": BRIEF_VERSION},
+                sort_keys=True, allow_nan=False
             ).encode()).hexdigest()
             existing = repository.get_analysis(request_sha256=key)
             if existing is not None:
@@ -806,6 +827,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         payload = {
             **narrative,
             "status": "ready",
+            "matchup_brief": build_matchup_brief(evidence, narrative),
             "ai_guidance": {
                 "status": "experimental", "validated": False,
                 "baseline_p_fighter_win": baseline["p_fighter_win"],

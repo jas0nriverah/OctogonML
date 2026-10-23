@@ -1,6 +1,7 @@
 """The winner API keeps probability and SQL audit contracts separate from strike forecasts."""
 
 from datetime import datetime, timedelta
+import json
 from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 
@@ -127,3 +128,50 @@ def test_invalid_model_probabilities_are_not_persisted(winner_client, probabilit
     winner_client.app.state.winner.predict_matchup = invalid
     assert winner_client.post("/api/v1/predict-winner", json=payload()).status_code == 503
     assert winner_client.app.state.repository.counts()["prediction_count"] == 0
+
+
+def test_evidence_quality_is_saved_without_replacing_model_inputs(winner_client):
+    original = winner_client.app.state.winner.predict_matchup
+
+    def contextual(*args):
+        return original(*args) | {"fighter_context": {
+            "fighter": {"rank_missing": 1, "rank_observed": None, "rank_board_age_days": None},
+            "opponent": {"rank_missing": 1, "rank_observed": None, "rank_board_age_days": 200,
+                         "ranking_board_date": "2026-04-05"}}}
+
+    winner_client.app.state.winner.predict_matchup = contextual
+    path = winner_client.app.state.settings.data_dir / "rankings" / "current.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"observed_at": "2026-10-22", "published_board_date": None,
+                               "entries": [{"fighter_id": "a", "division": "Lightweight", "rank": 2}]}))
+    result = winner_client.post("/api/v1/predict-winner", json=payload()).json()
+    quality = result["evidence_quality"]
+    assert result["p_fighter_win"] == .65
+    assert quality["fighter"]["covered_bouts"] == 2
+    assert quality["opponent"]["covered_bouts"] == 1
+    assert quality["fighter"]["display_ranking"]["rank"] == 2
+    assert quality["fighter"]["model_ranking"]["rank"] is None
+    assert quality["opponent"]["model_ranking"]["status"] == "stale"
+    path.write_text(json.dumps({"entries": []}))
+    assert winner_client.get(f"/api/v1/winner-predictions/{result['prediction_id']}").json() == result
+
+
+def test_publication_policy_persists_research_probability_unchanged(winner_client):
+    original = winner_client.app.state.winner.predict_matchup
+
+    def sparse(*args):
+        return original(*args) | {"history": {"fighter_bouts": 3, "opponent_bouts": 8}}
+
+    winner_client.app.state.winner.predict_matchup = sparse
+    current = {"known": True, "scope": "live_observed_media", "observed_at": "2026-10-22T20:00:00Z",
+               "board_complete": True, "used_by_model": False}
+    context = {"fighter": {"weekly_ranking": current | {"status": "unranked", "rank": None}},
+               "opponent": {"weekly_ranking": current | {"status": "ranked", "rank": 2}}}
+    winner_client.app.state.evidence_context = SimpleNamespace(compare=lambda *args: context)
+    response = winner_client.post("/api/v1/predict-winner", json=payload())
+    assert response.status_code == 201, response.text
+    result = response.json()
+    assert result["p_fighter_win"] == .65
+    assert result["evidence_quality"]["publication"]["publish_probability"] is False
+    assert result["comparison_context"] == context
+    assert winner_client.get(f"/api/v1/winner-predictions/{result['prediction_id']}").json() == result

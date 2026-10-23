@@ -1,0 +1,15 @@
+# Full dated media ranking archive
+
+Source: Mart Jürisoo (`martj42`), [UFC Rankings](https://www.kaggle.com/datasets/martj42/ufc-rankings), **version 47**, last updated June 6, 2026, labeled **CC0: Public Domain** by its author. The author reports compiling official UFC media rankings from Internet Archive snapshots of UFC.com, with some missing weeks. The archive contains 100,065 rows over 532 published board dates, February 4, 2013–June 2, 2026. A gap is not filled with an invented weekly board.
+
+The version-selected download URL, actual retrieval UTC, original metadata, ZIP/CSV SHA-256 hashes, and author description are retained in `provenance.json` and `raw/`. The original compressed CSV is `rankings_history.csv.gz`. This new source is separate from the canonical completed-fight manifest and frozen Winner V2 artifact.
+
+`normalized.csv.gz` maps 99,900 rows to canonical UFCStats fighter IDs. Unresolved or ambiguous observations remain explicit. Nine source aliases are resolved using unique **exact board date + division + rank slot** anchors from the pinned Noah Bair wide dataset, with consistent canonical fighter IDs across every available anchor. `ranking_identity_crosswalk.json` preserves source hashes, example bout/board anchors, and the identity policy. No fuzzy name matching or bout-outcome information establishes aliases.
+
+`boards.csv.gz` contains 6,643 date/division boards. Only 4,350 meet the conservative completeness criterion: champion rank 0 plus every rank 1–15, all identities resolved, and no duplicated canonical athlete slots. Early top-ten, partial, ambiguous, or conflicting boards may establish an exact positive rank, but absence on them remains **unknown**. They do not establish unranked status. `identity_audit.json` retains coverage and unresolved names.
+
+Historical lookup selects the latest source board **strictly before** a forecast date and masks observations older than 35 days. Source retrieval occurred later than historical events; this is reconstruction, not proof of contemporaneous archival availability. The module never substitutes a fighter's own-bout observation date for the latest full board.
+
+The separate `../current_media.json` is derived from the retained official UFC page HTML under `../raw/`. It parses the **media** table only, excluding the distinct Meta algorithm table. The page explicitly labels the media update as “Tuesday, Oct. 20” but omits the year. `published_board_date` stays null; `published_date_inferred` records the unique nearby weekday/year candidate and its explicit inference basis. It is available for live context only at or after its actual October 22 observation timestamp. The inferred October 20 date never backfills historical training or earlier forecasts.
+
+Original UFC rankings, names, and marks retain their owners' rights. The project is independent and unaffiliated with UFC, Kaggle, or the source authors. This archive is sporting context, not calibrated probability evidence or betting advice.

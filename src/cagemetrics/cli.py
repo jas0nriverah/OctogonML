@@ -171,6 +171,8 @@ def main(argv=None):
             "train-winner",
             "train-rounds",
             "train-winner-v2",
+            "train-winner-v3",
+            "train-winner-v4",
             "forward-issue",
             "forward-settle",
             "forward-export",
@@ -519,6 +521,19 @@ def main(argv=None):
                 {"stage": "train-winner-v2", "model_version": report["model_version"],
                  "promotion_passed": report["promotion_passed"], "evaluation": report.get("evaluation", {})}
             )
+        if args.command in ("train-winner-v3", "train-winner-v4"):
+            import importlib
+
+            version = args.command.rsplit("-", 1)[-1]
+            module = importlib.import_module(f".winner_{version}_training", __package__)
+            report = getattr(module, f"run_winner_{version}_study")(
+                repository.dataset(), settings.data_dir, settings.artifact_dir / f"winner_{version}",
+                settings.report_dir, settings.artifact_dir / "winner_v2",
+            )
+            _output({"stage": args.command, "model_version": report["model_version"],
+                     "promotion_passed": report["promotion_passed"],
+                     "evaluation": report.get("evaluation", {}),
+                     "artifact_reused": report.get("artifact_reused", False)})
         if args.command == "features":
             from .features import build_features
 

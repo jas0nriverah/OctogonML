@@ -1,0 +1,318 @@
+{
+  "policy": "Alias accepted only when exact dated division/rank slot is unique and every pinned wide-source anchor agrees on one canonical UFCStats fighter ID; no fuzzy names or bout outcomes.",
+  "aliases": {
+    "294aa73dbf37d281": [
+      "Bruno Gustavo da Silva"
+    ],
+    "82cbb809d5ee565c": [
+      "Mara Borella"
+    ],
+    "7a703c565ccaa18f": [
+      "Ronaldo Souza"
+    ],
+    "634bb0de2eb043b4": [
+      "Cris Cyborg"
+    ],
+    "7c3c48cf54a2848e": [
+      "Ulka Sasaki"
+    ],
+    "cc900af167fbedfd": [
+      "Tim Johnson"
+    ],
+    "73e09f837f3b5ecc": [
+      "Antonio Rogerio Nogueira"
+    ],
+    "7ea4a9f07df33a45": [
+      "Francisco Rivera Jr."
+    ],
+    "05560764359161e4": [
+      "Costas Philippou"
+    ]
+  },
+  "evidence": [
+    {
+      "source_name": "Bruno Gustavo da Silva",
+      "fighter_id": "294aa73dbf37d281",
+      "canonical_name": "Bruno Silva",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "20d74ed23d3e9b3a",
+          "board_date": "2026-06-02",
+          "division": "flyweight",
+          "rank": 15
+        },
+        {
+          "bout_id": "fc9168fd102e2e66",
+          "board_date": "2026-03-10",
+          "division": "flyweight",
+          "rank": 15
+        },
+        {
+          "bout_id": "668a44403a130043",
+          "board_date": "2025-10-14",
+          "division": "flyweight",
+          "rank": 14
+        },
+        {
+          "bout_id": "b6a87389bdc36a00",
+          "board_date": "2025-06-03",
+          "division": "flyweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "1a635a5e4551e7d5",
+          "board_date": "2024-12-10",
+          "division": "flyweight",
+          "rank": 12
+        }
+      ],
+      "total_anchors": 5
+    },
+    {
+      "source_name": "Mara Borella",
+      "fighter_id": "82cbb809d5ee565c",
+      "canonical_name": "Mara Romero Borella",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "96919cf8d3e988ff",
+          "board_date": "2020-02-10",
+          "division": "womensflyweight",
+          "rank": 13
+        },
+        {
+          "bout_id": "e3acb789f7dcd34c",
+          "board_date": "2019-07-29",
+          "division": "womensflyweight",
+          "rank": 10
+        },
+        {
+          "bout_id": "904e0e46392dff93",
+          "board_date": "2019-01-21",
+          "division": "womensflyweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "c5f0c83e303d80bf",
+          "board_date": "2018-01-24",
+          "division": "womensflyweight",
+          "rank": 9
+        }
+      ],
+      "total_anchors": 4
+    },
+    {
+      "source_name": "Ronaldo Souza",
+      "fighter_id": "7a703c565ccaa18f",
+      "canonical_name": "Jacare Souza",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "c04274c8caa505dd",
+          "board_date": "2019-11-11",
+          "division": "middleweight",
+          "rank": 8
+        },
+        {
+          "bout_id": "f0ca713121289d24",
+          "board_date": "2019-04-22",
+          "division": "middleweight",
+          "rank": 4
+        },
+        {
+          "bout_id": "c037cdc1de53de8e",
+          "board_date": "2018-10-31",
+          "division": "middleweight",
+          "rank": 5
+        },
+        {
+          "bout_id": "d86e31793564cd31",
+          "board_date": "2018-04-23",
+          "division": "middleweight",
+          "rank": 2
+        },
+        {
+          "bout_id": "3a94bf34e62ae5fd",
+          "board_date": "2018-01-24",
+          "division": "middleweight",
+          "rank": 3
+        }
+      ],
+      "total_anchors": 14
+    },
+    {
+      "source_name": "Cris Cyborg",
+      "fighter_id": "634bb0de2eb043b4",
+      "canonical_name": "Cristiane Justino",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "3278e45b30f7dd33",
+          "board_date": "2018-12-17",
+          "division": "womensfeatherweight",
+          "rank": 0
+        },
+        {
+          "bout_id": "4960379abe6ed525",
+          "board_date": "2018-02-26",
+          "division": "womensfeatherweight",
+          "rank": 0
+        },
+        {
+          "bout_id": "279b4190d9ef1379",
+          "board_date": "2017-12-18",
+          "division": "womensfeatherweight",
+          "rank": 0
+        }
+      ],
+      "total_anchors": 3
+    },
+    {
+      "source_name": "Ulka Sasaki",
+      "fighter_id": "7c3c48cf54a2848e",
+      "canonical_name": "Yuta Sasaki",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "961f434fe238f40e",
+          "board_date": "2018-11-12",
+          "division": "flyweight",
+          "rank": 13
+        }
+      ],
+      "total_anchors": 1
+    },
+    {
+      "source_name": "Tim Johnson",
+      "fighter_id": "cc900af167fbedfd",
+      "canonical_name": "Timothy Johnson",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "0da43c3ec0e11650",
+          "board_date": "2018-01-29",
+          "division": "heavyweight",
+          "rank": 14
+        },
+        {
+          "bout_id": "d83ae4a2e117b775",
+          "board_date": "2017-07-18",
+          "division": "heavyweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "f99ee57f75b20b69",
+          "board_date": "2017-03-15",
+          "division": "heavyweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "689116759885e4a5",
+          "board_date": "2016-11-16",
+          "division": "heavyweight",
+          "rank": 14
+        }
+      ],
+      "total_anchors": 4
+    },
+    {
+      "source_name": "Antonio Rogerio Nogueira",
+      "fighter_id": "73e09f837f3b5ecc",
+      "canonical_name": "Rogerio Nogueira",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "106088694fa0c682",
+          "board_date": "2016-11-16",
+          "division": "lightheavyweight",
+          "rank": 9
+        },
+        {
+          "bout_id": "375c2ecb6fe54cc6",
+          "board_date": "2016-05-10",
+          "division": "lightheavyweight",
+          "rank": 10
+        },
+        {
+          "bout_id": "aa62b8f58fc09790",
+          "board_date": "2015-07-27",
+          "division": "lightheavyweight",
+          "rank": 11
+        }
+      ],
+      "total_anchors": 3
+    },
+    {
+      "source_name": "Francisco Rivera Jr.",
+      "fighter_id": "7ea4a9f07df33a45",
+      "canonical_name": "Francisco Rivera",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "7c20284c4c2dc9d3",
+          "board_date": "2016-02-23",
+          "division": "bantamweight",
+          "rank": 15
+        },
+        {
+          "bout_id": "52f0398eb74c139d",
+          "board_date": "2015-08-25",
+          "division": "bantamweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "c611e81778c0b1fc",
+          "board_date": "2015-06-01",
+          "division": "bantamweight",
+          "rank": 11
+        },
+        {
+          "bout_id": "c5ae278a05b73db9",
+          "board_date": "2014-11-24",
+          "division": "bantamweight",
+          "rank": 11
+        },
+        {
+          "bout_id": "f9a59f7c67fbce01",
+          "board_date": "2014-05-12",
+          "division": "bantamweight",
+          "rank": 10
+        }
+      ],
+      "total_anchors": 5
+    },
+    {
+      "source_name": "Costas Philippou",
+      "fighter_id": "05560764359161e4",
+      "canonical_name": "Constantinos Philippou",
+      "exact_board_slot_anchors": [
+        {
+          "bout_id": "1caec47dc08613a7",
+          "board_date": "2015-05-11",
+          "division": "middleweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "2d14f73c374f2875",
+          "board_date": "2014-05-06",
+          "division": "middleweight",
+          "rank": 12
+        },
+        {
+          "bout_id": "0f3e6876516edeaf",
+          "board_date": "2014-01-07",
+          "division": "middleweight",
+          "rank": 10
+        },
+        {
+          "bout_id": "d9834a03626a3c06",
+          "board_date": "2013-09-06",
+          "division": "middleweight",
+          "rank": 7
+        }
+      ],
+      "total_anchors": 4
+    }
+  ],
+  "wide_source": {
+    "url": "https://raw.githubusercontent.com/nlbair/ufc-data/a9c65430b3c5cb6e6351940f36e03b2adeb908d0/data/ufc_all_fights_wide.csv",
+    "commit": "a9c65430b3c5cb6e6351940f36e03b2adeb908d0",
+    "sha256": "d63add2ae5c5bafafab56c5cddde9620ec7501cca48ca912d35565f73e31dd61",
+    "bytes": 11337448,
+    "observed_at": "2026-10-22T15:57:32.386326+00:00"
+  },
+  "ranking_csv_sha256": "a31032fc11db4ec2ef3b43f940937118f07dbd0b3bd622d27bf22f672fad2437"
+}

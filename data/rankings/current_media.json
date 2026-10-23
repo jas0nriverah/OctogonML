@@ -1,0 +1,2081 @@
+{
+  "source_url": "https://www.ufc.com/rankings",
+  "observed_at": "2026-10-22T20:17:16.420435+00:00",
+  "published_board_date": null,
+  "date_basis": "Page explicitly labels weekday/month/day but omits year. Candidate year inferred only when unique weekday match within 35days before source observation. Effective live availability remains actual observed_at; NEVER use inferred date to backfill training.",
+  "sha256": "2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0",
+  "entries": [
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Islam Makhachev",
+      "profile_url": "https://www.ufc.com/athlete/islam-makhachev",
+      "fighter_id": "275aca31f61ba28c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Alexander Volkanovski",
+      "profile_url": "https://www.ufc.com/athlete/alexander-volkanovski",
+      "fighter_id": "e1248941344b3288",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Justin Gaethje",
+      "profile_url": "https://www.ufc.com/athlete/justin-gaethje",
+      "fighter_id": "9e8f6c728eb01124",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Petr Yan",
+      "profile_url": "https://www.ufc.com/athlete/petr-yan",
+      "fighter_id": "d661ce4da776fc20",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Ilia Topuria",
+      "profile_url": "https://www.ufc.com/athlete/ilia-topuria",
+      "fighter_id": "54f64b5e283b0ce7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Joshua Van",
+      "profile_url": "https://www.ufc.com/athlete/joshua-van",
+      "fighter_id": "17e97649403ba428",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Tom Aspinall",
+      "profile_url": "https://www.ufc.com/athlete/tom-aspinall",
+      "fighter_id": "399afbabc02376b5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Sean Strickland",
+      "profile_url": "https://www.ufc.com/athlete/sean-strickland",
+      "fighter_id": "0d8011111be000b2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Merab Dvalishvili",
+      "profile_url": "https://www.ufc.com/athlete/merab-dvalishvili",
+      "fighter_id": "c03520b5c88ed6b4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Alex Pereira",
+      "profile_url": "https://www.ufc.com/athlete/alex-pereira",
+      "fighter_id": "e5549c82bfb5582d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Ciryl Gane",
+      "profile_url": "https://www.ufc.com/athlete/ciryl-gane",
+      "fighter_id": "787bb1f087ccff8a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Khamzat Chimaev",
+      "profile_url": "https://www.ufc.com/athlete/khamzat-chimaev",
+      "fighter_id": "767755fd74662dbf",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Arman Tsarukyan",
+      "profile_url": "https://www.ufc.com/athlete/arman-tsarukyan",
+      "fighter_id": "eae48ff31db420c2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Alexandre Pantoja",
+      "profile_url": "https://www.ufc.com/athlete/alexandre-pantoja",
+      "fighter_id": "a0f0004aadf10b71",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Men's Pound-for-Pound",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Carlos Ulberg",
+      "profile_url": "https://www.ufc.com/athlete/carlos-ulberg",
+      "fighter_id": "9014c02eff8b3d62",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Joshua Van",
+      "profile_url": "https://www.ufc.com/athlete/joshua-van",
+      "fighter_id": "17e97649403ba428",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alexandre Pantoja",
+      "profile_url": "https://www.ufc.com/athlete/alexandre-pantoja",
+      "fighter_id": "a0f0004aadf10b71",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Manel Kape",
+      "profile_url": "https://www.ufc.com/athlete/manel-kape",
+      "fighter_id": "5d1b7e3dd9e11074",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Brandon Royval",
+      "profile_url": "https://www.ufc.com/athlete/brandon-royval",
+      "fighter_id": "6e15f63b6c2e2c15",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tatsuro Taira",
+      "profile_url": "https://www.ufc.com/athlete/tatsuro-taira",
+      "fighter_id": "4461d7e47375a895",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Kyoji Horiguchi",
+      "profile_url": "https://www.ufc.com/athlete/kyoji-horiguchi",
+      "fighter_id": "98aa60cf58071fd6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Lone\u2019er Kavanagh",
+      "profile_url": "https://www.ufc.com/athlete/loneer-kavanagh",
+      "fighter_id": "bb2c3c3a466224af",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Asu Almabayev",
+      "profile_url": "https://www.ufc.com/athlete/asu-almabayev",
+      "fighter_id": "8d3273573b85be09",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Brandon Moreno",
+      "profile_url": "https://www.ufc.com/athlete/brandon-moreno",
+      "fighter_id": "792be9a24df82ed6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Amir Albazi",
+      "profile_url": "https://www.ufc.com/athlete/amir-albazi",
+      "fighter_id": "6d35bf94f7d30241",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ramazan Temirov",
+      "profile_url": "https://www.ufc.com/athlete/ramazan-temirov",
+      "fighter_id": "7d0a1968b38ca439",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tim Elliott",
+      "profile_url": "https://www.ufc.com/athlete/tim-elliott",
+      "fighter_id": "c96d9178c9ed9e62",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Steve Erceg",
+      "profile_url": "https://www.ufc.com/athlete/steve-erceg",
+      "fighter_id": "32ab52e5de93092d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Sumudaerji",
+      "profile_url": "https://www.ufc.com/athlete/su-mudaerji",
+      "fighter_id": "3cf18e01cb6cbde3",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tagir Ulanbekov",
+      "profile_url": "https://www.ufc.com/athlete/tagir-ulanbekov",
+      "fighter_id": "f00ac08ab056af5d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Flyweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alex Perez",
+      "profile_url": "https://www.ufc.com/athlete/alex-perez",
+      "fighter_id": "ab2b4ff41d6ebe0f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Petr Yan",
+      "profile_url": "https://www.ufc.com/athlete/petr-yan",
+      "fighter_id": "d661ce4da776fc20",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Merab Dvalishvili",
+      "profile_url": "https://www.ufc.com/athlete/merab-dvalishvili",
+      "fighter_id": "c03520b5c88ed6b4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Sean O'Malley",
+      "profile_url": "https://www.ufc.com/athlete/sean-omalley",
+      "fighter_id": "b50a426a33da0012",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Song Yadong",
+      "profile_url": "https://www.ufc.com/athlete/song-yadong",
+      "fighter_id": "efb96bf3e9ada36f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Umar Nurmagomedov",
+      "profile_url": "https://www.ufc.com/athlete/umar-nurmagomedov",
+      "fighter_id": "2b6fc1c02736833d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mario Bautista",
+      "profile_url": "https://www.ufc.com/athlete/mario-bautista",
+      "fighter_id": "bc711b6dd95c1af6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Cory Sandhagen",
+      "profile_url": "https://www.ufc.com/athlete/cory-sandhagen",
+      "fighter_id": "65f09bacd3957381",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Payton Talbott",
+      "profile_url": "https://www.ufc.com/athlete/payton-talbott",
+      "fighter_id": "6e743a33d56bdaa4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "David Martinez",
+      "profile_url": "https://www.ufc.com/athlete/david-martinez",
+      "fighter_id": "9a97acbfd5a08bfa",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Aiemann Zahabi",
+      "profile_url": "https://www.ufc.com/athlete/aiemann-zahabi",
+      "fighter_id": "24656ef4d605c96f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Raul Rosas Jr.",
+      "profile_url": "https://www.ufc.com/athlete/raul-rosas-jr",
+      "fighter_id": "fe2babf95de24fb1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Marlon Vera",
+      "profile_url": "https://www.ufc.com/athlete/marlon-vera",
+      "fighter_id": "7c7332319c14094c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Deiveson Figueiredo",
+      "profile_url": "https://www.ufc.com/athlete/deiveson-figueiredo",
+      "fighter_id": "aa72b0f831d0bfe5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Marcus McGhee",
+      "profile_url": "https://www.ufc.com/athlete/marcus-mcghee",
+      "fighter_id": "c0ac37a4a1133da9",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Raoni Barcelos",
+      "profile_url": "https://www.ufc.com/athlete/raoni-barcelos",
+      "fighter_id": "b9f28e7045fdfce7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Bantamweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Bryce Mitchell",
+      "profile_url": "https://www.ufc.com/athlete/bryce-mitchell",
+      "fighter_id": "d9c6f19f958643e9",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Alexander Volkanovski",
+      "profile_url": "https://www.ufc.com/athlete/alexander-volkanovski",
+      "fighter_id": "e1248941344b3288",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Movsar Evloev",
+      "profile_url": "https://www.ufc.com/athlete/movsar-evloev",
+      "fighter_id": "76e2870ffafbe38f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Diego Lopes",
+      "profile_url": "https://www.ufc.com/athlete/diego-lopes",
+      "fighter_id": "f166e93d04a8c274",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Lerone Murphy",
+      "profile_url": "https://www.ufc.com/athlete/lerone-murphy",
+      "fighter_id": "396fe87b84ac2e1c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Aljamain Sterling",
+      "profile_url": "https://www.ufc.com/athlete/aljamain-sterling",
+      "fighter_id": "cb696ebfb6598724",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jean Silva",
+      "profile_url": "https://www.ufc.com/athlete/jean-silva",
+      "fighter_id": "52ef95b5860fb28c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Yair Rodriguez",
+      "profile_url": "https://www.ufc.com/athlete/yair-rodriguez",
+      "fighter_id": "cbf5e6f231b55443",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Arnold Allen",
+      "profile_url": "https://www.ufc.com/athlete/arnold-allen",
+      "fighter_id": "040a74bb0a465c54",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Youssef Zalal",
+      "profile_url": "https://www.ufc.com/athlete/youssef-zalal",
+      "fighter_id": "52c2ae6d2f2d2613",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Kevin Vallejos",
+      "profile_url": "https://www.ufc.com/athlete/kevin-vallejos",
+      "fighter_id": "239d8e5359022f3b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Steve Garcia",
+      "profile_url": "https://www.ufc.com/athlete/steve-garcia",
+      "fighter_id": "97cf1a2c7c5e7889",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Aaron Pico",
+      "profile_url": "https://www.ufc.com/athlete/aaron-pico",
+      "fighter_id": "5537efc6e496dd84",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Melquizael Costa",
+      "profile_url": "https://www.ufc.com/athlete/melquizael-costa",
+      "fighter_id": "20bccc9bb4ceb23e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Brian Ortega",
+      "profile_url": "https://www.ufc.com/athlete/brian-ortega",
+      "fighter_id": "def8166ff24bd237",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Patricio Pitbull",
+      "profile_url": "https://www.ufc.com/athlete/patricio-freire",
+      "fighter_id": "98a58c26c5b1ed17",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Featherweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "David Onama",
+      "profile_url": "https://www.ufc.com/athlete/david-onama",
+      "fighter_id": "ffe9703408fb5964",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Justin Gaethje",
+      "profile_url": "https://www.ufc.com/athlete/justin-gaethje",
+      "fighter_id": "9e8f6c728eb01124",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ilia Topuria",
+      "profile_url": "https://www.ufc.com/athlete/ilia-topuria",
+      "fighter_id": "54f64b5e283b0ce7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Arman Tsarukyan",
+      "profile_url": "https://www.ufc.com/athlete/arman-tsarukyan",
+      "fighter_id": "eae48ff31db420c2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Charles Oliveira",
+      "profile_url": "https://www.ufc.com/athlete/charles-oliveira",
+      "fighter_id": "07225ba28ae309b6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Max Holloway",
+      "profile_url": "https://www.ufc.com/athlete/max-holloway",
+      "fighter_id": "150ff4cc642270b9",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Paddy Pimblett",
+      "profile_url": "https://www.ufc.com/athlete/paddy-pimblett",
+      "fighter_id": "7826923b47f8d72a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Beno\u00eet Saint Denis",
+      "profile_url": "https://www.ufc.com/athlete/benoit-saint-denis",
+      "fighter_id": "c2299ec916bc7c56",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Quillan Salkilld",
+      "profile_url": "https://www.ufc.com/athlete/quillan-salkilld",
+      "fighter_id": "17734443a833cdf7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mauricio Ruffy",
+      "profile_url": "https://www.ufc.com/athlete/mauricio-ruffy",
+      "fighter_id": "9c393e836a852f30",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Salahdine Parnasse",
+      "profile_url": "https://www.ufc.com/athlete/salahdine-parnasse",
+      "fighter_id": "b3cb9dfccff3be76",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mateusz Gamrot",
+      "profile_url": "https://www.ufc.com/athlete/mateusz-gamrot",
+      "fighter_id": "72db2a14ffa73ece",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Rafael Fiziev",
+      "profile_url": "https://www.ufc.com/athlete/rafael-fiziev",
+      "fighter_id": "c814b4c899793af6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Renato Moicano",
+      "profile_url": "https://www.ufc.com/athlete/renato-moicano",
+      "fighter_id": "b6452706b373eea1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Dan Hooker",
+      "profile_url": "https://www.ufc.com/athlete/dan-hooker",
+      "fighter_id": "193b9d1858bc4df3",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tom Nolan",
+      "profile_url": "https://www.ufc.com/athlete/tom-nolan",
+      "fighter_id": "6c3b2525436cf5d4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Lightweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Beneil Dariush",
+      "profile_url": "https://www.ufc.com/athlete/beneil-dariush",
+      "fighter_id": "08af939f41b5a57b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Islam Makhachev",
+      "profile_url": "https://www.ufc.com/athlete/islam-makhachev",
+      "fighter_id": "275aca31f61ba28c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ian Machado Garry",
+      "profile_url": "https://www.ufc.com/athlete/ian-machado-garry",
+      "fighter_id": "442c9011034ae1fd",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Carlos Prates",
+      "profile_url": "https://www.ufc.com/athlete/carlos-prates",
+      "fighter_id": "7ee0fd831c0fe7c3",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Michael Morales",
+      "profile_url": "https://www.ufc.com/athlete/michael-morales",
+      "fighter_id": "c32aeb1a59e6272d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jack Della Maddalena",
+      "profile_url": "https://www.ufc.com/athlete/jack-della-maddalena",
+      "fighter_id": "6b453bc35a823c3f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Gabriel Bonfim",
+      "profile_url": "https://www.ufc.com/athlete/gabriel-bonfim",
+      "fighter_id": "01641ba5df0c69b0",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Sean Brady",
+      "profile_url": "https://www.ufc.com/athlete/sean-brady",
+      "fighter_id": "45f7cb591c3ab00b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Belal Muhammad",
+      "profile_url": "https://www.ufc.com/athlete/belal-muhammad",
+      "fighter_id": "b1b0729d27936f2f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Leon Edwards",
+      "profile_url": "https://www.ufc.com/athlete/leon-edwards",
+      "fighter_id": "f1fac969a1d70b08",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Kamaru Usman",
+      "profile_url": "https://www.ufc.com/athlete/kamaru-usman",
+      "fighter_id": "f1b2aa7853d1ed6e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mike Malott",
+      "profile_url": "https://www.ufc.com/athlete/mike-malott",
+      "fighter_id": "dd6103dd7127db1d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Yaroslav Amosov",
+      "profile_url": "https://www.ufc.com/athlete/yaroslav-amosov",
+      "fighter_id": "f139d6836efd43dd",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Uro\u0161 Medi\u0107",
+      "profile_url": "https://www.ufc.com/athlete/uros-medic",
+      "fighter_id": "681399317dbf4701",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Joaquin Buckley",
+      "profile_url": "https://www.ufc.com/athlete/joaquin-buckley",
+      "fighter_id": "b9437600497350f3",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Daniel Rodriguez",
+      "profile_url": "https://www.ufc.com/athlete/daniel-rodriguez",
+      "fighter_id": "8a1f3b5c526cd6e6",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Welterweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Neil Magny",
+      "profile_url": "https://www.ufc.com/athlete/neil-magny",
+      "fighter_id": "84b3e7d38f2d2ec5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Sean Strickland",
+      "profile_url": "https://www.ufc.com/athlete/sean-strickland",
+      "fighter_id": "0d8011111be000b2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Khamzat Chimaev",
+      "profile_url": "https://www.ufc.com/athlete/khamzat-chimaev",
+      "fighter_id": "767755fd74662dbf",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Dricus Du Plessis",
+      "profile_url": "https://www.ufc.com/athlete/dricus-du-plessis",
+      "fighter_id": "0d7b51c9d2649a6e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Nassourdine Imavov",
+      "profile_url": "https://www.ufc.com/athlete/nassourdine-imavov",
+      "fighter_id": "881bf86d4cba8578",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Brendan Allen",
+      "profile_url": "https://www.ufc.com/athlete/brendan-allen",
+      "fighter_id": "2f181c0467965b98",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Caio Borralho",
+      "profile_url": "https://www.ufc.com/athlete/caio-borralho",
+      "fighter_id": "4126a78111c0855a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Joe Pyfer",
+      "profile_url": "https://www.ufc.com/athlete/joe-pyfer",
+      "fighter_id": "c1085e1701b13eca",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Gregory Rodrigues",
+      "profile_url": "https://www.ufc.com/athlete/gregory-rodrigues",
+      "fighter_id": "d1c65d2cf2925ddd",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Anthony Hernandez",
+      "profile_url": "https://www.ufc.com/athlete/anthony-hernandez",
+      "fighter_id": "093e1f5bb73850be",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Israel Adesanya",
+      "profile_url": "https://www.ufc.com/athlete/israel-adesanya",
+      "fighter_id": "1338e2c7480bdf9e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Christian Leroy Duncan",
+      "profile_url": "https://www.ufc.com/athlete/christian-leroy-duncan",
+      "fighter_id": "a93f94c923c3a9cb",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jared Cannonier",
+      "profile_url": "https://www.ufc.com/athlete/jared-cannonier",
+      "fighter_id": "13a0275fa13c4d26",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Abus Magomedov",
+      "profile_url": "https://www.ufc.com/athlete/abus-magomedov",
+      "fighter_id": "36b8f265bcd1b7a4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ikram Aliskerov",
+      "profile_url": "https://www.ufc.com/athlete/ikram-aliskerov",
+      "fighter_id": "b07aed698fba8624",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Bo Nickal",
+      "profile_url": "https://www.ufc.com/athlete/bo-nickal",
+      "fighter_id": "35673bf5204524ee",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Middleweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Shara Magomedov",
+      "profile_url": "https://www.ufc.com/athlete/shara-magomedov",
+      "fighter_id": "06734ca9d88dec3a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Carlos Ulberg",
+      "profile_url": "https://www.ufc.com/athlete/carlos-ulberg",
+      "fighter_id": "9014c02eff8b3d62",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Magomed Ankalaev",
+      "profile_url": "https://www.ufc.com/athlete/magomed-ankalaev",
+      "fighter_id": "d802174b0c0c1f4e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ji\u0159\u00ed Proch\u00e1zka",
+      "profile_url": "https://www.ufc.com/athlete/jiri-prochazka",
+      "fighter_id": "009341ed974bad72",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alex Pereira",
+      "profile_url": "https://www.ufc.com/athlete/alex-pereira",
+      "fighter_id": "e5549c82bfb5582d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Khalil Rountree Jr.",
+      "profile_url": "https://www.ufc.com/athlete/khalil-rountree-jr",
+      "fighter_id": "749f572d1d3161fb",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Navajo Stirling",
+      "profile_url": "https://www.ufc.com/athlete/navajo-stirling",
+      "fighter_id": "b4b496ec2197ee3e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Paulo Costa",
+      "profile_url": "https://www.ufc.com/athlete/paulo-costa",
+      "fighter_id": "2e5c2aa8e4ab9d82",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Azamat Murzakanov",
+      "profile_url": "https://www.ufc.com/athlete/azamat-murzakanov",
+      "fighter_id": "e90a2f22417af68e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Dominick Reyes",
+      "profile_url": "https://www.ufc.com/athlete/dominick-reyes",
+      "fighter_id": "2e19380f34871c6a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jan B\u0142achowicz",
+      "profile_url": "https://www.ufc.com/athlete/jan-blachowicz",
+      "fighter_id": "99df7d0a2a08a8a8",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Bogdan Guskov",
+      "profile_url": "https://www.ufc.com/athlete/bogdan-guskov",
+      "fighter_id": "ef5dcb10d2bd4b0f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Robert Whittaker",
+      "profile_url": "https://www.ufc.com/athlete/robert-whittaker",
+      "fighter_id": "e1147d3d2dabe1ce",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alonzo Menifield",
+      "profile_url": "https://www.ufc.com/athlete/alonzo-menifield",
+      "fighter_id": "a495f599e787614f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Muhammad Saidov",
+      "profile_url": "https://www.ufc.com/athlete/muhammad-said",
+      "fighter_id": "b01a5e0dcd9f231d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Reinier de Ridder",
+      "profile_url": "https://www.ufc.com/athlete/reinier-de-ridder",
+      "fighter_id": "d549cefc7c54ab78",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Light Heavyweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Nikita Krylov",
+      "profile_url": "https://www.ufc.com/athlete/nikita-krylov",
+      "fighter_id": "1091d4d957141094",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Ciryl Gane",
+      "profile_url": "https://www.ufc.com/athlete/ciryl-gane",
+      "fighter_id": "787bb1f087ccff8a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tom Aspinall",
+      "profile_url": "https://www.ufc.com/athlete/tom-aspinall",
+      "fighter_id": "399afbabc02376b5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alexander Volkov",
+      "profile_url": "https://www.ufc.com/athlete/alexander-volkov",
+      "fighter_id": "279566840aa55bf2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Sergei Pavlovich",
+      "profile_url": "https://www.ufc.com/athlete/sergei-pavlovich",
+      "fighter_id": "f14cf73e51b29254",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Josh Hokit",
+      "profile_url": "https://www.ufc.com/athlete/josh-hokit",
+      "fighter_id": "955da1675ad58a50",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Curtis Blaydes",
+      "profile_url": "https://www.ufc.com/athlete/curtis-blaydes",
+      "fighter_id": "fa6796c55d6c5440",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Waldo Cortes Acosta",
+      "profile_url": "https://www.ufc.com/athlete/waldo-cortes-acosta",
+      "fighter_id": "fc08099550072fe4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Rizvan Kuniev",
+      "profile_url": "https://www.ufc.com/athlete/rizvan-kuniev",
+      "fighter_id": "739fd4fbb5d862f4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Vitor Petrino",
+      "profile_url": "https://www.ufc.com/athlete/vitor-petrino",
+      "fighter_id": "71171fc96445bf65",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Serghei Spivac",
+      "profile_url": "https://www.ufc.com/athlete/serghei-spivac",
+      "fighter_id": "e2f6b2769aaedd6c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ante Delija",
+      "profile_url": "https://www.ufc.com/athlete/ante-delija",
+      "fighter_id": "7d8435c56043b0ae",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Valter Walker",
+      "profile_url": "https://www.ufc.com/athlete/valter-walker",
+      "fighter_id": "f5779a2303ed76ec",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tyrell Fortune",
+      "profile_url": "https://www.ufc.com/athlete/tyrell-fortune",
+      "fighter_id": "bc7f4b2d4c2724a2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Derrick Lewis",
+      "profile_url": "https://www.ufc.com/athlete/derrick-lewis",
+      "fighter_id": "d3df1add9d9a7efb",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Aleksandar Raki\u0107",
+      "profile_url": "https://www.ufc.com/athlete/aleksandar-rakic",
+      "fighter_id": "333b9e5c723ac873",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Heavyweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mario Pinto",
+      "profile_url": "https://www.ufc.com/athlete/mario-pinto",
+      "fighter_id": "39d309957c5c210d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Valentina Shevchenko",
+      "profile_url": "https://www.ufc.com/athlete/valentina-shevchenko",
+      "fighter_id": "132deb59abae64b1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Kayla Harrison",
+      "profile_url": "https://www.ufc.com/athlete/kayla-harrison",
+      "fighter_id": "1af1170ed937cba7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Zhang Weili",
+      "profile_url": "https://www.ufc.com/athlete/zhang-weili",
+      "fighter_id": "1ebe20ebbfa15e29",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Natalia Silva",
+      "profile_url": "https://www.ufc.com/athlete/natalia-silva",
+      "fighter_id": "262d32ebda89efc4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Mackenzie Dern",
+      "profile_url": "https://www.ufc.com/athlete/mackenzie-dern",
+      "fighter_id": "7447e9f28508106a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Alexa Grasso",
+      "profile_url": "https://www.ufc.com/athlete/alexa-grasso",
+      "fighter_id": "e8b731feff72294b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Manon Fiorot",
+      "profile_url": "https://www.ufc.com/athlete/manon-fiorot",
+      "fighter_id": "34ff304266360297",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Tatiana Suarez",
+      "profile_url": "https://www.ufc.com/athlete/tatiana-suarez",
+      "fighter_id": "b08012bbe542592a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Erin Blanchfield",
+      "profile_url": "https://www.ufc.com/athlete/erin-blanchfield",
+      "fighter_id": "669970f7feba8ecd",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Julianna Pe\u00f1a",
+      "profile_url": "https://www.ufc.com/athlete/julianna-pena",
+      "fighter_id": "3253b16d38ae087d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Virna Jandiroba",
+      "profile_url": "https://www.ufc.com/athlete/virna-jandiroba",
+      "fighter_id": "7dda2cf308f24a02",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Jasmine Jasudavicius",
+      "profile_url": "https://www.ufc.com/athlete/jasmine-jasudavicius",
+      "fighter_id": "a9e260472d321361",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Rose Namajunas",
+      "profile_url": "https://www.ufc.com/athlete/rose-namajunas",
+      "fighter_id": "47b63240018d5d86",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Raquel Pennington",
+      "profile_url": "https://www.ufc.com/athlete/raquel-pennington",
+      "fighter_id": "fc169c387b4b465d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Pound-for-Pound",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": true,
+      "name": "Denise Gomes",
+      "profile_url": "https://www.ufc.com/athlete/denise-gomes",
+      "fighter_id": "cffb87059e645bd1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Mackenzie Dern",
+      "profile_url": "https://www.ufc.com/athlete/mackenzie-dern",
+      "fighter_id": "7447e9f28508106a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Zhang Weili",
+      "profile_url": "https://www.ufc.com/athlete/zhang-weili",
+      "fighter_id": "1ebe20ebbfa15e29",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tatiana Suarez",
+      "profile_url": "https://www.ufc.com/athlete/tatiana-suarez",
+      "fighter_id": "b08012bbe542592a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Virna Jandiroba",
+      "profile_url": "https://www.ufc.com/athlete/virna-jandiroba",
+      "fighter_id": "7dda2cf308f24a02",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Denise Gomes",
+      "profile_url": "https://www.ufc.com/athlete/denise-gomes",
+      "fighter_id": "cffb87059e645bd1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Gillian Robertson",
+      "profile_url": "https://www.ufc.com/athlete/gillian-robertson",
+      "fighter_id": "38c7f72747f4f712",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Yan Xiaonan",
+      "profile_url": "https://www.ufc.com/athlete/yan-xiaonan",
+      "fighter_id": "c41d426cc7326d1b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Fatima Kline",
+      "profile_url": "https://www.ufc.com/athlete/fatima-kline",
+      "fighter_id": "745fa7b605f8e2da",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Loopy Godinez",
+      "profile_url": "https://www.ufc.com/athlete/loopy-godinez",
+      "fighter_id": "8e5d953bdb9ae5e7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alexia Thainara",
+      "profile_url": "https://www.ufc.com/athlete/alexia-thainara",
+      "fighter_id": "545092d13c67aa49",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "J\u00e9ssica Andrade",
+      "profile_url": "https://www.ufc.com/athlete/jessica-andrade",
+      "fighter_id": "6a1901c62ab3870f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tabatha Ricci",
+      "profile_url": "https://www.ufc.com/athlete/tabatha-ricci",
+      "fighter_id": "d25240135aee03e5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Amanda Lemos",
+      "profile_url": "https://www.ufc.com/athlete/amanda-lemos",
+      "fighter_id": "3df5493bb279226f",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Amanda Ribas",
+      "profile_url": "https://www.ufc.com/athlete/amanda-ribas",
+      "fighter_id": "beecb672a279223e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Angela Hill",
+      "profile_url": "https://www.ufc.com/athlete/angela-hill",
+      "fighter_id": "f0feeb2192937424",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Strawweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Mizuki",
+      "profile_url": "https://www.ufc.com/athlete/mizuki-inoue",
+      "fighter_id": "43a59ce3bb40449e",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Natalia Silva",
+      "profile_url": "https://www.ufc.com/athlete/natalia-silva",
+      "fighter_id": "262d32ebda89efc4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Valentina Shevchenko",
+      "profile_url": "https://www.ufc.com/athlete/valentina-shevchenko",
+      "fighter_id": "132deb59abae64b1",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alexa Grasso",
+      "profile_url": "https://www.ufc.com/athlete/alexa-grasso",
+      "fighter_id": "e8b731feff72294b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Manon Fiorot",
+      "profile_url": "https://www.ufc.com/athlete/manon-fiorot",
+      "fighter_id": "34ff304266360297",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jasmine Jasudavicius",
+      "profile_url": "https://www.ufc.com/athlete/jasmine-jasudavicius",
+      "fighter_id": "a9e260472d321361",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Erin Blanchfield",
+      "profile_url": "https://www.ufc.com/athlete/erin-blanchfield",
+      "fighter_id": "669970f7feba8ecd",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Rose Namajunas",
+      "profile_url": "https://www.ufc.com/athlete/rose-namajunas",
+      "fighter_id": "47b63240018d5d86",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Maycee Barber",
+      "profile_url": "https://www.ufc.com/athlete/maycee-barber",
+      "fighter_id": "6a740daf1b279661",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Wang Cong",
+      "profile_url": "https://www.ufc.com/athlete/wang-cong",
+      "fighter_id": "2997e7fe3c9d3d4a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Tracy Cortez",
+      "profile_url": "https://www.ufc.com/athlete/tracy-cortez",
+      "fighter_id": "68d4a891e5cf2029",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Miranda Maverick",
+      "profile_url": "https://www.ufc.com/athlete/miranda-maverick",
+      "fighter_id": "f29a6350c69f4a33",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Karine Silva",
+      "profile_url": "https://www.ufc.com/athlete/karine-silva",
+      "fighter_id": "9d62c2d8ee151f08",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Casey O'Neill",
+      "profile_url": "https://www.ufc.com/athlete/casey-oneill",
+      "fighter_id": "04835018f90b118c",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Eduarda Moura",
+      "profile_url": "https://www.ufc.com/athlete/eduarda-moura",
+      "fighter_id": "de594b35c45c2e9a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Gabriella Fernandes",
+      "profile_url": "https://www.ufc.com/athlete/gabriella-fernandes",
+      "fighter_id": "a6eb54ae17a551be",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Flyweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Regina Tarin",
+      "profile_url": "https://www.ufc.com/athlete/regina-malpica-rivera",
+      "fighter_id": "9f5609dba6584ab2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 0,
+      "is_champion": true,
+      "is_p4p": false,
+      "name": "Kayla Harrison",
+      "profile_url": "https://www.ufc.com/athlete/kayla-harrison",
+      "fighter_id": "1af1170ed937cba7",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 1,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Julianna Pe\u00f1a",
+      "profile_url": "https://www.ufc.com/athlete/julianna-pena",
+      "fighter_id": "3253b16d38ae087d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 2,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Joselyne Edwards",
+      "profile_url": "https://www.ufc.com/athlete/joselyne-edwards",
+      "fighter_id": "f9ab66e67240db7b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 3,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Ailin Perez",
+      "profile_url": "https://www.ufc.com/athlete/ailin-perez",
+      "fighter_id": "06e4245d16fc5315",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 4,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Norma Dumont",
+      "profile_url": "https://www.ufc.com/athlete/norma-dumont",
+      "fighter_id": "d3f5d33d61cd00c9",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 5,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Raquel Pennington",
+      "profile_url": "https://www.ufc.com/athlete/raquel-pennington",
+      "fighter_id": "fc169c387b4b465d",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 6,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Yana Santos",
+      "profile_url": "https://www.ufc.com/athlete/yana-santos",
+      "fighter_id": "3143bf892608139a",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 7,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Luana Santos",
+      "profile_url": "https://www.ufc.com/athlete/luana-santos",
+      "fighter_id": "5078e1dacf9d25f4",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 8,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Jacqueline Cavalcanti",
+      "profile_url": "https://www.ufc.com/athlete/jacqueline-cavalcanti",
+      "fighter_id": "e3964ece586e0635",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 9,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Macy Chiasson",
+      "profile_url": "https://www.ufc.com/athlete/macy-chiasson",
+      "fighter_id": "9cdd2da1a9104a0b",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 10,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Karol Rosa",
+      "profile_url": "https://www.ufc.com/athlete/karol-rosa",
+      "fighter_id": "351c4ec637380ad5",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 11,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Bia Mesquita",
+      "profile_url": "https://www.ufc.com/athlete/bia-mesquita",
+      "fighter_id": "eff9074bc066f0f2",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 12,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Michelle Montague",
+      "profile_url": "https://www.ufc.com/athlete/michelle-montague",
+      "fighter_id": "ca80d72da81d7224",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 13,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Nora Cornolle",
+      "profile_url": "https://www.ufc.com/athlete/nora-cornolle",
+      "fighter_id": "f2b3f4ef3f780168",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 14,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Chelsea Chandler",
+      "profile_url": "https://www.ufc.com/athlete/chelsea-chandler",
+      "fighter_id": "af9efbfd63d39734",
+      "identity_status": "unique_exact_verified_name"
+    },
+    {
+      "division": "Women's Bantamweight",
+      "rank": 15,
+      "is_champion": false,
+      "is_p4p": false,
+      "name": "Alice Pereira",
+      "profile_url": "https://www.ufc.com/athlete/alice-pereira",
+      "fighter_id": "81d2c551886bd5a1",
+      "identity_status": "unique_exact_verified_name"
+    }
+  ],
+  "coverage": {
+    "divisions": 13,
+    "entries": 206,
+    "matched": 206
+  },
+  "policy": "Official media poll display/live observation, separate from Meta algorithm and historical dated training archive. Absent athlete means unranked only if the relevant complete board is fully identity resolved.",
+  "credit": "UFC official rankings; UFC/Zuffa. Independent project; no affiliation.",
+  "source_cache": "rankings/raw/2990cc2e5fe968dcfd9076f7a578c01198850e32821b4c6345740bb3b7fd08e0.html.gz",
+  "ranking_system": "official_media_poll",
+  "parse_scope": "view-display-id-block_1 only; Meta algorithm table explicitly excluded",
+  "published_label": "Last updated: Tuesday, Oct. 20",
+  "published_date_inferred": "2026-10-20"
+}

@@ -1,0 +1,1483 @@
+{
+  "model_version": "winner-v4-ce245eac7d9bf525",
+  "artifact_sha256": "48fde6bfe32b7b3e09ddbec322f6e10baf3cd8f355700e00dbbffb60218d0ae7",
+  "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+  "ranking_context_sha256": "3e43e99f72bb8791435fb130091308b168401c7f6b1c1bf9c07d4d25f6587ca5",
+  "ranking_source_sha256": "a31032fc11db4ec2ef3b43f940937118f07dbd0b3bd622d27bf22f672fad2437",
+  "baseline_artifact_sha256": "78779bc7dfb0019265db4c9cb094d2a139c5985aa14f783aa064c28272d49163",
+  "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+  "data_through": "2026-10-17",
+  "training_cutoff_exclusive": "2026-07-01",
+  "calibration_cutoff_exclusive": "2026-10-18",
+  "selected_candidate": "curated_blend50",
+  "promotion_passed": false,
+  "promotion": {
+    "passed": false,
+    "checks": {
+      "log_loss_gain": false,
+      "brier_nonregression": false,
+      "calibration_stable": true,
+      "annual_consistency": true,
+      "paired_event_uncertainty": false,
+      "sparse_veteran_nonregression": true
+    },
+    "pooled": {
+      "baseline_v2": {
+        "n_bouts": 1497,
+        "log_loss": 0.65371869117753,
+        "brier_score": 0.2309332998799437,
+        "accuracy": 0.6085504342017368,
+        "calibration": [
+          {
+            "predicted": 0.2712373125386874,
+            "observed": 0.3870967741935484,
+            "n": 31
+          },
+          {
+            "predicted": 0.3588869756085345,
+            "observed": 0.39622641509433965,
+            "n": 212
+          },
+          {
+            "predicted": 0.45243708724287857,
+            "observed": 0.5093833780160858,
+            "n": 373
+          },
+          {
+            "predicted": 0.5503199622998444,
+            "observed": 0.5956284153005464,
+            "n": 366
+          },
+          {
+            "predicted": 0.6446424638340824,
+            "observed": 0.6675977653631285,
+            "n": 358
+          },
+          {
+            "predicted": 0.7353826995570649,
+            "observed": 0.7928571428571428,
+            "n": 140
+          },
+          {
+            "predicted": 0.8240334043081404,
+            "observed": 0.7647058823529411,
+            "n": 17
+          }
+        ],
+        "ece": 0.04449195231903971
+      },
+      "curated_blend50": {
+        "n_bouts": 1497,
+        "log_loss": 0.6534299618618251,
+        "brier_score": 0.23094739733259634,
+        "accuracy": 0.614562458249833,
+        "calibration": [
+          {
+            "predicted": 0.19039068185956823,
+            "observed": 0.5,
+            "n": 2
+          },
+          {
+            "predicted": 0.2677351308806713,
+            "observed": 0.34615384615384615,
+            "n": 52
+          },
+          {
+            "predicted": 0.35786963005175493,
+            "observed": 0.39111111111111113,
+            "n": 225
+          },
+          {
+            "predicted": 0.4520617920123925,
+            "observed": 0.5175438596491229,
+            "n": 342
+          },
+          {
+            "predicted": 0.5461076942802308,
+            "observed": 0.6052631578947368,
+            "n": 342
+          },
+          {
+            "predicted": 0.6480992797239723,
+            "observed": 0.6685878962536023,
+            "n": 347
+          },
+          {
+            "predicted": 0.7414312304260209,
+            "observed": 0.7484662576687117,
+            "n": 163
+          },
+          {
+            "predicted": 0.8320486924990557,
+            "observed": 0.9166666666666666,
+            "n": 24
+          }
+        ],
+        "ece": 0.043479927530478836
+      },
+      "curated_hgb": {
+        "n_bouts": 1497,
+        "log_loss": 0.6572522325200671,
+        "brier_score": 0.2327144552333132,
+        "accuracy": 0.6172344689378757,
+        "calibration": [
+          {
+            "predicted": 0.16385183860610494,
+            "observed": 0.0,
+            "n": 3
+          },
+          {
+            "predicted": 0.2695949986008082,
+            "observed": 0.3392857142857143,
+            "n": 56
+          },
+          {
+            "predicted": 0.3563033501447608,
+            "observed": 0.44933920704845814,
+            "n": 227
+          },
+          {
+            "predicted": 0.45255667574364333,
+            "observed": 0.4821917808219178,
+            "n": 365
+          },
+          {
+            "predicted": 0.5482332069219097,
+            "observed": 0.6286549707602339,
+            "n": 342
+          },
+          {
+            "predicted": 0.6461298105665177,
+            "observed": 0.656891495601173,
+            "n": 341
+          },
+          {
+            "predicted": 0.7406007647049727,
+            "observed": 0.7947019867549668,
+            "n": 151
+          },
+          {
+            "predicted": 0.8366002461670198,
+            "observed": 0.9166666666666666,
+            "n": 12
+          }
+        ],
+        "ece": 0.051191882344657144
+      },
+      "curated_logistic": {
+        "n_bouts": 1497,
+        "log_loss": 0.6611756872215593,
+        "brier_score": 0.2340571550815025,
+        "accuracy": 0.6045424181696727,
+        "calibration": [
+          {
+            "predicted": 0.029670147167716408,
+            "observed": 1.0,
+            "n": 1
+          },
+          {
+            "predicted": 0.15518600245613912,
+            "observed": 0.1,
+            "n": 10
+          },
+          {
+            "predicted": 0.261977690396302,
+            "observed": 0.3492063492063492,
+            "n": 63
+          },
+          {
+            "predicted": 0.3566175333294493,
+            "observed": 0.43455497382198954,
+            "n": 191
+          },
+          {
+            "predicted": 0.4536899460095296,
+            "observed": 0.5167958656330749,
+            "n": 387
+          },
+          {
+            "predicted": 0.5495740468140017,
+            "observed": 0.6135265700483091,
+            "n": 414
+          },
+          {
+            "predicted": 0.6431573073921348,
+            "observed": 0.6769759450171822,
+            "n": 291
+          },
+          {
+            "predicted": 0.7383100652081416,
+            "observed": 0.7747747747747747,
+            "n": 111
+          },
+          {
+            "predicted": 0.8316194751892311,
+            "observed": 0.7857142857142857,
+            "n": 28
+          },
+          {
+            "predicted": 0.9435073975039697,
+            "observed": 1.0,
+            "n": 1
+          }
+        ],
+        "ece": 0.05880602955804722
+      },
+      "curated_monotonic_hgb": {
+        "n_bouts": 1497,
+        "log_loss": 0.6582961387325605,
+        "brier_score": 0.23333161891443127,
+        "accuracy": 0.6118904475617902,
+        "calibration": [
+          {
+            "predicted": 0.17528083734486413,
+            "observed": 0.4,
+            "n": 5
+          },
+          {
+            "predicted": 0.2685014627458283,
+            "observed": 0.323943661971831,
+            "n": 71
+          },
+          {
+            "predicted": 0.3540698094210404,
+            "observed": 0.4523809523809524,
+            "n": 210
+          },
+          {
+            "predicted": 0.4510905589601135,
+            "observed": 0.4958217270194986,
+            "n": 359
+          },
+          {
+            "predicted": 0.5485735514755379,
+            "observed": 0.6121212121212121,
+            "n": 330
+          },
+          {
+            "predicted": 0.6458080892394974,
+            "observed": 0.6615384615384615,
+            "n": 325
+          },
+          {
+            "predicted": 0.7416212916716565,
+            "observed": 0.7441860465116279,
+            "n": 172
+          },
+          {
+            "predicted": 0.8306661570323058,
+            "observed": 0.96,
+            "n": 25
+          }
+        ],
+        "ece": 0.04777648913168064
+      }
+    },
+    "annual_log_loss_differences": [
+      -0.003089513860656923,
+      -0.0008053166998633898,
+      0.00301799436173944
+    ],
+    "paired_event_bootstrap": {
+      "events": 128,
+      "resamples": 2000,
+      "direction": "Negative favors selected classifier",
+      "log_loss": {
+        "difference": -0.0002887293157048368,
+        "ci_95": [
+          -0.004009044681321214,
+          0.0034732530053947627
+        ]
+      },
+      "brier_score": {
+        "difference": 1.4097452652611534e-05,
+        "ci_95": [
+          -0.0017070536038147539,
+          0.0018152309808615185
+        ]
+      }
+    },
+    "subgroups": {
+      "sparse_veteran": {
+        "n_bouts": 187,
+        "selected": {
+          "n_bouts": 187,
+          "log_loss": 0.656271085939553,
+          "brier_score": 0.23210731320353828,
+          "accuracy": 0.5935828877005348,
+          "calibration": [
+            {
+              "predicted": 0.2666160026843354,
+              "observed": 0.1111111111111111,
+              "n": 9
+            },
+            {
+              "predicted": 0.3593877233591925,
+              "observed": 0.27906976744186046,
+              "n": 43
+            },
+            {
+              "predicted": 0.451217477304665,
+              "observed": 0.5813953488372093,
+              "n": 43
+            },
+            {
+              "predicted": 0.5441043547706758,
+              "observed": 0.5454545454545454,
+              "n": 44
+            },
+            {
+              "predicted": 0.6409630331070758,
+              "observed": 0.6176470588235294,
+              "n": 34
+            },
+            {
+              "predicted": 0.7374045693949036,
+              "observed": 0.6153846153846154,
+              "n": 13
+            },
+            {
+              "predicted": 0.829814539875254,
+              "observed": 1.0,
+              "n": 1
+            }
+          ],
+          "ece": 0.06983668974595207
+        },
+        "baseline": {
+          "n_bouts": 187,
+          "log_loss": 0.6600246354652073,
+          "brier_score": 0.23371284458732125,
+          "accuracy": 0.5989304812834224,
+          "calibration": [
+            {
+              "predicted": 0.2685171838853722,
+              "observed": 0.0,
+              "n": 8
+            },
+            {
+              "predicted": 0.35818299618353344,
+              "observed": 0.28125,
+              "n": 32
+            },
+            {
+              "predicted": 0.4447183123113178,
+              "observed": 0.5185185185185185,
+              "n": 54
+            },
+            {
+              "predicted": 0.5509979111200864,
+              "observed": 0.6226415094339622,
+              "n": 53
+            },
+            {
+              "predicted": 0.6423936022631369,
+              "observed": 0.5517241379310345,
+              "n": 29
+            },
+            {
+              "predicted": 0.7261249075527922,
+              "observed": 0.5,
+              "n": 10
+            },
+            {
+              "predicted": 0.8157876330720124,
+              "observed": 1.0,
+              "n": 1
+            }
+          ],
+          "ece": 0.09340743905276569
+        },
+        "status": "scored",
+        "passed": true,
+        "scope": "promotion nonregression gate"
+      },
+      "all_novice": {
+        "n_bouts": 351,
+        "selected": {
+          "n_bouts": 351,
+          "log_loss": 0.6598149265140606,
+          "brier_score": 0.23419560232256095,
+          "accuracy": 0.603988603988604,
+          "calibration": [
+            {
+              "predicted": 0.2711631165352347,
+              "observed": 0.3125,
+              "n": 16
+            },
+            {
+              "predicted": 0.3517383440870668,
+              "observed": 0.4782608695652174,
+              "n": 46
+            },
+            {
+              "predicted": 0.449421500427831,
+              "observed": 0.6527777777777778,
+              "n": 72
+            },
+            {
+              "predicted": 0.5423185224925828,
+              "observed": 0.7160493827160493,
+              "n": 81
+            },
+            {
+              "predicted": 0.644153611150143,
+              "observed": 0.6442307692307693,
+              "n": 104
+            },
+            {
+              "predicted": 0.7420236491743848,
+              "observed": 0.8148148148148148,
+              "n": 27
+            },
+            {
+              "predicted": 0.8357013430879249,
+              "observed": 1.0,
+              "n": 5
+            }
+          ],
+          "ece": 0.10823406596001493
+        },
+        "baseline": {
+          "n_bouts": 351,
+          "log_loss": 0.6549146341072929,
+          "brier_score": 0.23174801294500882,
+          "accuracy": 0.6239316239316239,
+          "calibration": [
+            {
+              "predicted": 0.2783457686113509,
+              "observed": 0.4444444444444444,
+              "n": 9
+            },
+            {
+              "predicted": 0.35248677001187423,
+              "observed": 0.4807692307692308,
+              "n": 52
+            },
+            {
+              "predicted": 0.4565061255109747,
+              "observed": 0.5641025641025641,
+              "n": 78
+            },
+            {
+              "predicted": 0.5524211410861546,
+              "observed": 0.6923076923076923,
+              "n": 91
+            },
+            {
+              "predicted": 0.6432448567586736,
+              "observed": 0.7216494845360825,
+              "n": 97
+            },
+            {
+              "predicted": 0.7384222075846477,
+              "observed": 0.8095238095238095,
+              "n": 21
+            },
+            {
+              "predicted": 0.831715056226356,
+              "observed": 1.0,
+              "n": 3
+            }
+          ],
+          "ece": 0.1108006033607871
+        },
+        "status": "scored",
+        "passed": null,
+        "scope": "diagnostic only"
+      },
+      "any_sparse": {
+        "n_bouts": 835,
+        "selected": {
+          "n_bouts": 835,
+          "log_loss": 0.6633730691510947,
+          "brier_score": 0.2355451153636481,
+          "accuracy": 0.6023952095808384,
+          "calibration": [
+            {
+              "predicted": 0.19698661790578084,
+              "observed": 1.0,
+              "n": 1
+            },
+            {
+              "predicted": 0.2670258172426814,
+              "observed": 0.3225806451612903,
+              "n": 31
+            },
+            {
+              "predicted": 0.3553316542475705,
+              "observed": 0.4198473282442748,
+              "n": 131
+            },
+            {
+              "predicted": 0.4522933533777017,
+              "observed": 0.5628415300546448,
+              "n": 183
+            },
+            {
+              "predicted": 0.5456609269949313,
+              "observed": 0.6282722513089005,
+              "n": 191
+            },
+            {
+              "predicted": 0.6460470867983522,
+              "observed": 0.6635514018691588,
+              "n": 214
+            },
+            {
+              "predicted": 0.7380472857293692,
+              "observed": 0.7432432432432432,
+              "n": 74
+            },
+            {
+              "predicted": 0.8337465145721256,
+              "observed": 0.9,
+              "n": 10
+            }
+          ],
+          "ece": 0.062010544613707905
+        },
+        "baseline": {
+          "n_bouts": 835,
+          "log_loss": 0.6620276208737617,
+          "brier_score": 0.23485632047552535,
+          "accuracy": 0.6023952095808384,
+          "calibration": [
+            {
+              "predicted": 0.2697267056591374,
+              "observed": 0.38095238095238093,
+              "n": 21
+            },
+            {
+              "predicted": 0.35643554270625494,
+              "observed": 0.4444444444444444,
+              "n": 126
+            },
+            {
+              "predicted": 0.45247210114063136,
+              "observed": 0.526829268292683,
+              "n": 205
+            },
+            {
+              "predicted": 0.551265578452093,
+              "observed": 0.6291079812206573,
+              "n": 213
+            },
+            {
+              "predicted": 0.6428324264106319,
+              "observed": 0.6829268292682927,
+              "n": 205
+            },
+            {
+              "predicted": 0.7322669403104771,
+              "observed": 0.7457627118644068,
+              "n": 59
+            },
+            {
+              "predicted": 0.8229908781613539,
+              "observed": 0.8333333333333334,
+              "n": 6
+            }
+          ],
+          "ece": 0.06506128107135205
+        },
+        "status": "scored",
+        "passed": null,
+        "scope": "diagnostic only"
+      }
+    },
+    "warnings": [],
+    "scope": "Development selection only; not independent future validation"
+  },
+  "feature_names": [
+    "difference_prior_bouts",
+    "difference_layoff_days",
+    "elo_difference",
+    "win_rate_difference",
+    "decisive_experience_difference",
+    "lagged_weight_limit_difference",
+    "lagged_weight_missing_difference",
+    "weight_gap_experience_interaction",
+    "five_round_difference_prior_bouts",
+    "five_round_difference_layoff_days",
+    "five_round_elo_difference",
+    "five_round_win_rate_difference",
+    "five_round_decisive_experience_difference",
+    "five_round_lagged_weight_limit_difference",
+    "five_round_lagged_weight_missing_difference",
+    "five_round_weight_gap_experience_interaction",
+    "context_age",
+    "context_age_missing",
+    "context_height_cm",
+    "context_height_missing",
+    "context_reach_cm",
+    "context_reach_missing",
+    "context_grappling_prior_bouts",
+    "context_career_td_landed_per_minute",
+    "context_career_td_attempted_per_minute",
+    "context_career_sub_attempted_per_minute",
+    "context_career_control_seconds_per_minute",
+    "context_career_knockdowns_per_minute",
+    "context_last5_td_landed_per_minute",
+    "context_last5_td_attempted_per_minute",
+    "context_last5_sub_attempted_per_minute",
+    "context_last5_control_seconds_per_minute",
+    "context_last5_knockdowns_per_minute",
+    "context_missing_age",
+    "context_missing_age_missing",
+    "context_missing_height_cm",
+    "context_missing_height_missing",
+    "context_missing_reach_cm",
+    "context_missing_reach_missing",
+    "context_missing_grappling_prior_bouts",
+    "context_missing_career_td_landed_per_minute",
+    "context_missing_career_td_attempted_per_minute",
+    "context_missing_career_sub_attempted_per_minute",
+    "context_missing_career_control_seconds_per_minute",
+    "context_missing_career_knockdowns_per_minute",
+    "context_missing_last5_td_landed_per_minute",
+    "context_missing_last5_td_attempted_per_minute",
+    "context_missing_last5_sub_attempted_per_minute",
+    "context_missing_last5_control_seconds_per_minute",
+    "context_missing_last5_knockdowns_per_minute",
+    "age_curve_difference",
+    "strength_decayed_elo",
+    "strength_recent_win_rate",
+    "strength_opposition_strength",
+    "strength_win_quality",
+    "strength_streak",
+    "strength_finish_win_rate",
+    "reliable_career_landed",
+    "reliable_career_absorbed",
+    "reliable_career_attempted",
+    "reliable_career_accuracy",
+    "reliable_career_defense",
+    "reliable_career_adjusted_landed",
+    "reliable_career_adjusted_absorbed",
+    "reliable_career_reliability",
+    "reliable_career_log_minutes",
+    "reliable_career_log_bouts",
+    "reliable_career_attempt_reliability",
+    "reliable_career_opponent_expected_landed",
+    "reliable_career_opponent_expected_absorbed",
+    "reliable_career_opponent_exposure_reliability",
+    "reliable_career_opponent_log_bouts",
+    "reliable_last5_landed",
+    "reliable_last5_absorbed",
+    "reliable_last5_attempted",
+    "reliable_last5_accuracy",
+    "reliable_last5_defense",
+    "reliable_last5_adjusted_landed",
+    "reliable_last5_adjusted_absorbed",
+    "reliable_last5_reliability",
+    "reliable_last5_log_minutes",
+    "reliable_last5_log_bouts",
+    "reliable_last5_attempt_reliability",
+    "reliable_last5_opponent_expected_landed",
+    "reliable_last5_opponent_expected_absorbed",
+    "reliable_last5_opponent_exposure_reliability",
+    "reliable_last5_opponent_log_bouts",
+    "weekly_rank",
+    "weekly_known",
+    "weekly_champion",
+    "weekly_complete",
+    "weekly_age",
+    "weekly_ranked",
+    "weekly_unranked",
+    "weekly_missing",
+    "weekly_opponent_rank_strength",
+    "weekly_opponent_rank_known_share",
+    "weekly_top5_opponent_share",
+    "weekly_wins_vs_ranked_share"
+  ],
+  "fingerprint_input": {
+    "protocol": {
+      "candidates": [
+        "baseline_v2",
+        "curated_hgb",
+        "curated_monotonic_hgb",
+        "curated_logistic",
+        "curated_blend50"
+      ],
+      "schema": "Explicit99 replacement inputs; removes raw striking, finish/duration summaries, weight-pace interactions and sparse bout-sampled rank/P4P; retains experience, layoff, Elo, records, lagged weight, bios, grappling, reliable striking and dated weekly rank/opposition.",
+      "hgb": {
+        "max_iter": 180,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 60,
+        "l2_regularization": 20.0,
+        "learning_rate": 0.05,
+        "early_stopping": false
+      },
+      "logistic_C": 0.1,
+      "monotonic_constraints": {
+        "difference_prior_bouts": 0,
+        "difference_layoff_days": 0,
+        "elo_difference": 1,
+        "win_rate_difference": 1,
+        "decisive_experience_difference": 0,
+        "lagged_weight_limit_difference": 0,
+        "lagged_weight_missing_difference": 0,
+        "weight_gap_experience_interaction": 0,
+        "five_round_difference_prior_bouts": 0,
+        "five_round_difference_layoff_days": 0,
+        "five_round_elo_difference": 1,
+        "five_round_win_rate_difference": 1,
+        "five_round_decisive_experience_difference": 0,
+        "five_round_lagged_weight_limit_difference": 0,
+        "five_round_lagged_weight_missing_difference": 0,
+        "five_round_weight_gap_experience_interaction": 0,
+        "context_age": 0,
+        "context_age_missing": 0,
+        "context_height_cm": 0,
+        "context_height_missing": 0,
+        "context_reach_cm": 0,
+        "context_reach_missing": 0,
+        "context_grappling_prior_bouts": 0,
+        "context_career_td_landed_per_minute": 0,
+        "context_career_td_attempted_per_minute": 0,
+        "context_career_sub_attempted_per_minute": 0,
+        "context_career_control_seconds_per_minute": 0,
+        "context_career_knockdowns_per_minute": 0,
+        "context_last5_td_landed_per_minute": 0,
+        "context_last5_td_attempted_per_minute": 0,
+        "context_last5_sub_attempted_per_minute": 0,
+        "context_last5_control_seconds_per_minute": 0,
+        "context_last5_knockdowns_per_minute": 0,
+        "context_missing_age": 0,
+        "context_missing_age_missing": 0,
+        "context_missing_height_cm": 0,
+        "context_missing_height_missing": 0,
+        "context_missing_reach_cm": 0,
+        "context_missing_reach_missing": 0,
+        "context_missing_grappling_prior_bouts": 0,
+        "context_missing_career_td_landed_per_minute": 0,
+        "context_missing_career_td_attempted_per_minute": 0,
+        "context_missing_career_sub_attempted_per_minute": 0,
+        "context_missing_career_control_seconds_per_minute": 0,
+        "context_missing_career_knockdowns_per_minute": 0,
+        "context_missing_last5_td_landed_per_minute": 0,
+        "context_missing_last5_td_attempted_per_minute": 0,
+        "context_missing_last5_sub_attempted_per_minute": 0,
+        "context_missing_last5_control_seconds_per_minute": 0,
+        "context_missing_last5_knockdowns_per_minute": 0,
+        "age_curve_difference": 0,
+        "strength_decayed_elo": 1,
+        "strength_recent_win_rate": 1,
+        "strength_opposition_strength": 1,
+        "strength_win_quality": 1,
+        "strength_streak": 1,
+        "strength_finish_win_rate": 1,
+        "reliable_career_landed": 1,
+        "reliable_career_absorbed": -1,
+        "reliable_career_attempted": 0,
+        "reliable_career_accuracy": 1,
+        "reliable_career_defense": 1,
+        "reliable_career_adjusted_landed": 1,
+        "reliable_career_adjusted_absorbed": -1,
+        "reliable_career_reliability": 0,
+        "reliable_career_log_minutes": 0,
+        "reliable_career_log_bouts": 0,
+        "reliable_career_attempt_reliability": 0,
+        "reliable_career_opponent_expected_landed": 0,
+        "reliable_career_opponent_expected_absorbed": 0,
+        "reliable_career_opponent_exposure_reliability": 0,
+        "reliable_career_opponent_log_bouts": 0,
+        "reliable_last5_landed": 1,
+        "reliable_last5_absorbed": -1,
+        "reliable_last5_attempted": 0,
+        "reliable_last5_accuracy": 1,
+        "reliable_last5_defense": 1,
+        "reliable_last5_adjusted_landed": 1,
+        "reliable_last5_adjusted_absorbed": -1,
+        "reliable_last5_reliability": 0,
+        "reliable_last5_log_minutes": 0,
+        "reliable_last5_log_bouts": 0,
+        "reliable_last5_attempt_reliability": 0,
+        "reliable_last5_opponent_expected_landed": 0,
+        "reliable_last5_opponent_expected_absorbed": 0,
+        "reliable_last5_opponent_exposure_reliability": 0,
+        "reliable_last5_opponent_log_bouts": 0,
+        "weekly_rank": -1,
+        "weekly_known": 0,
+        "weekly_champion": 1,
+        "weekly_complete": 0,
+        "weekly_age": 0,
+        "weekly_ranked": 0,
+        "weekly_unranked": 0,
+        "weekly_missing": 0,
+        "weekly_opponent_rank_strength": 1,
+        "weekly_opponent_rank_known_share": 0,
+        "weekly_top5_opponent_share": 1,
+        "weekly_wins_vs_ranked_share": 1
+      },
+      "selection": "Pooled2021\u20132023 log loss only, same predeclared V3 promotion gates; no requested matchup or2024 selection",
+      "splits": "Train before preceding July1; calibrate July\u2013December; score next calendar year",
+      "calibration": "Mirrored fit, symmetric raw probabilities, then independent disjoint zero-intercept temperature calibration with logT in[-1.5,1.5]",
+      "blend": "Fixed50:50 baseline and curated_monotonic_hgb raw probabilities, then own disjoint temperature",
+      "feature_generation": {
+        "candidates": [
+          "baseline_v2",
+          "reliability_hgb",
+          "weekly_rank_hgb",
+          "blend_50",
+          "weekly_blend_50"
+        ],
+        "prior_minutes": 30.0,
+        "prior_attempts": 50.0,
+        "neutral_rates": {
+          "landed": 3.0,
+          "absorbed": 3.0,
+          "attempted": 7.0
+        },
+        "accuracy_prior": 0.43,
+        "defense_prior": 0.57,
+        "hgb": {
+          "max_iter": 180,
+          "max_leaf_nodes": 7,
+          "min_samples_leaf": 60,
+          "l2_regularization": 20.0,
+          "learning_rate": 0.05,
+          "early_stopping": false
+        },
+        "seed": 42,
+        "selection": "Pooled 2021\u20132023 log loss only; unchanged V2 promotion gate against baseline_v2",
+        "splits": "Train before preceding July1; calibrate July\u2013December; score next calendar year",
+        "confirmation": "2024 is retrospective, already inspected; never used for selection",
+        "blend": "Equal uncalibrated symmetric baseline/challenger probabilities, then independent disjoint temperature calibration",
+        "weekly_rank": "Additive complete dated media board inputs, latest strictly before date; stale after35days; unknown distinct from verified absence. Live observation eligible only after retrieval, never backfilled into development.",
+        "ranked_opposition": "Last5 strictly prior bouts; opponent rank frozen before that bout from dated boards only. Unknown ranks excluded. Strength=(16-rank)/16 with champion0/unranked16. Two-observation priors: strength.5,top5share0,ranked-opponent decisive winshare.5. Known-rank share=known/covered count,zero with no bouts. Draw/NC excluded from winshare denominator."
+      },
+      "seed": 42
+    },
+    "study": {
+      "development_years": [
+        2021,
+        2022,
+        2023
+      ],
+      "retrospective_year": 2024,
+      "retrospective_scope": "Previously inspected year; baseline and selected only after selection lock; never a selection input or untouched holdout.",
+      "baseline": "baseline_v2",
+      "minimum_log_loss_gain": 0.002,
+      "max_ece_regression": 0.015,
+      "minimum_improved_years": 2,
+      "max_annual_log_loss_regression": 0.005,
+      "event_bootstrap": "2000 paired event resamples, seed42; upper95 log-loss difference below zero",
+      "sparse_veteran": {
+        "min_prior_bouts_at_most": 3,
+        "max_prior_bouts_at_least": 8,
+        "minimum_n": 30,
+        "max_log_loss_regression": 0.005,
+        "max_brier_regression": 0.003
+      },
+      "all_novice": "Both athletes have at most3 prior covered bouts; diagnostic only",
+      "any_sparse": "At least one athlete has at most3 prior covered bouts; diagnostic only",
+      "prior_count_policy": "All canonical covered bouts strictly before event day; same-date observations excluded.",
+      "deployment_train_before": "2026-07-01",
+      "deployment_calibration_before": "2026-10-18",
+      "immutable_outputs": "Never replace an existing different artifact or study report; use versioned output directories."
+    },
+    "features": {
+      "baseline_v2": [
+        "difference_prior_bouts",
+        "difference_career_mean_strikes",
+        "difference_last5_mean_strikes",
+        "difference_career_landed_per_min",
+        "difference_last5_landed_per_min",
+        "difference_career_absorbed_per_min",
+        "difference_last5_absorbed_per_min",
+        "difference_career_attempted_per_min",
+        "difference_last5_attempted_per_min",
+        "difference_career_accuracy",
+        "difference_last5_accuracy",
+        "difference_career_mean_duration",
+        "difference_last5_mean_duration",
+        "difference_career_finish_rate",
+        "difference_last5_finish_rate",
+        "difference_layoff_days",
+        "elo_difference",
+        "win_rate_difference",
+        "decisive_experience_difference",
+        "lagged_weight_limit_difference",
+        "lagged_weight_missing_difference",
+        "weight_gap_experience_interaction",
+        "weight_context_pace_difference",
+        "five_round_difference_prior_bouts",
+        "five_round_difference_career_mean_strikes",
+        "five_round_difference_last5_mean_strikes",
+        "five_round_difference_career_landed_per_min",
+        "five_round_difference_last5_landed_per_min",
+        "five_round_difference_career_absorbed_per_min",
+        "five_round_difference_last5_absorbed_per_min",
+        "five_round_difference_career_attempted_per_min",
+        "five_round_difference_last5_attempted_per_min",
+        "five_round_difference_career_accuracy",
+        "five_round_difference_last5_accuracy",
+        "five_round_difference_career_mean_duration",
+        "five_round_difference_last5_mean_duration",
+        "five_round_difference_career_finish_rate",
+        "five_round_difference_last5_finish_rate",
+        "five_round_difference_layoff_days",
+        "five_round_elo_difference",
+        "five_round_win_rate_difference",
+        "five_round_decisive_experience_difference",
+        "five_round_lagged_weight_limit_difference",
+        "five_round_lagged_weight_missing_difference",
+        "five_round_weight_gap_experience_interaction",
+        "five_round_weight_context_pace_difference",
+        "context_age",
+        "context_age_missing",
+        "context_height_cm",
+        "context_height_missing",
+        "context_reach_cm",
+        "context_reach_missing",
+        "context_rank_observed",
+        "context_rank_missing",
+        "context_rank_board_age_days",
+        "context_champion_observed",
+        "context_p4p_observed",
+        "context_p4p_missing",
+        "context_grappling_prior_bouts",
+        "context_career_td_landed_per_minute",
+        "context_career_td_attempted_per_minute",
+        "context_career_sub_attempted_per_minute",
+        "context_career_control_seconds_per_minute",
+        "context_career_knockdowns_per_minute",
+        "context_last5_td_landed_per_minute",
+        "context_last5_td_attempted_per_minute",
+        "context_last5_sub_attempted_per_minute",
+        "context_last5_control_seconds_per_minute",
+        "context_last5_knockdowns_per_minute",
+        "context_missing_age",
+        "context_missing_age_missing",
+        "context_missing_height_cm",
+        "context_missing_height_missing",
+        "context_missing_reach_cm",
+        "context_missing_reach_missing",
+        "context_missing_rank_observed",
+        "context_missing_rank_missing",
+        "context_missing_rank_board_age_days",
+        "context_missing_champion_observed",
+        "context_missing_p4p_observed",
+        "context_missing_p4p_missing",
+        "context_missing_grappling_prior_bouts",
+        "context_missing_career_td_landed_per_minute",
+        "context_missing_career_td_attempted_per_minute",
+        "context_missing_career_sub_attempted_per_minute",
+        "context_missing_career_control_seconds_per_minute",
+        "context_missing_career_knockdowns_per_minute",
+        "context_missing_last5_td_landed_per_minute",
+        "context_missing_last5_td_attempted_per_minute",
+        "context_missing_last5_sub_attempted_per_minute",
+        "context_missing_last5_control_seconds_per_minute",
+        "context_missing_last5_knockdowns_per_minute",
+        "age_curve_difference",
+        "strength_decayed_elo",
+        "strength_recent_win_rate",
+        "strength_opposition_strength",
+        "strength_win_quality",
+        "strength_streak",
+        "strength_finish_win_rate"
+      ],
+      "curated_hgb": [
+        "difference_prior_bouts",
+        "difference_layoff_days",
+        "elo_difference",
+        "win_rate_difference",
+        "decisive_experience_difference",
+        "lagged_weight_limit_difference",
+        "lagged_weight_missing_difference",
+        "weight_gap_experience_interaction",
+        "five_round_difference_prior_bouts",
+        "five_round_difference_layoff_days",
+        "five_round_elo_difference",
+        "five_round_win_rate_difference",
+        "five_round_decisive_experience_difference",
+        "five_round_lagged_weight_limit_difference",
+        "five_round_lagged_weight_missing_difference",
+        "five_round_weight_gap_experience_interaction",
+        "context_age",
+        "context_age_missing",
+        "context_height_cm",
+        "context_height_missing",
+        "context_reach_cm",
+        "context_reach_missing",
+        "context_grappling_prior_bouts",
+        "context_career_td_landed_per_minute",
+        "context_career_td_attempted_per_minute",
+        "context_career_sub_attempted_per_minute",
+        "context_career_control_seconds_per_minute",
+        "context_career_knockdowns_per_minute",
+        "context_last5_td_landed_per_minute",
+        "context_last5_td_attempted_per_minute",
+        "context_last5_sub_attempted_per_minute",
+        "context_last5_control_seconds_per_minute",
+        "context_last5_knockdowns_per_minute",
+        "context_missing_age",
+        "context_missing_age_missing",
+        "context_missing_height_cm",
+        "context_missing_height_missing",
+        "context_missing_reach_cm",
+        "context_missing_reach_missing",
+        "context_missing_grappling_prior_bouts",
+        "context_missing_career_td_landed_per_minute",
+        "context_missing_career_td_attempted_per_minute",
+        "context_missing_career_sub_attempted_per_minute",
+        "context_missing_career_control_seconds_per_minute",
+        "context_missing_career_knockdowns_per_minute",
+        "context_missing_last5_td_landed_per_minute",
+        "context_missing_last5_td_attempted_per_minute",
+        "context_missing_last5_sub_attempted_per_minute",
+        "context_missing_last5_control_seconds_per_minute",
+        "context_missing_last5_knockdowns_per_minute",
+        "age_curve_difference",
+        "strength_decayed_elo",
+        "strength_recent_win_rate",
+        "strength_opposition_strength",
+        "strength_win_quality",
+        "strength_streak",
+        "strength_finish_win_rate",
+        "reliable_career_landed",
+        "reliable_career_absorbed",
+        "reliable_career_attempted",
+        "reliable_career_accuracy",
+        "reliable_career_defense",
+        "reliable_career_adjusted_landed",
+        "reliable_career_adjusted_absorbed",
+        "reliable_career_reliability",
+        "reliable_career_log_minutes",
+        "reliable_career_log_bouts",
+        "reliable_career_attempt_reliability",
+        "reliable_career_opponent_expected_landed",
+        "reliable_career_opponent_expected_absorbed",
+        "reliable_career_opponent_exposure_reliability",
+        "reliable_career_opponent_log_bouts",
+        "reliable_last5_landed",
+        "reliable_last5_absorbed",
+        "reliable_last5_attempted",
+        "reliable_last5_accuracy",
+        "reliable_last5_defense",
+        "reliable_last5_adjusted_landed",
+        "reliable_last5_adjusted_absorbed",
+        "reliable_last5_reliability",
+        "reliable_last5_log_minutes",
+        "reliable_last5_log_bouts",
+        "reliable_last5_attempt_reliability",
+        "reliable_last5_opponent_expected_landed",
+        "reliable_last5_opponent_expected_absorbed",
+        "reliable_last5_opponent_exposure_reliability",
+        "reliable_last5_opponent_log_bouts",
+        "weekly_rank",
+        "weekly_known",
+        "weekly_champion",
+        "weekly_complete",
+        "weekly_age",
+        "weekly_ranked",
+        "weekly_unranked",
+        "weekly_missing",
+        "weekly_opponent_rank_strength",
+        "weekly_opponent_rank_known_share",
+        "weekly_top5_opponent_share",
+        "weekly_wins_vs_ranked_share"
+      ],
+      "curated_monotonic_hgb": [
+        "difference_prior_bouts",
+        "difference_layoff_days",
+        "elo_difference",
+        "win_rate_difference",
+        "decisive_experience_difference",
+        "lagged_weight_limit_difference",
+        "lagged_weight_missing_difference",
+        "weight_gap_experience_interaction",
+        "five_round_difference_prior_bouts",
+        "five_round_difference_layoff_days",
+        "five_round_elo_difference",
+        "five_round_win_rate_difference",
+        "five_round_decisive_experience_difference",
+        "five_round_lagged_weight_limit_difference",
+        "five_round_lagged_weight_missing_difference",
+        "five_round_weight_gap_experience_interaction",
+        "context_age",
+        "context_age_missing",
+        "context_height_cm",
+        "context_height_missing",
+        "context_reach_cm",
+        "context_reach_missing",
+        "context_grappling_prior_bouts",
+        "context_career_td_landed_per_minute",
+        "context_career_td_attempted_per_minute",
+        "context_career_sub_attempted_per_minute",
+        "context_career_control_seconds_per_minute",
+        "context_career_knockdowns_per_minute",
+        "context_last5_td_landed_per_minute",
+        "context_last5_td_attempted_per_minute",
+        "context_last5_sub_attempted_per_minute",
+        "context_last5_control_seconds_per_minute",
+        "context_last5_knockdowns_per_minute",
+        "context_missing_age",
+        "context_missing_age_missing",
+        "context_missing_height_cm",
+        "context_missing_height_missing",
+        "context_missing_reach_cm",
+        "context_missing_reach_missing",
+        "context_missing_grappling_prior_bouts",
+        "context_missing_career_td_landed_per_minute",
+        "context_missing_career_td_attempted_per_minute",
+        "context_missing_career_sub_attempted_per_minute",
+        "context_missing_career_control_seconds_per_minute",
+        "context_missing_career_knockdowns_per_minute",
+        "context_missing_last5_td_landed_per_minute",
+        "context_missing_last5_td_attempted_per_minute",
+        "context_missing_last5_sub_attempted_per_minute",
+        "context_missing_last5_control_seconds_per_minute",
+        "context_missing_last5_knockdowns_per_minute",
+        "age_curve_difference",
+        "strength_decayed_elo",
+        "strength_recent_win_rate",
+        "strength_opposition_strength",
+        "strength_win_quality",
+        "strength_streak",
+        "strength_finish_win_rate",
+        "reliable_career_landed",
+        "reliable_career_absorbed",
+        "reliable_career_attempted",
+        "reliable_career_accuracy",
+        "reliable_career_defense",
+        "reliable_career_adjusted_landed",
+        "reliable_career_adjusted_absorbed",
+        "reliable_career_reliability",
+        "reliable_career_log_minutes",
+        "reliable_career_log_bouts",
+        "reliable_career_attempt_reliability",
+        "reliable_career_opponent_expected_landed",
+        "reliable_career_opponent_expected_absorbed",
+        "reliable_career_opponent_exposure_reliability",
+        "reliable_career_opponent_log_bouts",
+        "reliable_last5_landed",
+        "reliable_last5_absorbed",
+        "reliable_last5_attempted",
+        "reliable_last5_accuracy",
+        "reliable_last5_defense",
+        "reliable_last5_adjusted_landed",
+        "reliable_last5_adjusted_absorbed",
+        "reliable_last5_reliability",
+        "reliable_last5_log_minutes",
+        "reliable_last5_log_bouts",
+        "reliable_last5_attempt_reliability",
+        "reliable_last5_opponent_expected_landed",
+        "reliable_last5_opponent_expected_absorbed",
+        "reliable_last5_opponent_exposure_reliability",
+        "reliable_last5_opponent_log_bouts",
+        "weekly_rank",
+        "weekly_known",
+        "weekly_champion",
+        "weekly_complete",
+        "weekly_age",
+        "weekly_ranked",
+        "weekly_unranked",
+        "weekly_missing",
+        "weekly_opponent_rank_strength",
+        "weekly_opponent_rank_known_share",
+        "weekly_top5_opponent_share",
+        "weekly_wins_vs_ranked_share"
+      ],
+      "curated_logistic": [
+        "difference_prior_bouts",
+        "difference_layoff_days",
+        "elo_difference",
+        "win_rate_difference",
+        "decisive_experience_difference",
+        "lagged_weight_limit_difference",
+        "lagged_weight_missing_difference",
+        "weight_gap_experience_interaction",
+        "five_round_difference_prior_bouts",
+        "five_round_difference_layoff_days",
+        "five_round_elo_difference",
+        "five_round_win_rate_difference",
+        "five_round_decisive_experience_difference",
+        "five_round_lagged_weight_limit_difference",
+        "five_round_lagged_weight_missing_difference",
+        "five_round_weight_gap_experience_interaction",
+        "context_age",
+        "context_age_missing",
+        "context_height_cm",
+        "context_height_missing",
+        "context_reach_cm",
+        "context_reach_missing",
+        "context_grappling_prior_bouts",
+        "context_career_td_landed_per_minute",
+        "context_career_td_attempted_per_minute",
+        "context_career_sub_attempted_per_minute",
+        "context_career_control_seconds_per_minute",
+        "context_career_knockdowns_per_minute",
+        "context_last5_td_landed_per_minute",
+        "context_last5_td_attempted_per_minute",
+        "context_last5_sub_attempted_per_minute",
+        "context_last5_control_seconds_per_minute",
+        "context_last5_knockdowns_per_minute",
+        "context_missing_age",
+        "context_missing_age_missing",
+        "context_missing_height_cm",
+        "context_missing_height_missing",
+        "context_missing_reach_cm",
+        "context_missing_reach_missing",
+        "context_missing_grappling_prior_bouts",
+        "context_missing_career_td_landed_per_minute",
+        "context_missing_career_td_attempted_per_minute",
+        "context_missing_career_sub_attempted_per_minute",
+        "context_missing_career_control_seconds_per_minute",
+        "context_missing_career_knockdowns_per_minute",
+        "context_missing_last5_td_landed_per_minute",
+        "context_missing_last5_td_attempted_per_minute",
+        "context_missing_last5_sub_attempted_per_minute",
+        "context_missing_last5_control_seconds_per_minute",
+        "context_missing_last5_knockdowns_per_minute",
+        "age_curve_difference",
+        "strength_decayed_elo",
+        "strength_recent_win_rate",
+        "strength_opposition_strength",
+        "strength_win_quality",
+        "strength_streak",
+        "strength_finish_win_rate",
+        "reliable_career_landed",
+        "reliable_career_absorbed",
+        "reliable_career_attempted",
+        "reliable_career_accuracy",
+        "reliable_career_defense",
+        "reliable_career_adjusted_landed",
+        "reliable_career_adjusted_absorbed",
+        "reliable_career_reliability",
+        "reliable_career_log_minutes",
+        "reliable_career_log_bouts",
+        "reliable_career_attempt_reliability",
+        "reliable_career_opponent_expected_landed",
+        "reliable_career_opponent_expected_absorbed",
+        "reliable_career_opponent_exposure_reliability",
+        "reliable_career_opponent_log_bouts",
+        "reliable_last5_landed",
+        "reliable_last5_absorbed",
+        "reliable_last5_attempted",
+        "reliable_last5_accuracy",
+        "reliable_last5_defense",
+        "reliable_last5_adjusted_landed",
+        "reliable_last5_adjusted_absorbed",
+        "reliable_last5_reliability",
+        "reliable_last5_log_minutes",
+        "reliable_last5_log_bouts",
+        "reliable_last5_attempt_reliability",
+        "reliable_last5_opponent_expected_landed",
+        "reliable_last5_opponent_expected_absorbed",
+        "reliable_last5_opponent_exposure_reliability",
+        "reliable_last5_opponent_log_bouts",
+        "weekly_rank",
+        "weekly_known",
+        "weekly_champion",
+        "weekly_complete",
+        "weekly_age",
+        "weekly_ranked",
+        "weekly_unranked",
+        "weekly_missing",
+        "weekly_opponent_rank_strength",
+        "weekly_opponent_rank_known_share",
+        "weekly_top5_opponent_share",
+        "weekly_wins_vs_ranked_share"
+      ],
+      "curated_blend50": [
+        "difference_prior_bouts",
+        "difference_layoff_days",
+        "elo_difference",
+        "win_rate_difference",
+        "decisive_experience_difference",
+        "lagged_weight_limit_difference",
+        "lagged_weight_missing_difference",
+        "weight_gap_experience_interaction",
+        "five_round_difference_prior_bouts",
+        "five_round_difference_layoff_days",
+        "five_round_elo_difference",
+        "five_round_win_rate_difference",
+        "five_round_decisive_experience_difference",
+        "five_round_lagged_weight_limit_difference",
+        "five_round_lagged_weight_missing_difference",
+        "five_round_weight_gap_experience_interaction",
+        "context_age",
+        "context_age_missing",
+        "context_height_cm",
+        "context_height_missing",
+        "context_reach_cm",
+        "context_reach_missing",
+        "context_grappling_prior_bouts",
+        "context_career_td_landed_per_minute",
+        "context_career_td_attempted_per_minute",
+        "context_career_sub_attempted_per_minute",
+        "context_career_control_seconds_per_minute",
+        "context_career_knockdowns_per_minute",
+        "context_last5_td_landed_per_minute",
+        "context_last5_td_attempted_per_minute",
+        "context_last5_sub_attempted_per_minute",
+        "context_last5_control_seconds_per_minute",
+        "context_last5_knockdowns_per_minute",
+        "context_missing_age",
+        "context_missing_age_missing",
+        "context_missing_height_cm",
+        "context_missing_height_missing",
+        "context_missing_reach_cm",
+        "context_missing_reach_missing",
+        "context_missing_grappling_prior_bouts",
+        "context_missing_career_td_landed_per_minute",
+        "context_missing_career_td_attempted_per_minute",
+        "context_missing_career_sub_attempted_per_minute",
+        "context_missing_career_control_seconds_per_minute",
+        "context_missing_career_knockdowns_per_minute",
+        "context_missing_last5_td_landed_per_minute",
+        "context_missing_last5_td_attempted_per_minute",
+        "context_missing_last5_sub_attempted_per_minute",
+        "context_missing_last5_control_seconds_per_minute",
+        "context_missing_last5_knockdowns_per_minute",
+        "age_curve_difference",
+        "strength_decayed_elo",
+        "strength_recent_win_rate",
+        "strength_opposition_strength",
+        "strength_win_quality",
+        "strength_streak",
+        "strength_finish_win_rate",
+        "reliable_career_landed",
+        "reliable_career_absorbed",
+        "reliable_career_attempted",
+        "reliable_career_accuracy",
+        "reliable_career_defense",
+        "reliable_career_adjusted_landed",
+        "reliable_career_adjusted_absorbed",
+        "reliable_career_reliability",
+        "reliable_career_log_minutes",
+        "reliable_career_log_bouts",
+        "reliable_career_attempt_reliability",
+        "reliable_career_opponent_expected_landed",
+        "reliable_career_opponent_expected_absorbed",
+        "reliable_career_opponent_exposure_reliability",
+        "reliable_career_opponent_log_bouts",
+        "reliable_last5_landed",
+        "reliable_last5_absorbed",
+        "reliable_last5_attempted",
+        "reliable_last5_accuracy",
+        "reliable_last5_defense",
+        "reliable_last5_adjusted_landed",
+        "reliable_last5_adjusted_absorbed",
+        "reliable_last5_reliability",
+        "reliable_last5_log_minutes",
+        "reliable_last5_log_bouts",
+        "reliable_last5_attempt_reliability",
+        "reliable_last5_opponent_expected_landed",
+        "reliable_last5_opponent_expected_absorbed",
+        "reliable_last5_opponent_exposure_reliability",
+        "reliable_last5_opponent_log_bouts",
+        "weekly_rank",
+        "weekly_known",
+        "weekly_champion",
+        "weekly_complete",
+        "weekly_age",
+        "weekly_ranked",
+        "weekly_unranked",
+        "weekly_missing",
+        "weekly_opponent_rank_strength",
+        "weekly_opponent_rank_known_share",
+        "weekly_top5_opponent_share",
+        "weekly_wins_vs_ranked_share"
+      ]
+    },
+    "implementations": {
+      "winner_v3": "b255926439e0aaf2feddce0c3529f0b0ab65c625b94cf7889f5f04ab0578dd9a",
+      "winner_v2": "7fa7d786b348b61905c102d8527d175ad7a535846b6fdee33336a39254ed9b0f",
+      "winner": "9d432d4950a4cb80ea7bd69687356e6e47d1cb6303fdb755d3ff84360d772d41",
+      "winner_context": "de11aaa71956fa05891b14107f00ba56bbf8a34e51701a977e18f50ed0012166",
+      "ranking_context": "52c8ee05d946ebe0625e2c24b7208e80ab9a3b17c2c3075a7932fe9fc81a4094",
+      "divisions": "04c288808060e50f601767ecfe6d86c6d6c5551e78ebbc6b23b678291671c0ab",
+      "features": "ec7d2c312600035a34778f00e014a93b68fb24da5088d41175786e79d4dcdbef",
+      "experiments": "e47c681feb2ec7bb3d7ec971ee6b3d6de614bfd9dc03d2a01a85ce9e84ac53c5",
+      "schedule": "eb093cab770f9b0dc52ff6936d75f42f9da4f8435e99e6ee16a6ecc78e1e8ade",
+      "winner_v3_training": "600be77aca0b38cda94d073aa86feb5714debed6cd45b662e31d326193153f2a",
+      "winner_v4": "cc934525ae545dc8638c521ffba1019a4b6c66ff5073e46967900e3c39be6b65",
+      "winner_v4_training": "12378bc9eb18cec83cd72477ed4349a5b3d71226e6e145a88ad33742313ddd8b"
+    },
+    "dependencies": {
+      "python": "3.12.14",
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "scipy": "1.18.1",
+      "sklearn": "1.9.1"
+    },
+    "source_snapshot_sha256": "d0daeff36d6fa687f945c3722b73d4485aca78dd8bf2d8bf7545122af4eb4545",
+    "outcome_labels_sha256": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+    "ranking_context_sha256": "3e43e99f72bb8791435fb130091308b168401c7f6b1c1bf9c07d4d25f6587ca5",
+    "ranking_source_sha256": "a31032fc11db4ec2ef3b43f940937118f07dbd0b3bd622d27bf22f672fad2437",
+    "baseline_model_version": "winner-v2-d04e8f09a8abcbb4",
+    "baseline_artifact_sha256": "78779bc7dfb0019265db4c9cb094d2a139c5985aa14f783aa064c28272d49163",
+    "baseline_files": {
+      "context.joblib": "2341d45eff29d8adac5e29d6b0b0807a08d356dea4ced24e23d809a42f7d2883",
+      "fight_outcomes.csv": "997d683b9b9250a30b96ec7a5a96de3469d3ef4c1be916824705c424a4f791bb",
+      "metadata.json": "b6e26ff1893c356bdef7783ae2bbe89c5585e2627b255443e3af3ae6aab64465",
+      "model.joblib": "78779bc7dfb0019265db4c9cb094d2a139c5985aa14f783aa064c28272d49163"
+    }
+  },
+  "trained_at": "2026-10-23T00:30:18.678128+00:00",
+  "train_rows": 6402,
+  "calibration_rows": 188,
+  "evaluation": {
+    "n_bouts": 507,
+    "log_loss": 0.6353759253353408,
+    "brier_score": 0.2222893209423826,
+    "accuracy": 0.6410256410256411,
+    "calibration": [
+      {
+        "predicted": 0.18089554336008645,
+        "observed": 0.5,
+        "n": 2
+      },
+      {
+        "predicted": 0.26246500120846344,
+        "observed": 0.24,
+        "n": 25
+      },
+      {
+        "predicted": 0.351750008190606,
+        "observed": 0.3698630136986301,
+        "n": 73
+      },
+      {
+        "predicted": 0.451178881308482,
+        "observed": 0.41904761904761906,
+        "n": 105
+      },
+      {
+        "predicted": 0.5525738909846597,
+        "observed": 0.5344827586206896,
+        "n": 116
+      },
+      {
+        "predicted": 0.6474447360762292,
+        "observed": 0.6574074074074074,
+        "n": 108
+      },
+      {
+        "predicted": 0.7449599925638003,
+        "observed": 0.8260869565217391,
+        "n": 69
+      },
+      {
+        "predicted": 0.8281361217014367,
+        "observed": 0.8888888888888888,
+        "n": 9
+      }
+    ],
+    "ece": 0.030009745875227634,
+    "period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "kind": "Previously inspected year; baseline and selected only after selection lock; never a selection input or untouched holdout."
+  },
+  "warnings": [
+    "2024 is an already-inspected retrospective comparison, not an untouched holdout.",
+    "Weekly rankings are retrospectively reconstructed; live observations are never backfilled into history.",
+    "Sparse histories and unusual hypothetical matchups limit direct validation; no requested probability is a training target."
+  ]
+}

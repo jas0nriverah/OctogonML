@@ -1,0 +1,66 @@
+{
+  "hardware": "Apple M4, 16 GiB RAM",
+  "provider": "local Ollama",
+  "runtime_version": "0.40.8",
+  "observations": [
+    {
+      "case": "forward",
+      "analysis_id": "a75fb02b-d3cc-488b-bff1-3a413bff1ceb",
+      "elapsed_seconds": 14.796,
+      "cached_post_seconds": 0.06,
+      "immutable_get_verified": true,
+      "immutable_retry_verified": true,
+      "publication_probability": false,
+      "prompt_version": "grounded-matchup-v3-ai5pp-catalogue-60d9a5e9397f",
+      "model": "qwen3:4b",
+      "model_versions": {
+        "winner": "winner-v2-d04e8f09a8abcbb4",
+        "rounds": "rounds-8f9fc4ebaff2963e",
+        "fighter_strikes": "v3-5108e9766d66f10b",
+        "opponent_strikes": "v3-5108e9766d66f10b",
+        "narrator": "qwen3:4b@359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+      },
+      "usage": {
+        "input_tokens": 3130,
+        "output_tokens": 122
+      },
+      "adjustment_percentage_points": 0.0,
+      "evidence_budget": {
+        "policy": "selected-24-facts-6500-characters",
+        "available_facts": 68,
+        "supplied_facts": 24,
+        "supplied_bytes": 6743
+      }
+    },
+    {
+      "case": "reverse",
+      "analysis_id": "4ebf3b59-17ff-4558-a29a-d624c41b6033",
+      "elapsed_seconds": 15.042,
+      "cached_post_seconds": 0.064,
+      "immutable_get_verified": true,
+      "immutable_retry_verified": true,
+      "publication_probability": false,
+      "prompt_version": "grounded-matchup-v3-ai5pp-catalogue-60d9a5e9397f",
+      "model": "qwen3:4b",
+      "model_versions": {
+        "winner": "winner-v2-d04e8f09a8abcbb4",
+        "rounds": "rounds-8f9fc4ebaff2963e",
+        "fighter_strikes": "v3-5108e9766d66f10b",
+        "opponent_strikes": "v3-5108e9766d66f10b",
+        "narrator": "qwen3:4b@359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+      },
+      "usage": {
+        "input_tokens": 3131,
+        "output_tokens": 125
+      },
+      "adjustment_percentage_points": 0.0,
+      "evidence_budget": {
+        "policy": "selected-24-facts-6500-characters",
+        "available_facts": 68,
+        "supplied_facts": 24,
+        "supplied_bytes": 6743
+      }
+    }
+  ],
+  "scope": "Two workflow checks; not a latency benchmark or predictive performance evaluation."
+}

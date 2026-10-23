@@ -1,0 +1,15 @@
+{
+  "source_url": "https://www.kaggle.com/api/v1/datasets/download/martj42/ufc-rankings?datasetVersionNumber=47",
+  "dataset_url": "https://www.kaggle.com/datasets/martj42/ufc-rankings",
+  "version": 47,
+  "license": "CC0: Public Domain",
+  "observed_at": "2026-10-23T00:15:58.335559+00:00",
+  "source_last_updated": "2026-06-06T18:07:40.85Z",
+  "zip_sha256": "c6b08efa951119c5036d9dcf6634971564350d6bb8cf99424cb1f135116f9f29",
+  "csv_sha256": "a31032fc11db4ec2ef3b43f940937118f07dbd0b3bd622d27bf22f672fad2437",
+  "csv_rows": 100065,
+  "min_board_date": "2013-02-04",
+  "max_board_date": "2026-06-02",
+  "board_dates": 532,
+  "source_author_statement": "### Content\n\nThis dataset contains the historical rankings of UFC fighters. From their inception in 2013 up until today. The rankings are published weekly, more or less, by the UFC and compiled via a vote by media members. God bless.\n\nIn each weight class, the fighters are listed by their rank, except for the champion who is marked as ranked at 0.\n\nThe dataset isn't 100% complete, there are weeks missing here and there but it's probably over 95% complete. Rankings are published only after UFC events so every 2-3 week period without new rankings does not necessarily mean missing data.\n\n\n### Acknowledgements\n\nThe data was pulled from The Internet Archive's records of ufc.com."
+}

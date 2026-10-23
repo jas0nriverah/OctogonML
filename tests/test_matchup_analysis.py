@@ -91,13 +91,27 @@ def client_for(handler):
 
 
 def local_response(narrative):
+    selection = {
+        "summary_id": narrative["summary"]["evidence_ids"][0],
+        "fighter_advantage_id": narrative["fighter_case"]["advantages"][0]["evidence_ids"][0],
+        "opponent_advantage_id": narrative["opponent_case"]["advantages"][0]["evidence_ids"][0],
+        "fighter_route": 0,
+        "opponent_route": 0,
+        "key_matchup_id": narrative["key_matchup"]["evidence_ids"][0],
+        "uncertainty": 0,
+        "favor_fighter_id": narrative["probability_adjustment"]["favor_fighter_id"],
+        "delta_percentage_points": narrative["probability_adjustment"]["delta_percentage_points"],
+        "rationale_id": narrative["probability_adjustment"]["rationale"]["evidence_ids"][0],
+    }
     return httpx.Response(
         200,
         json={
             "model": "qwen3:4b",
             "done": True,
             "done_reason": "stop",
-            "message": {"role": "assistant", "content": json.dumps(narrative)},
+            "message": {"role": "assistant", "content": json.dumps(selection)},
+            "prompt_eval_count": 800,
+            "eval_count": 120,
         },
     )
 
@@ -294,6 +308,13 @@ def test_local_request_cache_copy_isolation_and_prediction_identity(evidence, na
     assert evidence == before and len(requests) == 1
     assert requests[0]["think"] is False and requests[0]["stream"] is False
     assert requests[0]["options"]["num_ctx"] == 4096
+    assert requests[0]["options"]["num_predict"] == 384
+    assert result["narrative_mode"] == "llm_selected_grounded_ids"
+    assert result["usage"] == {"input_tokens": 800, "output_tokens": 120}
+    assert requests[0]["format"]["properties"]["fighter_advantage_id"]["enum"] == [
+        "", "fighter.sig_landed_per_min"
+    ]
+    assert evidence["facts"][0]["text"] not in json.dumps(requests[0]["format"])
     assert requests[0]["messages"][0]["role"] == "system"
     changed = deepcopy(evidence)
     changed["prediction_ids"]["winner"] = "new-saved-prediction"
@@ -545,3 +566,20 @@ def test_local_rich_packet_balances_strength_and_removes_provenance_overhead(evi
         assert all(set(route["evidence_ids"]) <= facts.keys() for route in routes)
     assert rich == original
     assert selected_evidence(rich, "openai") == original
+
+
+def test_large_strength_summary_cannot_displace_the_other_fighters_latest_result(evidence):
+    rich = deepcopy(evidence)
+    for side, identity in (("fighter", "a"), ("opponent", "b")):
+        for suffix in ("sample", "weekly_rank", "ranked_opposition", "adjusted_striking"):
+            rich["facts"].append({"id": f"{side}.{suffix}", "fighter_id": identity,
+                                  "text": "A dated coverage observation. " * 22})
+    rich["facts"].extend([
+        {"id": "fighter.recent1", "fighter_id": "a", "text": "Aster's latest covered result."},
+        {"id": "fighter.model_strength", "fighter_id": "a", "text": "A derived strength summary. " * 20},
+        {"id": "opponent.recent1", "fighter_id": "b", "text": "Beryl's latest covered result."},
+    ])
+    packet = selected_evidence(rich)
+    identities = {fact["id"] for fact in packet["facts"]}
+    assert {"fighter.recent1", "opponent.recent1"} <= identities
+    assert "fighter.model_strength" not in identities

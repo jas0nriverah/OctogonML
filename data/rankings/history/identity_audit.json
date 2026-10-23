@@ -1,0 +1,16 @@
+{
+  "records": 100065,
+  "matched": 99900,
+  "boards": 6643,
+  "complete_boards": 4350,
+  "unresolved_names": {
+    "Patricio Freire": 34,
+    "Shane Carwin": 4,
+    "Jon Fitch": 2,
+    "Luis Henrique Barbosa": 1,
+    "Jaime Alvarez": 1
+  },
+  "unresolved_or_ambiguous_rows": 165,
+  "empty_source_name_rows": 123,
+  "contradictory_fighter_slots": 12
+}

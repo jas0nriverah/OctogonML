@@ -22,7 +22,7 @@ OctogonML uses a local Ollama provider by default for evidence-linked matchup ex
 
 No OpenAI/API key is needed for Ollama. A clone does not include weights or an Ollama binary. The 4B Q4_K_M model is approximately 2.5 GB; the prepared check used Apple M4 with 16 GiB RAM. Resource needs and latency depend on context size, concurrent work, and hardware. API configuration requires a loopback Ollama URL. Host Ollama is not a container's `127.0.0.1`; this setup assumes both services run on the same host.
 
-Check `http://127.0.0.1:11434/api/version` and `/api/tags` to distinguish a reachable server from an installed model. Model output is validated separately. A timeout or failed evidence check must remain an error rather than a fabricated explanation.
+Check `http://127.0.0.1:11434/api/version` and `/api/tags` to inspect the service and model listing. A listed model can still have missing or damaged weight files; an actual chat request is the inference check. Run `ollama pull qwen3:4b` again to restore and verify model blobs when necessary. Model output is validated separately. A timeout or failed evidence check remains an error rather than a fabricated explanation.
 
 ## Prepared workspace runtime
 
@@ -50,9 +50,11 @@ The [official Ollama 0.40.8 release](https://github.com/ollama/ollama/releases/t
 
 ## Verification status and request bounds
 
+The current compact selector passed real Riley–Lopes requests in both fighter orders in **14.8 and 15.0 seconds** on Apple M4, with prompt `grounded-matchup-v3-ai5pp-catalogue-60d9a5e9397f`. Each retained 68 facts and supplied 24, including both latest covered results, opponent-rank coverage, and opponent-adjusted striking. Ollama reported 3,130/3,131 input tokens and 122/125 output tokens, within the 4,096-token context and 384-token output bounds. Both proposed zero adjustment. Immutable GET and repeated POST checks returned the identical saved record; repeated POST took approximately 0.06 seconds. See the [actual response](../reports/matchup-analysis-riley-lopes.json) and [workflow observations](../reports/matchup-analysis-riley-lopes-verification.json). These two checks are not a capacity benchmark or a predictive evaluation. No paid provider was called.
+
 The basic actual `/api/chat` check used a JSON schema, `stream: false`, `think: false`, temperature zero, 4,096-token context, and bounded generation. It returned valid JSON, preserved a supplied baseline probability, and emitted no thinking content. Cold elapsed time was **10.7 seconds**, including a **5.6-second load**, with approximately **8.8 generated tokens/second**. Ollama reported all 37 layers on Apple M4 Metal and approximately 3.18 GB allocated model/context memory. This is one setup observation, not a capacity benchmark.
 
-**Complete local analyses passed in both fighter orientations**, in **37.5 and 56.6 seconds** (approximately 38/57 seconds), separately from the basic JSON check. The checked prompt is `grounded-matchup-v3-ai5pp-catalogue-2bbad14bab04`. The LLM selects sourced advantages, an exact comparison, and an eligible conditional tactical route from a server-authored catalogue, retaining the original fact IDs. Positive observed metrics determine route eligibility; zero takedowns do not establish takedown defense. Missing support allows explicit abstention. A valid actual LLM response is required: the catalogue is not a fabricated failure fallback. Rationale and the bounded probability proposal remain LLM output.
+Earlier complete local analyses passed in both fighter orientations in **37.5 and 56.6 seconds**, separately from the basic JSON check, using prompt `grounded-matchup-v3-ai5pp-catalogue-2bbad14bab04`. These timings describe the earlier full-text output protocol. The LLM selected sourced advantages, an exact comparison, and an eligible conditional tactical route from a server-authored catalogue, retaining original fact IDs. Positive observed metrics determine route eligibility; zero takedowns do not establish takedown defense. Missing support allows explicit abstention. A valid actual LLM response is required: the catalogue is not a failure fallback.
 
 Both checked orientations proposed zero percentage-point adjustment and preserved the complementary 78.1%/21.9% ML baseline. These are successful workflow examples, not proof of universal semantic correctness, calibrated AI probabilities, or reliability under every machine/load. Timeouts and grounding rejections remain explicit failure states. The prompt version includes a hash of the entire analysis implementation, so selection changes invalidate the cache. The service allows at most a 90-second provider timeout and bounded local concurrency; keep output/context budgets appropriate for the machine.
 
@@ -94,10 +96,12 @@ The OpenAI path uses a larger server-built evidence package than the small local
 
 | Provider | Evidence selection | Output budget |
 |---|---|---|
-| Ollama | Up to 24 facts and 6,500 characters | 640 generated tokens |
-| OpenAI | Up to 80 facts and 24,000 UTF-8 bytes | 4,096 output tokens by default |
+| Ollama | Up to 24 facts and 6,500 characters | 384 generated tokens; compact selection IDs |
+| OpenAI | Up to 80 facts and 32,000 UTF-8 bytes | 4,096 output tokens by default |
 
-The local packet prioritizes supported tactical facts, sample sizes, frozen strength indices, and the latest covered results. Redundant URLs, hashes, and source metadata stay in the full saved audit record rather than consuming local context. Fact IDs, text, identities, and relevant dates remain intact. OpenAI receives the full bounded packet.
+The local packet prioritizes supported tactical facts, sample sizes, weekly ranking context, opponent-adjusted rates, frozen strength indices, and the latest covered results. Redundant URLs, hashes, and source metadata stay in the full saved audit record rather than consuming local context. Fact IDs, text, identities, and relevant dates remain intact. OpenAI receives the full bounded packet.
+
+The current local protocol returns evidence IDs, route indices, one uncertainty index, and an experimental guidance selection. Its schema contains IDs rather than repeated long fact text. The server expands only valid choices from the exact supplied packet, then applies the existing narrative checks. The detailed comparison, history, and strength-of-schedule sections are server-authored context; the language model selects factors and conditional routes. This is identified as `llm_selected_grounded_ids`, with separate hashes for the raw provider output and expanded narrative. Invalid choices, truncated output, and provider failures never trigger substitute selections. Local token counts are retained when supplied by Ollama.
 
 OpenAI instructions allow up to three sourced advantages per athlete, four uncertainty options, and six supported route choices. Missing observations permit abstention. Additional context does not relax identity, numerical, citation, or source/date validation. Successful responses retain the full evidence hash and the selected evidence IDs, plus available input/output/total token usage and cached/reasoning token counts. The OpenAI output budget includes reasoning and visible output.
 

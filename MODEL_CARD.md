@@ -24,7 +24,7 @@ Raw sources were observed after the historical evaluation events. Event-date rec
 
 Auxiliary grappling normalization covers every canonical athlete-bout pair: takedowns landed/attempted, submission attempts, control seconds, and knockdowns. Career/last-five rates divide aggregate counts by aggregate observed minutes. Unknown values and sparse history are explicitly represented.
 
-Historical ranking inputs come from **dated, bout-linked** weekly-board observations, not a complete current ranking feed. A board must strictly predate the forecast, and evidence older than 35 days is masked. Missing or stale evidence is unknown, never proof of being unranked. A separate [official ranking display snapshot](data/rankings/current.json) contains 206 mapped entries across 13 boards observed on October 22. Its page has no explicit weekly board date; `published_board_date` is null. That display observation does not backfill historical predictors or silently update frozen model inputs.
+Historical ranking inputs come from **dated, bout-linked** weekly-board observations, not a complete current ranking feed. A board must strictly predate the forecast, and evidence older than 35 days is masked. Missing or stale evidence is unknown, never proof of being unranked. A separate [official ranking display snapshot](data/rankings/current.json) contains 206 mapped entries across 13 boards observed on October 22. Its media footer explicitly says “Last updated: Tuesday, Oct. 20” without a year. The [separate media snapshot](data/rankings/current_media.json) records October 20, 2026 as an explicitly inferred date; `published_board_date` stays null. Live eligibility starts at its actual October 22 observation timestamp, not the inferred date. That display observation does not backfill historical predictors or silently update frozen model inputs.
 
 ## Winner V2
 
@@ -59,6 +59,14 @@ All stored gates pass. Development log loss falls from **0.674881 to 0.653719** 
 Deployment fits before July 1, 2026 and calibrates on July 1–October 17. Its artifact freezes source, outcome-label and context hashes, implementation fingerprints, feature names, outcome history, and cutoffs. `CAGEMETRICS_WINNER_CHANNEL=auto` prefers verified V2 only when promotion passes; `v1` restores the baseline and `v2` explicitly requests V2. Missing/invalid winner artifacts do not turn strike predictions into outcome forecasts.
 
 Evidence: [V2 evaluation](reports/winner_v2_evaluation.json), [selection](reports/winner_v2_selection.json), [protocol](reports/winner_v2_protocol.json), [predictions](reports/winner_v2_predictions.csv), [metadata](artifacts/winner_v2/metadata.json), and [baseline evaluation](reports/winner_evaluation.json).
+
+## Unpromoted winner research and publication policy
+
+Winner V3 and V4 both failed their unchanged, predeclared development gates on 1,497 bouts scored in 2021–2023. Selected V3 log loss was 0.652766 versus V2's 0.653719: the 0.000952 gain was below the required 0.002, and the paired event-bootstrap interval crossed zero. V4 selected log loss was 0.653430, also below the required gain; its Brier score regressed slightly and its bootstrap interval crossed zero. Better-looking already-seen 2024 results do not authorize promotion. `auto` retains V2; explicit `v3`/`v4` channels are research opt-ins. No validated accuracy improvement is claimed. [Full methods, gates, source provenance and reports](docs/WINNER_RESEARCH.md).
+
+Those research artifacts freeze a separate CC0 full weekly ranking archive through June 2, 2026. Historical lookups require strictly prior board dates and a 35-day freshness limit; unknown rank differs from explicitly unranked on a complete resolved board. Current official media observations are eligible only after their actual retrieval timestamp and never backfill training.
+
+The publication policy `sparse-top5-comparison-v1` withholds a displayed favorite when one athlete has at most three covered UFC bouts and is explicitly observed unranked on a complete current division board, while the opponent has at least eight covered bouts and is verified current champion or top five. Both current rankings must be eligible, known media observations. This conservative presentation rule does not change the stored ML probabilities, fit a confidence score, or substitute a hand-chosen probability. Missing or stale rank alone does not trigger that specific rule. The comparison can still present supported factual context without publishing a favorite.
 
 ## Independent elapsed-time model
 
