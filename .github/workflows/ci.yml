@@ -73,6 +73,8 @@ jobs:
               result = json.load(response)
           assert abs(result['p_fighter_win'] + result['p_opponent_win'] - 1) < 1e-12
           assert result['scope'] == 'conditional on a decisive outcome'
+          assert result['comparison_context']['scope'] == 'analysis_context_only'
+          assert result['comparison_context']['used_by_model'] is False
           with urllib.request.urlopen(base + '/api/v1/winner-predictions/' + result['prediction_id']) as response:
               assert json.load(response) == result
           request = urllib.request.Request(

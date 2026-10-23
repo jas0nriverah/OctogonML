@@ -45,6 +45,25 @@ def _output(value):
     print(json.dumps(value, indent=2, default=str))
 
 
+def _seed_bundled_assets(source_data, target_data):
+    """Add newly packaged assets without replacing existing observations."""
+    import shutil
+
+    if source_data.resolve() == target_data.resolve():
+        return
+    for name in ("schedules", "rankings", "fighter_photos.json"):
+        source = source_data / name
+        paths = sorted(source.rglob("*")) if source.is_dir() else [source]
+        for path in paths:
+            if not path.is_file() or path.is_symlink():
+                continue
+            target = target_data / path.relative_to(source_data)
+            if target.exists() or target.is_symlink():
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+
+
 def _hardware():
     if platform.system() == "Darwin":
         try:
@@ -382,16 +401,7 @@ def main(argv=None):
             bundle = ingest_dataset(settings.data_dir, refresh=args.refresh, **kwargs)
             counts = repository.store_dataset(bundle)
             if args.command == "bootstrap":
-                import shutil
-
-                source_data = settings.project_dir / "data"
-                for name in ("schedules", "rankings", "fighter_photos.json"):
-                    source, target = source_data / name, settings.data_dir / name
-                    if source.exists() and source.resolve() != target.resolve() and not target.exists():
-                        if source.is_dir():
-                            shutil.copytree(source, target)
-                        else:
-                            shutil.copy2(source, target)
+                _seed_bundled_assets(settings.project_dir / "data", settings.data_dir)
             _output({"stage": "ingest", **counts, "quality": bundle.quality})
         if args.command == "refresh-schedule":
             from .schedule import refresh_schedule

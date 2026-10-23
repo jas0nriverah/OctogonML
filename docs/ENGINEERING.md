@@ -32,6 +32,8 @@ The normalized snapshot uses stable UFCStats bout and fighter identifiers. Each 
 
 Repeated identical ingestion is idempotent. Conflicting strike targets or feature-relevant event/bout fields are rejected rather than silently ignored. The manifest, source observation times, licenses, and transformed rows are separate artifacts. Sporting event time is not the time the source was observed, and reconstructed history does not prove historical publication availability.
 
+Bootstrap adds missing bundled schedule, ranking, and photo assets to an existing data directory. Existing observation files are preserved; this additive copy is not a source refresh. New ranking-history files can therefore arrive with an application upgrade without replacing a volume's current observations.
+
 The public Git repository excludes raw downloads. Packaged normalized records, frozen model artifacts, and reports support offline serving; the prepared project archive also retains raw files. An independent refit must recover the exact raw sources it needs, not infer missing labels from the dashboard.
 
 ## Prepared features and independent models

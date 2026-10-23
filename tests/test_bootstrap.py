@@ -74,6 +74,8 @@ def test_offline_bootstrap_and_real_inference(tmp_path, monkeypatch, capsys, cha
         winner = client.post("/api/v1/predict-winner", json=winner_request)
         assert winner.status_code == 201, winner.text
         assert winner.json()["scope"] == "conditional on a decisive outcome"
+        assert winner.json()["comparison_context"]["scope"] == "analysis_context_only"
+        assert winner.json()["comparison_context"]["used_by_model"] is False
         assert winner.json()["p_fighter_win"] + winner.json()["p_opponent_win"] == pytest.approx(1)
         assert winner.json()["source_snapshot_sha256"] == metadata["serving_snapshot_id"]
         assert client.get(
@@ -107,7 +109,14 @@ def test_offline_bootstrap_and_real_inference(tmp_path, monkeypatch, capsys, cha
         assert reverse_duration.status_code == 201, reverse_duration.text
         assert reverse_duration.json()["round_thresholds"] == elapsed["round_thresholds"]
         # Repeating bootstrap is safe and does not re-fit or duplicate observations.
+    # Existing volumes receive newly packaged history without replacing observations.
+    current_ranking = settings.data_dir / "rankings/current.json"
+    current_bytes = current_ranking.read_bytes()
+    history_path = settings.data_dir / "rankings/history/provenance.json"
+    history_path.unlink()
     main(["bootstrap"])
+    assert history_path.read_bytes() == (project / "data/rankings/history/provenance.json").read_bytes()
+    assert current_ranking.read_bytes() == current_bytes
     repo = Repository(settings.database_url)
     assert repo.counts()["bout_count"] == 6639
     assert repo.counts()["prediction_count"] == 5
