@@ -176,6 +176,7 @@ def main(argv=None):
         "command",
         choices=[
             "demo",
+            "doctor",
             "migrate",
             "ingest",
             "features",
@@ -228,6 +229,14 @@ def main(argv=None):
     if args.llm_provider is not None and args.command != "serve":
         parser.error("--llm-provider applies to serve only")
     settings = Settings.from_env()
+    if args.command == "doctor":
+        from .doctor import diagnose
+
+        result = diagnose(settings)
+        _output(result)
+        if not result["ok"]:
+            raise SystemExit(1)
+        return
     if args.command == "setup-openai":
         from .secrets_config import DEFAULT_OPENAI_MODEL, ensure_openai_key_file, read_openai_key
 

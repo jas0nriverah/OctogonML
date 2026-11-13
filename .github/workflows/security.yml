@@ -1,0 +1,52 @@
+name: Dependency security
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths: [requirements-lock.txt, pyproject.toml, .github/workflows/security.yml]
+  schedule:
+    - cron: "23 9 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+  locked-dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12.14"
+      - name: Install isolated audit tool, not the scientific runtime
+        run: python -m pip install pip-audit==2.10.1
+      - name: Audit exact locked versions without installing target packages
+        run: |
+          mkdir -p reports
+          python -m pip_audit --no-deps --disable-pip -r requirements-lock.txt --format json --output reports/dependency-audit.json
+      - name: Preserve advisory evidence even when audit fails
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-audit-${{ github.sha }}
+          path: reports/dependency-audit.json
+          retention-days: 14

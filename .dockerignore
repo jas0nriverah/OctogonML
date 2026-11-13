@@ -13,3 +13,6 @@ data/*.db*
 src/*.egg-info
 .env
 .secrets
+reports/coverage.xml
+reports/test-results.xml
+reports/dependency-audit.json

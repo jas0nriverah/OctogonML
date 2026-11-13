@@ -1,12 +1,19 @@
-.PHONY: demo serve test lint benchmark
+.PHONY: demo serve test lint benchmark check verify start
+PYTHON ?= .venv/bin/python
+check:
+	./start.sh --check
+verify:
+	./scripts/verify.sh
+start:
+	./start.sh
 demo:
-	cagemetrics demo
+	$(PYTHON) -m cagemetrics.cli demo
 serve:
-	cagemetrics serve
+	$(PYTHON) -m cagemetrics.cli serve
 test:
-	pytest
+	$(PYTHON) -m pytest
 lint:
-	ruff check src tests migrations scripts
+	$(PYTHON) -m ruff check src tests migrations scripts
 benchmark:
-	cagemetrics benchmark --requests 300 --concurrency 1 --warmup 20
-	cagemetrics benchmark --requests 500 --concurrency 10 --warmup 20
+	$(PYTHON) -m cagemetrics.cli benchmark --requests 300 --concurrency 1 --warmup 20
+	$(PYTHON) -m cagemetrics.cli benchmark --requests 500 --concurrency 10 --warmup 20
