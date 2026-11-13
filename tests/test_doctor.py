@@ -1,7 +1,9 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -199,7 +201,8 @@ def test_incomplete_environment_returns_setup_instructions(tmp_path):
 def test_check_rejects_accidental_serve_options():
     root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
-        ["bash", str(root / "start.sh"), "--check", "--port", "8001"], capture_output=True
+        ["bash", str(root / "start.sh"), "--check", "--port", "8001"], capture_output=True,
+        env={**os.environ, "CAGEMETRICS_PYTHON": sys.executable},
     )
     assert result.returncode == 2
 
@@ -207,7 +210,8 @@ def test_check_rejects_accidental_serve_options():
 def test_invalid_start_options_fail_before_bootstrap():
     root = Path(__file__).resolve().parents[1]
     result = subprocess.run(
-        ["bash", str(root / "start.sh"), "--port", "99999"], capture_output=True, text=True
+        ["bash", str(root / "start.sh"), "--port", "99999"], capture_output=True, text=True,
+        env={**os.environ, "CAGEMETRICS_PYTHON": sys.executable},
     )
     assert result.returncode == 2
     assert "between 1 and 65535" in result.stderr
