@@ -1,0 +1,105 @@
+name: Build verified offline source bundle
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semantic version, for example v0.4.0 (does not create a tag)"
+        required: true
+        type: string
+      source_ref:
+        description: "Existing local Git ref or full commit SHA"
+        required: true
+        default: HEAD
+        type: string
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12.14"
+      - name: Build deterministic tracked-file bundle and verify manifest
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          SOURCE_REF: ${{ inputs.source_ref || github.sha }}
+        run: |
+          version="${INPUT_VERSION:-$GITHUB_REF_NAME}"
+          python scripts/package_release.py --version "$version" --ref "$SOURCE_REF" --output-dir dist
+      - name: Verify external archive checksums
+        working-directory: dist
+        run: sha256sum --check *.sha256
+      - name: Extract verified source into a fresh directory
+        run: |
+          python - <<'PY'
+          import os, pathlib, tarfile
+          from scripts.package_release import verify_package
+          archives = list(pathlib.Path('dist').glob('*.tar.gz'))
+          assert len(archives) == 1
+          manifest = verify_package(archives[0])
+          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'release-source'
+          destination.mkdir()
+          with tarfile.open(archives[0]) as archive:
+              archive.extractall(destination, filter='data')
+          project = destination / manifest['prefix']
+          assert (project / 'pyproject.toml').is_file()
+          with open(os.environ['GITHUB_ENV'], 'a') as environment:
+              print(f'OCTOGONML_RELEASE_ROOT={project}', file=environment)
+          PY
+      - name: Install the selected bundle's locked dependencies
+        run: |
+          python -m venv "$RUNNER_TEMP/release-env"
+          "$RUNNER_TEMP/release-env/bin/python" -m pip install -r "$OCTOGONML_RELEASE_ROOT/requirements-lock.txt" -e "${OCTOGONML_RELEASE_ROOT}[dev,postgres]"
+      - name: Verify fresh-volume startup and packaged inference offline
+        env:
+          CAGEMETRICS_LLM_PROVIDER: ollama
+          CAGEMETRICS_MODEL_CHANNEL: auto
+          CAGEMETRICS_WINNER_CHANNEL: auto
+        run: |
+          export CAGEMETRICS_PYTHON="$RUNNER_TEMP/release-env/bin/python"
+          export CAGEMETRICS_HOME="$OCTOGONML_RELEASE_ROOT"
+          export CAGEMETRICS_DATA_DIR="$RUNNER_TEMP/release-data"
+          export DATABASE_URL="sqlite:///$CAGEMETRICS_DATA_DIR/smoke.db"
+          "$OCTOGONML_RELEASE_ROOT/start.sh" --check
+          test ! -e "$CAGEMETRICS_DATA_DIR"
+          "$CAGEMETRICS_PYTHON" -m cagemetrics.cli bootstrap
+          "$CAGEMETRICS_PYTHON" - <<'PY'
+          from fastapi.testclient import TestClient
+          from cagemetrics.api import create_app
+          with TestClient(create_app()) as client:
+              health = client.get('/health/ready')
+              assert health.status_code == 200
+              for family in ('model_version', 'winner_model_version', 'rounds_model_version'):
+                  assert health.json()[family]
+              athletes = [client.get('/api/v1/fighters', params={'q': name, 'limit': 1}).json()['fighters'][0]
+                          for name in ('Justin Gaethje', 'Paddy Pimblett')]
+              result = client.post('/api/v1/predict-winner', json={
+                  'fighter_a_id': athletes[0]['fighter_id'], 'fighter_b_id': athletes[1]['fighter_id'],
+                  'scheduled_rounds': 3})
+              assert result.status_code == 201, result.text
+              forecast = result.json()
+              assert forecast['comparison_context']['scope'] == 'analysis_context_only'
+              assert forecast['comparison_context']['used_by_model'] is False
+              assert abs(forecast['p_fighter_win'] + forecast['p_opponent_win'] - 1) < 1e-12
+              assert client.get('/api/v1/winner-predictions/' + forecast['prediction_id']).json() == forecast
+              metrics = client.get('/metrics')
+              assert metrics.status_code == 200 and 'octogonml_http_requests_total' in metrics.text
+          print('Verified offline bundle: three model families, comparison context, immutable forecast, metrics.')
+          PY
+      - name: Upload build output only; no release publication or tag creation
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: octogonml-source-${{ github.sha }}
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 30

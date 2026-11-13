@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Runtime/scientific dependencies are intentionally excluded from automatic PRs.
+  # Their lock updates require offline artifact-load, inference parity and full CI
+  # validation before a human approves the compatibility change.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    labels: [dependencies, ci]
+    groups:
+      official-actions:
+        patterns: ["actions/*"]

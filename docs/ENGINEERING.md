@@ -34,7 +34,7 @@ Repeated identical ingestion is idempotent. Conflicting strike targets or featur
 
 Bootstrap adds missing bundled schedule, ranking, and photo assets to an existing data directory. Existing observation files are preserved; this additive copy is not a source refresh. New ranking-history files can therefore arrive with an application upgrade without replacing a volume's current observations.
 
-The public Git repository excludes raw downloads. Packaged normalized records, frozen model artifacts, and reports support offline serving; the prepared project archive also retains raw files. An independent refit must recover the exact raw sources it needs, not infer missing labels from the dashboard.
+The public Git repository excludes ordinary raw fight-source downloads. Packaged normalized records, frozen model artifacts, and reports support offline serving. Versioned source bundles include only tracked, allowlisted assets, including the canonical public ranking HTML needed for offline context verification; local raw caches and runtime databases are excluded. An independent refit must recover the exact raw sources it needs, not infer missing labels from the dashboard.
 
 ## Prepared features and independent models
 

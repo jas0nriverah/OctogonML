@@ -14,7 +14,7 @@ import time
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -27,8 +27,8 @@ from .db import Repository
 from . import forward as forward_ledger
 from .serving import LiveForecaster
 from .reliability import winner_evidence_quality
+from .http_runtime import HTTPMetrics, HTTPRuntimeMiddleware, HTTPSettings, configure_http_logging
 from collections import Counter, deque
-from uuid import uuid4
 from threading import BoundedSemaphore
 import numpy as np
 
@@ -198,9 +198,11 @@ def _upcoming_snapshot(path: Path, modified_ns: int):
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
+    http_settings = HTTPSettings.from_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        configure_http_logging(http_settings.log_level)
         # Native BLAS pools otherwise multiply with the ASGI request threadpool.
         app.state.thread_limiter = threadpool_limits(limits=1)
         app.state.repository = Repository(settings.database_url)
@@ -268,9 +270,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             except (ImportError, FileNotFoundError, ValueError, OSError, SQLAlchemyError) as exc:
                 app.state.rounds_startup_error = str(exc)
                 LOGGER.warning("Duration model unavailable: %s", exc)
-        yield
-        app.state.repository.engine.dispose()
-        app.state.thread_limiter.restore_original_limits()
+        try:
+            yield
+        finally:
+            try:
+                app.state.repository.engine.dispose()
+            finally:
+                app.state.thread_limiter.restore_original_limits()
 
     app = FastAPI(
         title="OctogonML",
@@ -283,22 +289,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.request_statuses = Counter()
     app.state.process_started = time.perf_counter()
     app.state.analysis_capacity = BoundedSemaphore(1)
+    app.state.http_metrics = HTTPMetrics()
 
-    @app.middleware("http")
-    async def request_timing(request: Request, call_next):
-        start = time.perf_counter()
-        status_code = 500
-        try:
-            response = await call_next(request)
-            status_code = response.status_code
-        finally:
-            elapsed = (time.perf_counter() - start) * 1000
-            app.state.request_latencies.append(elapsed)
-            app.state.request_statuses[f"{status_code // 100}xx"] += 1
-        response.headers["Server-Timing"] = f"app;dur={elapsed:.3f}"
-        response.headers["X-Request-ID"] = str(uuid4())
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        return response
+    def record_timing(status_code, elapsed):
+        app.state.request_latencies.append(elapsed)
+        app.state.request_statuses[f"{status_code // 100}xx"] += 1
+
+    app.add_middleware(HTTPRuntimeMiddleware, settings=http_settings,
+                       metrics=app.state.http_metrics, on_finish=record_timing)
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics():
+        return Response(app.state.http_metrics.render(), headers={
+            "Content-Type": "text/plain; version=0.0.4; charset=utf-8", "Cache-Control": "no-store"
+        })
 
     def ready():
         if app.state.startup_error or app.state.forecaster is None:
@@ -306,7 +310,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 503,
                 detail={
                     "message": "Run cagemetrics bootstrap to initialize data and models",
-                    "reason": app.state.startup_error,
+                    "reason": "Service initialization failed; inspect server logs",
                 },
             )
         if app.state.repository.latest_snapshot_id() != app.state.forecaster.snapshot_id:

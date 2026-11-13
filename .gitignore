@@ -13,6 +13,8 @@ data/*.db*
 data/*.sqlite*
 reports/*.png
 reports/coverage.json
+reports/coverage.xml
+reports/dependency-audit.json
 reports/test-results.xml
 reports/verification*.json
 .env

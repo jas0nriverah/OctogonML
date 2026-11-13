@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title description">
+<title id="title">OctogonML architecture</title><desc id="description">Pinned sources enter SQL history and chronological model fitting. One FastAPI service serves a static dashboard, persists immutable forecasts, and optionally sends saved evidence to an LLM.</desc>
+<defs><style>text{font-family:Arial,Helvetica,sans-serif;fill:#eeeef0;font-size:15px}.small{fill:#b8bac3;font-size:12px}.box{fill:#1b1e25;stroke:#4b4e59;stroke-width:1.5}.flow{fill:none;stroke:#b6b9c4;stroke-width:2;marker-end:url(#arrow)}</style><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#b6b9c4"/></marker></defs>
+<rect width="960" height="360" rx="16" fill="#101216"/>
+<rect class="box" x="25" y="40" width="190" height="85" rx="8"/><text x="43" y="72">Pinned source snapshots</text><text class="small" x="43" y="97">Exact IDs · hashes · dates</text>
+<rect class="box" x="275" y="40" width="190" height="85" rx="8"/><text x="295" y="72">SQL history &amp; features</text><text class="small" x="295" y="97">SQLite / PostgreSQL</text>
+<rect class="box" x="525" y="40" width="190" height="85" rx="8"/><text x="544" y="72">Model artifacts</text><text class="small" x="544" y="97">Winner · duration · strikes</text>
+<rect class="box" x="745" y="178" width="190" height="85" rx="8"/><text x="764" y="210">Browser dashboard</text><text class="small" x="764" y="235">Same-origin API requests</text>
+<rect class="box" x="525" y="178" width="190" height="85" rx="8" style="stroke:#d9575d"/><text x="545" y="210">FastAPI service</text><text class="small" x="545" y="235">Inference · API · readiness</text>
+<rect class="box" x="275" y="178" width="190" height="85" rx="8"/><text x="295" y="210">Immutable SQL records</text><text class="small" x="295" y="235">Forecasts · evidence · ledger</text>
+<rect class="box" x="25" y="178" width="190" height="85" rx="8"/><text x="43" y="210">Optional LLM provider</text><text class="small" x="43" y="235">Validated evidence selections</text>
+<path class="flow" d="M215 82H275"/><path class="flow" d="M465 82H525"/><path class="flow" d="M620 125V178"/><path class="flow" d="M745 220H715"/><path class="flow" d="M525 220H465"/><path class="flow" d="M275 220H215"/><path class="flow" d="M370 125V148H580V178"/>
+<text class="small" x="25" y="314">Explicit offline pipeline: ingest → chronological fit + calibration → verified artifacts. Server startup never trains.</text>
+<text class="small" x="25" y="337">LLM guidance is experimental and separate from the unchanged ML baseline.</text></svg>

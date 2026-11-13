@@ -182,6 +182,30 @@ def test_http_prediction_and_saved_audit_roundtrip(client):
     assert client.post("/api/v1/predictions", json=payload).json()["p_push"] == 0
 
 
+def test_prometheus_metrics_use_registered_routes_and_preserve_http_errors(client):
+    for identity in ("missing-one", "missing-two"):
+        response = client.get(f"/api/v1/predictions/{identity}")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Prediction not found"
+    metrics = client.get("/metrics")
+    assert metrics.status_code == 200
+    assert metrics.headers["Content-Type"].startswith("text/plain; version=0.0.4")
+    assert metrics.headers["Cache-Control"] == "no-store"
+    assert 'route="/api/v1/predictions/{prediction_id}",method="GET",status="404"} 2' in metrics.text
+    assert "missing-one" not in metrics.text and "missing-two" not in metrics.text
+
+
+def test_oversized_forecast_request_does_not_persist_sql(client):
+    from cagemetrics.http_runtime import HTTPSettings
+
+    repository = client.app.state.repository
+    before = repository.counts()["prediction_count"]
+    response = client.post("/api/v1/predictions", content=b"x" * (HTTPSettings.from_env().max_request_bytes + 1))
+    assert response.status_code == 413
+    assert response.json()["request_id"] == response.headers["X-Request-ID"]
+    assert repository.counts()["prediction_count"] == before
+
+
 @pytest.mark.parametrize(
     "patch", [{"line": -1}, {"scheduled_rounds": 4}, {"opponent_id": "a"}, {"extra": True}]
 )

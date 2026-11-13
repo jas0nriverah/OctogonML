@@ -25,20 +25,33 @@ jobs:
       OMP_NUM_THREADS: "1"
       OPENBLAS_NUM_THREADS: "1"
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-python@v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12.14"
           cache: pip
       - run: pip install -c requirements-lock.txt -e '.[dev,postgres]'
       - run: ruff check src tests migrations scripts
-      - run: pytest --cov=cagemetrics --cov-report=term-missing
+      - run: pytest --cov=cagemetrics --cov-report=term-missing --cov-report=xml:reports/coverage.xml --junitxml=reports/test-results.xml
       - run: node --check src/cagemetrics/web/app.js
+      - name: Preserve coverage and test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-and-coverage-${{ github.sha }}
+          path: |
+            reports/coverage.xml
+            reports/test-results.xml
+          retention-days: 14
   container:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: docker build -t cagemetrics:ci .
       - run: docker run -d --name cagemetrics-smoke -p 127.0.0.1:8000:8000 cagemetrics:ci
       - name: Wait for offline bootstrap and model readiness
